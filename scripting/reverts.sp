@@ -1221,11 +1221,13 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 	) {
 		item1 = TF2Items_CreateItem(0);
 		TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
-		TF2Items_SetNumAttributes(item1, 3);
+		TF2Items_SetNumAttributes(item1, 4);
 		TF2Items_SetAttribute(item1, 0, 412, 1.00); // dmg taken
 		//these atributes revert back to the old deploy and hoslter speed before Tough Break update
-		TF2Items_SetAttribute(item1, 1, 547, 0.75); // 75% faster deploy speed
-		TF2Items_SetAttribute(item1, 2, 199, 0.75); // 75% faster holster speed
+		TF2Items_SetAttribute(item1, 1, 547, 0.75); // 75% faster deploy speed (single attrib)
+		TF2Items_SetAttribute(item1, 2, 772, 0.00); // try to get rid of holster delay
+		TF2Items_SetAttribute(item1, 3, 199, 0.75); // 75% faster holster speed #this attribute doesn't seem to work?
+		
 		//health handled elsewhere
 	}
 
@@ -1314,7 +1316,7 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		TF2Items_SetNumAttributes(item1, 2);
 		//these atributes revert back to the old deploy and hoslter speed before Tough Break update
 		TF2Items_SetAttribute(item1, 0, 178, 0.75); // 75% faster deploy speed
-		TF2Items_SetAttribute(item1, 1, 199, 0.75); // 75% faster holster speed
+		TF2Items_SetAttribute(item1, 1, 199, 0.75); // 75% faster holster speed #this attrib works on eyelander
 	}
 
 	else if (
@@ -1536,10 +1538,11 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 	) {
 		item1 = TF2Items_CreateItem(0);
 		TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
-		TF2Items_SetNumAttributes(item1, 2);
+		TF2Items_SetNumAttributes(item1, 3);
 		//these atributes revert back to the old deploy and hoslter speed before Tough Break update
 		TF2Items_SetAttribute(item1, 0, 547, 0.75); // 75% faster deploy speed
-		TF2Items_SetAttribute(item1, 1, 199, 0.75); // 75% faster holster speed
+		TF2Items_SetAttribute(item1, 1, 772, 0.00); // try to get rid of holster delay
+		TF2Items_SetAttribute(item1, 2, 199, 0.75); // 75% faster holster speed #this attribute doesn't seem to work?
 	}
 
 	else if (
@@ -1681,10 +1684,7 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		TF2Items_SetAttribute(item1, 0, 15, 1.0); // crit mod disabled
 		TF2Items_SetAttribute(item1, 1, 220, 0.0); // restore health on kill
 		TF2Items_SetAttribute(item1, 2, 226, 0.0); // honorbound
-		TF2Items_SetAttribute(item1, 3, 781, 0.0); // is a sword
-		//these atributes revert back to the old deploy and hoslter speed before Tough Break update
-		TF2Items_SetAttribute(item1, 4, 547, 0.75); // 75% faster deploy speed
-		TF2Items_SetAttribute(item1, 5, 199, 0.75); // 75% faster holster speed
+		TF2Items_SetAttribute(item1, 3, 781, 0.0); // is a sword, brings back old deploy and holster speed before Tough Break update
 	}
 
 	if (item1 != null) {
