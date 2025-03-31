@@ -28,10 +28,25 @@ Special Delivery Set Bonus Restored
  	Pre-July 10, 2013 Patch
         +25 max health on wearer.
 
- Croc-o-Style Set Bonus Restored
+Croc-o-Style Set Bonus Restored
 	
  	Pre-July 10, 2013 Patch
 	Survive headshots with 1 HP left
+
+Bushwacka reverted to release (Mostly, the +20% fire vulnerability only works when deployed, not on wearing. It can do random crits again.)
+
+	June 18, 2014 Patch
+    	The Bushwacka can no longer randomly Crit.
+ 	
+  	July 2, 2015 Patch #1 (Gun Mettle Update)
+    	Changed attributes:
+        Changed penalty from +20% fire vulnerability to +20% damage vulnerability while active.
+
+Darwin's Danger Shield reverted to release (flat +25 max HP buff)
+	
+	September 30, 2010 Patch (Mann-Conomy Update)
+    	The Darwin's Danger Shield was added to the game. The attributes was:
+        +25 max health on wearer.
 
 ## Readme from the original below:
 
