@@ -12,12 +12,12 @@ Stuff I reverted:
 9. Demoman swords deploy and holster speeds (thanks huutti)
 10. Expert's Ordnance Item Set bonus (+10% fire dmg resist)
 11. Gas Jockey's Gear Item Set bonus (+10% move speed, +10% bullet vulnerability)
+12. Powerjack (+75 hp on kill, overheals above 175 hp, max 260 hp overheal)
 
 Unfinished stuff:
 
-1. Powerjack (95% accurate, it should overheal when at full hp on kill)
-2. Unfinished Persian Persuader (Ammo collected from ammo boxes becomes health attribute does not work anymore, find a workaround.)
-3. Splendid Screen revert. Need to find a way to not get rid of debuffs while charging
+1. Unfinished Persian Persuader (Ammo collected from ammo boxes becomes health attribute does not work anymore, find a workaround.)
+2. Splendid Screen revert. Need to find a way to not get rid of debuffs while charging
 
 ## Introduction
 Repository for plugins used on [castaway.tf](https://castaway.tf/)
