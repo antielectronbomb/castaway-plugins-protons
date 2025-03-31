@@ -102,6 +102,14 @@ enum struct Player {
 #define ItemSet_GasJockey 1
 #define ItemSet_Expert 1
 
+//powerjack overheal
+#define PYRO_OVERHEAL 260
+//Get the smaller integral value; required for powerjack overheal calculation
+int intMin(int x, int y)
+{
+    return x > y ? y : x;
+}
+
 enum struct Entity {
 	bool exists;
 	float spawn_time;
@@ -1479,7 +1487,8 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
 		TF2Items_SetNumAttributes(item1, 5);
 		TF2Items_SetAttribute(item1, 0, 107, 1.00); // remove faster move speed on wearer while active
-		TF2Items_SetAttribute(item1, 1, 180, 75.0); // overwrite to 75 health restored on kill (this doesn't have the overheal bonus when full health sadly)
+		//TF2Items_SetAttribute(item1, 1, 180, 75.0); // overwrite to 75 health restored on kill (this doesn't have the overheal bonus when full health sadly)
+		TF2Items_SetAttribute(item1, 1, 180, 0.0); // remove health bonus attribute
 		TF2Items_SetAttribute(item1, 2, 412, 1.0); // remove damage vulnerability on wearer while active 
 		TF2Items_SetAttribute(item1, 3, 2, 1.25); // add +25% damage bonus
 		TF2Items_SetAttribute(item1, 4, 15, 0.0); // no random crits mod
@@ -1502,7 +1511,7 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 	}
 */
 
-//to revert splendid screen to pre-tough break version because its modern charge interval with old persuader is not accurate (and unbalanced)
+//revert splendid screen to pre-tough break version because its modern charge interval with old persuader is not accurate (and unbalanced)
 	else if (
 		ItemIsEnabled("persuader") &&
 		StrEqual(class, "tf_weapon_sword") &&
@@ -1884,6 +1893,41 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 					}
 				}
 			}
+
+			{
+				// WIP: powerjack heal on kill
+
+				if (
+					client != attacker &&
+					(GetEventInt(event, "death_flags") & TF_DEATH_FEIGN_DEATH) == 0 &&
+					GetEventInt(event, "inflictor_entindex") == attacker && // make sure it wasn't a "finished off" kill
+					IsPlayerAlive(attacker)
+				) {
+					weapon = GetEntPropEnt(attacker, Prop_Send, "m_hActiveWeapon");
+
+					if (weapon > 0) {
+						GetEntityClassname(weapon, class, sizeof(class));
+
+						if (
+							ItemIsEnabled("powerjack") &&
+							StrEqual(class, "tf_weapon_fireaxe") &&
+							GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 214
+						) {
+							health_cur = GetClientHealth(attacker);
+							{
+								event1 = CreateEvent("player_healonhit", true);
+								SetEventInt(event1, "amount", intMin(PYRO_OVERHEAL - health_cur, 75));
+								SetEventInt(event1, "entindex", attacker);
+								SetEventInt(event1, "weapon_def_index", -1);
+								FireEvent(event1);
+								// Set health
+								SetEntityHealth(attacker, intMin(GetClientHealth(attacker) + 75, PYRO_OVERHEAL));
+							}
+						}
+					}
+				}
+			}
+
 		}
 	}
 
