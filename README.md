@@ -16,7 +16,7 @@ Rocket Jumper and Sticky Jumper can pick up the intelligence again.
  	May 31, 2012 Patch
     	Players with the Sticky Jumper equipped cannot carry the intelligence.
 
-Warrior's Spirit reverted to pre-Tough Break:
+Warrior's Spirit reverted to pre-Tough Break (note: HP debuff doesn't work on Windows):
 	
  	Pre-December 17, 2015 Patch:
 	+30% damage bonus
