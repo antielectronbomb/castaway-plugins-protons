@@ -26,7 +26,7 @@ public Plugin myinfo = {
 	url = PLUGIN_URL
 };
 
-#define ITEMS_MAX 60
+#define ITEMS_MAX 160
 #define ITEM_MENU_TIME (60*3)
 // #define ITEM_COOKIE_VER 1
 // #define ITEM_FL_PICKABLE (1 << 0) // players can choose to toggle this item
@@ -99,6 +99,8 @@ enum struct Player {
 #define ItemSet_Saharan 1
 #define ItemSet_SpDelivery 1
 #define ItemSet_CrocoStyle 1
+#define ItemSet_GasJockey 1
+#define ItemSet_Expert 1
 
 enum struct Entity {
 	bool exists;
@@ -149,7 +151,7 @@ public void OnPluginStart() {
 	cvar_enable = CreateConVar("sm_reverts__enable", "1", (PLUGIN_NAME ... " - Enable plugin"), _, true, 0.0, true, 1.0);
 	cvar_extras = CreateConVar("sm_reverts__extras", "0", (PLUGIN_NAME ... " - Enable some fun extra features"), _, true, 0.0, true, 1.0);
 
-//	ItemDefine("Airblast", "airblast", "All flamethrowers' airblast mechanics are reverted to pre-inferno");
+	ItemDefine("Airblast", "airblast", "All flamethrowers' airblast mechanics are reverted to pre-inferno");
 	ItemDefine("Air Strike", "airstrike", "Reverted to pre-toughbreak, no extra blast radius penalty when blast jumping");
 	ItemDefine("Ambassador", "ambassador", "Reverted to pre-inferno, deals full headshot damage (102) at all ranges");
 	ItemDefine("Atomizer", "atomizer", "Reverted to pre-inferno, can always triple jump, taking 10 damage each time");
@@ -161,7 +163,7 @@ public void OnPluginStart() {
 	ItemDefine("Bonk! Atomic Punch", "bonk", "Reverted to pre-inferno, no longer slows after the effect wears off");
 	ItemDefine("Booties & Bootlegger", "booties", "Reverted to pre-matchmaking, shield not required for speed bonus");
 	ItemDefine("Brass Beast", "brassbeast", "Reverted to pre-matchmaking, 20% damage resistance when spun up at any health");
-	ItemDefine("Bushwacka", "bushwacka", "Reverted to release, +20% fire vulnerability, does random crits");
+	ItemDefine("Bushwacka", "bushwacka", "Reverted to release, +20% fire vulnerability on wearer, does random crits");
 	ItemDefine("Chargin' Targe", "targe", "Reverted to pre-toughbreak, 40% blast resistance, afterburn immunity");
 	ItemDefine("Claidheamh Mòr", "claidheamh", "Reverted to pre-toughbreak, -15 health, no damage vulnerability, old deploy and holster speeds");
 	ItemDefine("Cleaner's Carbine", "carbine", "Reverted to release, crits for 3 seconds on kill");
@@ -174,9 +176,11 @@ public void OnPluginStart() {
 	ItemDefine("Enforcer", "enforcer", "Reverted to release, +20% damage bonus overall, no piercing, +0.5 s cloak time increase penalty");
 	ItemDefine("Equalizer & Escape Plan", "equalizer", "Merged back together, no healing, no mark-for-death");
 	ItemDefine("Eviction Notice", "eviction", "Reverted to pre-inferno, no health drain, +20% damage taken");
+	ItemDefine("Expert's Ordnance", "expert", "Restored item set bonus. +10% fire damage resistance on wearer. Scotch Bonnet is not required");
 	ItemDefine("Eyelander", "eyelander", "Reverted deploy and holster speeds to pre-Tough Break");
 	ItemDefine("Fists of Steel", "fiststeel", "Reverted to pre-inferno, no healing penalties");
 	ItemDefine("Flying Guillotine", "guillotine", "Reverted to pre-inferno, stun crits, distance mini-crits, no recharge");
+	ItemDefine("Gas Jockey's Gear", "gasjockey", "Restored item set bonus. +10% move speed, +10% bullet dmg on wearer. Attendant is not required");
 	ItemDefine("Gloves of Running Urgently", "glovesru", "Reverted to pre-inferno, no health drain, marks for death");
 	ItemDefine("Half-Zatoichi", "zatoichi", "Reverted to pre-toughbreak, fast switch, less range, old honorbound, full heal, crits, old holster & deploy");
 	ItemDefine("Liberty Launcher", "liberty", "Reverted to release, +40% projectile speed, -25% clip size");
@@ -1193,7 +1197,9 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		TF2Items_SetNumAttributes(item1, 3);
 		TF2Items_SetAttribute(item1, 0, 15, 1.0); // adds back random crits
 		TF2Items_SetAttribute(item1, 1, 412, 1.00); // remove 20% dmg vulnerability on wearer
-		TF2Items_SetAttribute(item1, 2, 61, 1.20); // add 20% fire vulnerability on wearer !!!attribute only works when active!!!
+		//TF2Items_SetAttribute(item1, 2, 61, 1.20); // add 20% fire vulnerability on wearer !!!attribute only works when active!!!
+		//I am not sure if the Bushwacka fire vulnerability affected you if it was active or if it was equipped. Need more history research for this. 
+		//I'm assuming it was on equip so you get 20% overall fire vulnerability regardless if its active or not.
 	}
 
 	else if (
@@ -1240,9 +1246,8 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		TF2Items_SetNumAttributes(item1, 3);
 		TF2Items_SetAttribute(item1, 0, 412, 1.00); // dmg taken
 		//these atributes revert back to the old deploy and hoslter speed before Tough Break update
-		TF2Items_SetAttribute(item1, 1, 547, 0.75); // 75% faster deploy speed (single attrib)
-		//TF2Items_SetAttribute(item1, 1, 178, 0.75); // 75% faster deploy speed (this doesn't work somehow)
-		TF2Items_SetAttribute(item1, 2, 199, 0.75); // 75% faster holster speed
+		TF2Items_SetAttribute(item1, 1, 781, 0.00); // remove the is_a_sword attribute (This Weapon has a large melee range and deploys and holsters slower)
+		TF2Items_SetAttribute(item1, 2, 264, 1.50); // add back sword melee range. 50% increased melee attack range. 48 HU -> 72 HU
 
 		
 		//health handled elsewhere
@@ -1288,7 +1293,7 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		TF2Items_SetAttribute(item1, 0, 410, 1.0); // damage bonus while disguised attribute, put at 1.0 so +20% damage still happens while disguised
 		TF2Items_SetAttribute(item1, 1, 797, 0.0); // dmg pierces resists absorbs
 		TF2Items_SetAttribute(item1, 2, 2, 1.20); // increased overall 20% damage bonus
-		TF2Items_SetAttribute(item1, 3, 6, 0.80); // increase back the firing rate to same as stock revolver; fire rate bonus attribute
+		TF2Items_SetAttribute(item1, 3, 5, 1.00); // increase back the firing rate to same as stock revolver; fire rate penalty attribute
 		TF2Items_SetAttribute(item1, 4, 15, 1.0); // add back random crits; crit mod enabled 
 		TF2Items_SetAttribute(item1, 5, 253, 0.5); // 0.5 sec increase in time taken to cloak
 	}
@@ -1345,9 +1350,8 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
 		TF2Items_SetNumAttributes(item1, 2);
 		//these atributes revert back to the old deploy and hoslter speed before Tough Break update
-		TF2Items_SetAttribute(item1, 0, 178, 0.75); // 75% faster deploy speed
-		//TF2Items_SetAttribute(item1, 0, 547, 0.75); // 75% faster deploy speed (single attrib)
-		TF2Items_SetAttribute(item1, 1, 199, 0.75); // 75% faster holster speed #this attrib works on eyelander
+		TF2Items_SetAttribute(item1, 0, 781, 0.00); // remove the is_a_sword attribute (This Weapon has a large melee range and deploys and holsters slower)
+		TF2Items_SetAttribute(item1, 1, 264, 1.50); // add back sword melee range. 50% increased melee attack range. 48 HU -> 72 HU
 	}
 
 	else if (
@@ -1516,9 +1520,9 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		TF2Items_SetAttribute(item1, 4, 782, 0.00); // remove Ammo boxes collected also give Charge
 		TF2Items_SetAttribute(item1, 5, 249, 2.00); // +100% increase in charge recharge rate, shields should take around 6 seconds to charge with persuader
 		TF2Items_SetAttribute(item1, 6, 15, 0.0); // no random crits mod
-		//these attributes revert back to the old deploy and hoslter speed before Tough Break update
-		TF2Items_SetAttribute(item1, 7, 178, 0.75); // 75% faster deploy speed
-		TF2Items_SetAttribute(item1, 8, 199, 0.75); // 75% faster holster speed
+		//these atributes revert back to the old deploy and hoslter speed before Tough Break update
+		TF2Items_SetAttribute(item1, 7, 781, 0.00); // remove the is_a_sword attribute (This Weapon has a large melee range and deploys and holsters slower)
+		TF2Items_SetAttribute(item1, 8, 264, 1.50); // add back sword melee range. 50% increased melee attack range. 48 HU -> 72 HU
 	}
 
 	else if (
@@ -1569,9 +1573,8 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
 		TF2Items_SetNumAttributes(item1, 2);
 		//these atributes revert back to the old deploy and hoslter speed before Tough Break update
-		TF2Items_SetAttribute(item1, 0, 547, 0.75); // 75% faster deploy speed (single)
-		//TF2Items_SetAttribute(item1, 0, 178, 0.75); // 75% faster deploy speed (this doesn't work somehow)
-		TF2Items_SetAttribute(item1, 1, 199, 0.75); // 75% faster holster speed
+		TF2Items_SetAttribute(item1, 0, 781, 0.00); // remove the is_a_sword attribute (This Weapon has a large melee range and deploys and holsters slower)
+		TF2Items_SetAttribute(item1, 1, 264, 1.50); // add back sword melee range. 50% increased melee attack range. 48 HU -> 72 HU
 	}
 
 	else if (
@@ -2106,6 +2109,140 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 						case ItemSet_CrocoStyle:
 						{
 							TF2Attrib_SetByDefIndex(active_set,176,1.0); //SET BONUS: no death from headshots
+						}
+					}
+				}
+			}
+
+		}
+
+		//Gas Jockey's Gear Set Bonus
+		if (
+			ItemIsEnabled("gasjockey")
+		) {
+
+			//handle item sets
+			int first_wep = -1;
+			int wep_count = 0;
+			int active_set = 0;
+
+			int length = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
+			for (int i;i < length; i++)
+			{
+				weapon = GetEntPropEnt(client,Prop_Send,"m_hMyWeapons",i);
+				if (weapon != -1)
+				{
+					char classname[64];
+					GetEntityClassname(weapon, classname, sizeof(class));
+					int item_index = GetEntProp(weapon,Prop_Send,"m_iItemDefinitionIndex");
+
+					//stats appear to persist between loadout changes for whatever reason
+					//reset them each time here
+					if(
+						ItemIsEnabled("gasjockey") &&
+						(StrEqual(classname, "tf_weapon_flamethrower") &&
+						(item_index == 215)) ||
+						(StrEqual(classname, "tf_weapon_fireaxe") &&
+						(item_index == 214))
+					) {
+						if (first_wep == -1) first_wep = weapon;
+						wep_count++;
+						if(wep_count == 2) active_set = ItemSet_GasJockey;
+						//reset these values so loadout changes don't persist the attributes
+						TF2Attrib_SetByDefIndex(weapon,489,1.00); //reset the SET BONUS: move speed set bonus
+						TF2Attrib_SetByDefIndex(weapon,516,1.00); //reset the SET BONUS: dmg taken from bullets increased 
+					}
+
+				}
+			}
+
+			if (active_set)
+			{
+				bool validSet = true;
+
+				// bool validSet = false;
+				// int num_wearables = TF2Util_GetPlayerWearableCount(client);
+				// for (int i = 0; i < num_wearables; i++)
+				// {
+				// 	int wearable = TF2Util_GetPlayerWearable(client, i);
+				// 	int item_index = GetEntProp(wearable,Prop_Send,"m_iItemDefinitionIndex");
+				// 	if(
+				// 		(active_set == ItemSet_GasJockey) &&
+				// 		(item_index == 213)
+				// 	) {
+				// 		validSet = true;
+				// 		break;
+				// 	}
+				// }
+
+				if (validSet)
+				{
+					switch (active_set)
+					{
+						case ItemSet_GasJockey:
+						{
+							TF2Attrib_SetByDefIndex(active_set,489,1.10); //SET BONUS: move speed set bonus
+							TF2Attrib_SetByDefIndex(active_set,516,1.10); //SET BONUS: dmg taken from bullets increased
+						}
+					}
+				}
+			}
+
+		}
+
+		//Expert's Ordnance Set Bonus
+		if (
+			ItemIsEnabled("expert")
+		) {
+
+			//handle item sets
+			int first_wep = -1;
+			int wep_count = 0;
+			int active_set = 0;
+
+			int length = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
+			for (int i;i < length; i++)
+			{
+				weapon = GetEntPropEnt(client,Prop_Send,"m_hMyWeapons",i);
+				if (weapon != -1)
+				{
+					char classname[64];
+					GetEntityClassname(weapon, classname, sizeof(class));
+					int item_index = GetEntProp(weapon,Prop_Send,"m_iItemDefinitionIndex");
+
+					//stats appear to persist between loadout changes for whatever reason
+					//reset them each time here
+					if(
+						ItemIsEnabled("expert") &&
+						(StrEqual(classname, "tf_weapon_grenadelauncher") &&
+						(item_index == 308)) ||
+						(StrEqual(classname, "tf_weapon_stickbomb") &&
+						(item_index == 307))
+					) {
+						if (first_wep == -1) first_wep = weapon;
+						wep_count++;
+						if(wep_count == 2) active_set = ItemSet_Expert;
+						//reset these values so loadout changes don't persist the attributes
+						TF2Attrib_SetByDefIndex(weapon,492,1.00); //reset the SET BONUS: dmg taken from fire reduced set bonus 
+					}
+
+				}
+			}
+
+			if (active_set)
+			{
+				bool validSet = true;
+				
+				// HISTORICALLY, THE HAT IS NOT NEEDED FOR THE EXPERT'S ORDNANCE SET, JUST THE TWO WEAPONS ARE NEEDED
+				// https://wiki.teamfortress.com/w/index.php?title=Expert%27s_Ordnance&oldid=1190143
+
+				if (validSet)
+				{
+					switch (active_set)
+					{
+						case ItemSet_Expert:
+						{
+							TF2Attrib_SetByDefIndex(active_set,492,0.90); //+10% fire dmg resist; SET BONUS: dmg taken from fire reduced set bonus 
 						}
 					}
 				}
@@ -2905,6 +3042,17 @@ Action SDKHookCB_OnTakeDamageAlive(
 				// do it this way in order to preserve knockback caused by the explosion
 				players[victim].old_health = GetClientHealth(victim);
 				SetEntityHealth(victim, 500);
+			}
+		}
+		{
+			if (
+				ItemIsEnabled("bushwacka") &&
+				(damage_type & (DMG_BURN | DMG_IGNITE)) &&
+				PlayerHasItem(victim,"tf_weapon_club",232)
+			) {
+				// 20% fire damage vulnerability when equipping the Bushwacka
+				damage *= 1.20;
+				returnValue = Plugin_Changed;
 			}
 		}
 	}
