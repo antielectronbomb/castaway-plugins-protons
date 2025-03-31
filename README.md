@@ -9,12 +9,14 @@ Stuff I reverted:
 6. Croc-O-Style Item set bonus (survive headshots)
 7. Bushwacka to release version (95% accurate)
 8. Darwin's Danger Shield to release version
+9. Demoman swords deploy and holster speeds (thanks huutti)
+10. Expert's Ordnance Item Set bonus (+10% fire dmg resist)
+11. Gas Jockey's Gear Item Set bonus (+10% move speed, +10% bullet vulnerability)
 
 Stuff unique to this branch:
 
 1. Powerjack (95% accurate, it should overheal when at full hp on kill)
-2. 95% accurate Demoman swords deploy and holster speeds (spamming the quickswitch key causes the switch speed to be a bit slower)
-3. Unfinished Persian Persuader (Ammo collected from ammo boxes becomes health attribute does not work anymore, find a workaround.)
+2. Unfinished Persian Persuader (Ammo collected from ammo boxes becomes health attribute does not work anymore, find a workaround.)
 
 ## Introduction
 Repository for plugins used on [castaway.tf](https://castaway.tf/)
