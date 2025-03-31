@@ -13,10 +13,11 @@ Stuff I reverted:
 10. Expert's Ordnance Item Set bonus (+10% fire dmg resist)
 11. Gas Jockey's Gear Item Set bonus (+10% move speed, +10% bullet vulnerability)
 
-Stuff unique to this branch:
+Unfinished stuff:
 
 1. Powerjack (95% accurate, it should overheal when at full hp on kill)
 2. Unfinished Persian Persuader (Ammo collected from ammo boxes becomes health attribute does not work anymore, find a workaround.)
+3. Splendid Screen revert. Need to find a way to not get rid of debuffs while charging
 
 ## Introduction
 Repository for plugins used on [castaway.tf](https://castaway.tf/)
