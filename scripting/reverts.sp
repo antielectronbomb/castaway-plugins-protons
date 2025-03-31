@@ -149,7 +149,7 @@ public void OnPluginStart() {
 	cvar_enable = CreateConVar("sm_reverts__enable", "1", (PLUGIN_NAME ... " - Enable plugin"), _, true, 0.0, true, 1.0);
 	cvar_extras = CreateConVar("sm_reverts__extras", "0", (PLUGIN_NAME ... " - Enable some fun extra features"), _, true, 0.0, true, 1.0);
 
-	ItemDefine("Airblast", "airblast", "All flamethrowers' airblast mechanics are reverted to pre-inferno");
+//	ItemDefine("Airblast", "airblast", "All flamethrowers' airblast mechanics are reverted to pre-inferno");
 	ItemDefine("Air Strike", "airstrike", "Reverted to pre-toughbreak, no extra blast radius penalty when blast jumping");
 	ItemDefine("Ambassador", "ambassador", "Reverted to pre-inferno, deals full headshot damage (102) at all ranges");
 	ItemDefine("Atomizer", "atomizer", "Reverted to pre-inferno, can always triple jump, taking 10 damage each time");
@@ -161,11 +161,13 @@ public void OnPluginStart() {
 	ItemDefine("Bonk! Atomic Punch", "bonk", "Reverted to pre-inferno, no longer slows after the effect wears off");
 	ItemDefine("Booties & Bootlegger", "booties", "Reverted to pre-matchmaking, shield not required for speed bonus");
 	ItemDefine("Brass Beast", "brassbeast", "Reverted to pre-matchmaking, 20% damage resistance when spun up at any health");
+	ItemDefine("Bushwacka", "bushwacka", "Reverted to release, +20% fire vulnerability, does random crits");
 	ItemDefine("Chargin' Targe", "targe", "Reverted to pre-toughbreak, 40% blast resistance, afterburn immunity");
 	ItemDefine("Claidheamh Mòr", "claidheamh", "Reverted to pre-toughbreak, -15 health, no damage vulnerability, old deploy and holster speeds");
 	ItemDefine("Cleaner's Carbine", "carbine", "Reverted to release, crits for 3 seconds on kill");
 	ItemDefine("Crit-a-Cola", "critcola", "Reverted to pre-matchmaking, +25% movespeed, +10% damage taken, no mark-for-death on attack");
 	ItemDefine("Croc-o-Style Kit", "crocostyle", "Restored item set bonus. Survive headshots with 1 HP again, Ol' Snaggletooth hat is not required");
+	ItemDefine("Darwin's Danger Shield", "dangershield", "Reverted to release, just +25 max health, no afterburn immunity, no fire resist");
 	ItemDefine("Dead Ringer", "ringer", "Reverted to pre-gunmettle, can pick up ammo, 80% dmg resist for 4s");
 	ItemDefine("Degreaser", "degreaser", "Reverted to pre-toughbreak, full switch speed for all weapons, old penalties");
 	ItemDefine("Dragon's Fury", "dragonfury", "Reverted -25% projectile size nerf");
@@ -198,6 +200,7 @@ public void OnPluginStart() {
 	ItemDefine("Soda Popper", "sodapop", "Reverted to pre-2013, run to build hype and auto gain minicrits");
 	ItemDefine("Solemn Vow", "solemn", "Reverted to pre-gunmettle, firing speed penalty removed");
 	ItemDefine("Special Delivery", "spdelivery", "Restored the item set bonus, +25 max HP. Milkman hat is not required");
+	ItemDefine("Splendid Screen", "splendid", "Reverted to pre-Tough Break, +15% explosive dmg resist on wearer");
 	ItemDefine("Spy-cicle", "spycicle", "Reverted to pre-gunmettle, fire immunity for 2s, silent killer");
 	ItemDefine("Sticky Jumper", "stkjumper", "Can have 8 stickies out at once again, picks up intel again");
 	ItemDefine("Sydney Sleeper", "sleeper", "Reverted to pre-2018, restored jarate explosion, no headshots");
@@ -1181,6 +1184,19 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 	}
 
 	else if (
+		ItemIsEnabled("bushwacka") &&
+		StrEqual(class, "tf_weapon_club") &&
+		(index == 232)
+	) {
+		item1 = TF2Items_CreateItem(0);
+		TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
+		TF2Items_SetNumAttributes(item1, 3);
+		TF2Items_SetAttribute(item1, 0, 15, 1.0); // adds back random crits
+		TF2Items_SetAttribute(item1, 1, 412, 1.00); // remove 20% dmg vulnerability on wearer
+		TF2Items_SetAttribute(item1, 2, 61, 1.20); // add 20% fire vulnerability on wearer !!!attribute only works when active!!!
+	}
+
+	else if (
 		ItemIsEnabled("caber") &&
 		StrEqual(class, "tf_weapon_stickbomb")
 	) {
@@ -1221,14 +1237,28 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 	) {
 		item1 = TF2Items_CreateItem(0);
 		TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
-		TF2Items_SetNumAttributes(item1, 4);
+		TF2Items_SetNumAttributes(item1, 3);
 		TF2Items_SetAttribute(item1, 0, 412, 1.00); // dmg taken
 		//these atributes revert back to the old deploy and hoslter speed before Tough Break update
 		TF2Items_SetAttribute(item1, 1, 547, 0.75); // 75% faster deploy speed (single attrib)
-		TF2Items_SetAttribute(item1, 2, 772, 0.00); // try to get rid of holster delay
-		TF2Items_SetAttribute(item1, 3, 199, 0.75); // 75% faster holster speed #this attribute doesn't seem to work?
+		//TF2Items_SetAttribute(item1, 1, 178, 0.75); // 75% faster deploy speed (this doesn't work somehow)
+		TF2Items_SetAttribute(item1, 2, 199, 0.75); // 75% faster holster speed
+
 		
 		//health handled elsewhere
+	}
+
+	else if (
+		ItemIsEnabled("dangershield") &&
+		StrEqual(class, "tf_wearable") &&
+		(index == 231)
+	) {
+		item1 = TF2Items_CreateItem(0);
+		TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
+		TF2Items_SetNumAttributes(item1, 3);
+		TF2Items_SetAttribute(item1, 0, 60, 1.50); // remove fire damage resistance
+		TF2Items_SetAttribute(item1, 1, 527, 0.0); // remove afterburn immunity
+		TF2Items_SetAttribute(item1, 2, 26, 25.0); // +25 max health on wearer
 	}
 
 	else if (
@@ -1316,6 +1346,7 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		TF2Items_SetNumAttributes(item1, 2);
 		//these atributes revert back to the old deploy and hoslter speed before Tough Break update
 		TF2Items_SetAttribute(item1, 0, 178, 0.75); // 75% faster deploy speed
+		//TF2Items_SetAttribute(item1, 0, 547, 0.75); // 75% faster deploy speed (single attrib)
 		TF2Items_SetAttribute(item1, 1, 199, 0.75); // 75% faster holster speed #this attrib works on eyelander
 	}
 
@@ -1443,7 +1474,7 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		item1 = TF2Items_CreateItem(0);
 		TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
 		TF2Items_SetNumAttributes(item1, 5);
-		TF2Items_SetAttribute(item1, 0, 54, 0.87); // remove faster move speed on wearer while active
+		TF2Items_SetAttribute(item1, 0, 107, 1.00); // remove faster move speed on wearer while active
 		TF2Items_SetAttribute(item1, 1, 180, 75.0); // overwrite to 75 health restored on kill (this doesn't have the overheal bonus when full health sadly)
 		TF2Items_SetAttribute(item1, 2, 412, 1.0); // remove damage vulnerability on wearer while active 
 		TF2Items_SetAttribute(item1, 3, 2, 1.25); // add +25% damage bonus
@@ -1460,13 +1491,13 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		item1 = TF2Items_CreateItem(0);
 		TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
 		TF2Items_SetNumAttributes(item1, 4);
-		TF2Items_SetAttribute(item1, 0, 54, 0.87); // remove faster move speed on wearer while active
+		TF2Items_SetAttribute(item1, 0, 107, 1.00); // remove faster move speed on wearer while active
 		TF2Items_SetAttribute(item1, 1, 180, 75.0); // overwrite to 75 health restored on kill 
 		TF2Items_SetAttribute(item1, 2, 412, 1.0); // remove damage vulnerability on wearer while active 
 		TF2Items_SetAttribute(item1, 3, 206, 1.20); // add +20% damage from melee sources while active 
 	}
 */
-//to revert holster and deploy speed penalty for persuader - DONE. its 75% slower according to source code
+
 //to revert splendid screen to pre-tough break version because its modern charge interval with old persuader is not accurate (and unbalanced)
 	else if (
 		ItemIsEnabled("persuader") &&
@@ -1481,13 +1512,11 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		TF2Items_SetAttribute(item1, 2, 778, 0.00); // remove "Melee hits refill 20% of your charge meter" attribute
 		TF2Items_SetAttribute(item1, 3, 258, 1.0); // !!!!!!THIS ATTRIBUTE DOESN'T WORK!!!!!! Ammo collected from ammo boxes becomes health 
 		// ammo_becomes_health attribute does not work anymore
+		// TODO: find a way to collect health from ammo boxes again
 		TF2Items_SetAttribute(item1, 4, 782, 0.00); // remove Ammo boxes collected also give Charge
-		TF2Items_SetAttribute(item1, 5, 249, 2.00); // +100% increase in charge recharge rate
-		//this attribute is technically correct - with other shields it takes just under 6 seconds to charge. 
-		//however with the modern splendid screen, it's not 6 secs and its too quick and not accurate.
-		//will need to revert the splendid screen too to before pre-tough break to make this more accurate.
+		TF2Items_SetAttribute(item1, 5, 249, 2.00); // +100% increase in charge recharge rate, shields should take around 6 seconds to charge with persuader
 		TF2Items_SetAttribute(item1, 6, 15, 0.0); // no random crits mod
-		//these atributes revert back to the old deploy and hoslter speed before Tough Break update
+		//these attributes revert back to the old deploy and hoslter speed before Tough Break update
 		TF2Items_SetAttribute(item1, 7, 178, 0.75); // 75% faster deploy speed
 		TF2Items_SetAttribute(item1, 8, 199, 0.75); // 75% faster holster speed
 	}
@@ -1538,11 +1567,11 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 	) {
 		item1 = TF2Items_CreateItem(0);
 		TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
-		TF2Items_SetNumAttributes(item1, 3);
+		TF2Items_SetNumAttributes(item1, 2);
 		//these atributes revert back to the old deploy and hoslter speed before Tough Break update
-		TF2Items_SetAttribute(item1, 0, 547, 0.75); // 75% faster deploy speed
-		TF2Items_SetAttribute(item1, 1, 772, 0.00); // try to get rid of holster delay
-		TF2Items_SetAttribute(item1, 2, 199, 0.75); // 75% faster holster speed #this attribute doesn't seem to work?
+		TF2Items_SetAttribute(item1, 0, 547, 0.75); // 75% faster deploy speed (single)
+		//TF2Items_SetAttribute(item1, 0, 178, 0.75); // 75% faster deploy speed (this doesn't work somehow)
+		TF2Items_SetAttribute(item1, 1, 199, 0.75); // 75% faster holster speed
 	}
 
 	else if (
@@ -1577,6 +1606,20 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
 		TF2Items_SetNumAttributes(item1, 1);
 		TF2Items_SetAttribute(item1, 0, 5, 1.0); // fire rate penalty
+	}
+
+	else if (
+		ItemIsEnabled("splendid") &&
+		StrEqual(class, "tf_wearable_demoshield") &&
+		(index == 406)
+	) {
+		item1 = TF2Items_CreateItem(0);
+		TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
+		TF2Items_SetNumAttributes(item1, 3);
+		TF2Items_SetAttribute(item1, 0, 64, 0.85); // dmg taken from blast reduced
+		TF2Items_SetAttribute(item1, 1, 249, 1.00); // remove +50% increase in charge recharge rate
+		TF2Items_SetAttribute(item1, 2, 247, 1.0); // can deal charge impact damage at any range
+		//TODO: need to find a way to not get rid of debuffs while charging
 	}
 
 	else if (
