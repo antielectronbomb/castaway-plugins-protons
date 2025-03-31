@@ -13,8 +13,8 @@ Stuff I reverted:
 Stuff unique to this branch:
 
 1. Powerjack (95% accurate, it should overheal when at full hp on kill)
-2. 95% accurate Demoman swords deploy and holster speeds
-3. unfinished persian persuader
+2. 95% accurate Demoman swords deploy and holster speeds (spamming the quickswitch key causes the switch speed to be a bit slower)
+3. Unfinished Persian Persuader (Ammo collected from ammo boxes becomes health attribute does not work anymore, find a workaround.)
 
 ## Introduction
 Repository for plugins used on [castaway.tf](https://castaway.tf/)
