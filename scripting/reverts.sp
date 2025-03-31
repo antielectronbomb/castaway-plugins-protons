@@ -161,11 +161,13 @@ public void OnPluginStart() {
 	ItemDefine("Bonk! Atomic Punch", "bonk", "Reverted to pre-inferno, no longer slows after the effect wears off");
 	ItemDefine("Booties & Bootlegger", "booties", "Reverted to pre-matchmaking, shield not required for speed bonus");
 	ItemDefine("Brass Beast", "brassbeast", "Reverted to pre-matchmaking, 20% damage resistance when spun up at any health");
+	ItemDefine("Bushwacka", "bushwacka", "Reverted to release, +20% fire vulnerability, does random crits");
 	ItemDefine("Chargin' Targe", "targe", "Reverted to pre-toughbreak, 40% blast resistance, afterburn immunity");
 	ItemDefine("Claidheamh Mòr", "claidheamh", "Reverted to pre-toughbreak, -15 health, no damage vulnerability");
 	ItemDefine("Cleaner's Carbine", "carbine", "Reverted to release, crits for 3 seconds on kill");
 	ItemDefine("Crit-a-Cola", "critcola", "Reverted to pre-matchmaking, +25% movespeed, +10% damage taken, no mark-for-death on attack");
 	ItemDefine("Croc-o-Style Kit", "crocostyle", "Restored item set bonus. Survive headshots with 1 HP again, Ol' Snaggletooth hat is not required");
+	ItemDefine("Darwin's Danger Shield", "dangershield", "Reverted to release, just +25 max health, no afterburn immunity, no fire resist");
 	ItemDefine("Dead Ringer", "ringer", "Reverted to pre-gunmettle, can pick up ammo, 80% dmg resist for 4s");
 	ItemDefine("Degreaser", "degreaser", "Reverted to pre-toughbreak, full switch speed for all weapons, old penalties");
 	ItemDefine("Dragon's Fury", "dragonfury", "Reverted -25% projectile size nerf");
@@ -1177,6 +1179,19 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 	}
 
 	else if (
+		ItemIsEnabled("bushwacka") &&
+		StrEqual(class, "tf_weapon_club") &&
+		(index == 232)
+	) {
+		item1 = TF2Items_CreateItem(0);
+		TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
+		TF2Items_SetNumAttributes(item1, 3);
+		TF2Items_SetAttribute(item1, 0, 15, 1.0); // adds back random crits
+		TF2Items_SetAttribute(item1, 1, 412, 1.00); // remove 20% dmg vulnerability on wearer
+		TF2Items_SetAttribute(item1, 2, 61, 1.20); // add 20% fire vulnerability on wearer !!!attribute only works when active!!!
+	}
+
+	else if (
 		ItemIsEnabled("caber") &&
 		StrEqual(class, "tf_weapon_stickbomb")
 	) {
@@ -1220,6 +1235,19 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		TF2Items_SetNumAttributes(item1, 1);
 		TF2Items_SetAttribute(item1, 0, 412, 1.00); // dmg taken
 		//health handled elsewhere
+	}
+
+	else if (
+		ItemIsEnabled("dangershield") &&
+		StrEqual(class, "tf_wearable") &&
+		(index == 231)
+	) {
+		item1 = TF2Items_CreateItem(0);
+		TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
+		TF2Items_SetNumAttributes(item1, 3);
+		TF2Items_SetAttribute(item1, 0, 60, 1.50); // remove fire damage resistance
+		TF2Items_SetAttribute(item1, 1, 527, 0.0); // remove afterburn immunity
+		TF2Items_SetAttribute(item1, 2, 26, 25.0); // +25 max health on wearer
 	}
 
 	else if (
@@ -1574,7 +1602,7 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 	) {
 		item1 = TF2Items_CreateItem(0);
 		TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
-		TF2Items_SetNumAttributes(item1, 3);
+		TF2Items_SetNumAttributes(item1, 4);
 		TF2Items_SetAttribute(item1, 0, 180, 0.0); // remove +50 health restored on kill
 		TF2Items_SetAttribute(item1, 1, 412, 1.00); // remove 30% dmg vulnerability
 		TF2Items_SetAttribute(item1, 2, 110, 10.0); // reverted to +10 HP on hit
