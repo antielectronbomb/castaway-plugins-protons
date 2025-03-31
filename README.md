@@ -11,9 +11,10 @@ Stuff I reverted:
 8. Darwin's Danger Shield to release version
 
 Stuff unique to this branch:
-10. Powerjack (95% accurate, it should overheal when at full hp on kill)
-11. 95% accurate Demoman swords deploy and holster speeds
-12. unfinished persian persuader
+
+1. Powerjack (95% accurate, it should overheal when at full hp on kill)
+2. 95% accurate Demoman swords deploy and holster speeds
+3. unfinished persian persuader
 
 ## Introduction
 Repository for plugins used on [castaway.tf](https://castaway.tf/)
