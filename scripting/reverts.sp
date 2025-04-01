@@ -93,6 +93,7 @@ enum struct Player {
 	int ticks_since_attack;
 	int bonus_health;
 	int old_health;
+	int MaxHealth;
 }
 
 //item sets
@@ -190,6 +191,7 @@ public void OnPluginStart() {
 	ItemDefine("Flying Guillotine", "guillotine", "Reverted to pre-inferno, stun crits, distance mini-crits, no recharge");
 	ItemDefine("Gas Jockey's Gear", "gasjockey", "Restored item set bonus. +10% move speed, +10% bullet dmg on wearer. Attendant is not required");
 	ItemDefine("Gloves of Running Urgently", "glovesru", "Reverted to pre-inferno, no health drain, marks for death");
+	ItemDefine("Gunboats", "gunboats", "Reverted to release, -75% blast damage from rocket jumps");
 	ItemDefine("Half-Zatoichi", "zatoichi", "Reverted to pre-toughbreak, fast switch, less range, old honorbound, full heal, crits, old holster & deploy");
 	ItemDefine("Liberty Launcher", "liberty", "Reverted to release, +40% projectile speed, -25% clip size");
 	ItemDefine("Loch n Load", "lochload", "Reverted to pre-gunmettle, +20% damage against everything");
@@ -200,6 +202,7 @@ public void OnPluginStart() {
 	ItemDefine("Pomson 6000", "pomson", "Increased hitbox size (same as Bison), passes through team, full drains");
 	ItemDefine("Powerjack", "powerjack", "Reverted to release, +75 HP on kill, +20% damage bonus, no random crits");
 	ItemDefine("Pretty Boy's Pocket Pistol", "pocket", "Reverted to release, +15 health, no fall damage, slower firing speed, increased fire vuln");
+	ItemDefine("Razorback", "razorback", "Reverted to pre-inferno. Allows for overheals again, can only recharge from resupply cabinet.");
 	ItemDefine("Reserve Shooter", "reserve", "Deals minicrits to airblasted targets again");
 	ItemDefine("Righteous Bison", "bison", "Increased hitbox size, can hit the same player more times");
 	ItemDefine("Rocket Jumper", "rocketjmp", "Grants immunity to self-damage from Equalizer/Escape Plan taunt kill, picks up intel again");
@@ -1410,6 +1413,17 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 	}
 
 	else if (
+		ItemIsEnabled("gunboats") &&
+		StrEqual(class, "tf_wearable") &&
+		(index == 133)
+	) {
+		item1 = TF2Items_CreateItem(0);
+		TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
+		TF2Items_SetNumAttributes(item1, 1);
+		TF2Items_SetAttribute(item1, 0, 135, 0.25); // -75% blast damage from rocket jumps 
+	}
+
+	else if (
 		ItemIsEnabled("liberty") &&
 		StrEqual(class, "tf_weapon_rocketlauncher") &&
 		(index == 414)
@@ -1658,6 +1672,19 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 	}
 
 	else if (
+		ItemIsEnabled("razorback") &&
+		StrEqual(class, "tf_wearable_razorback") &&
+		(index == 57)
+	) {
+		item1 = TF2Items_CreateItem(0);
+		TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
+		TF2Items_SetNumAttributes(item1, 2);
+		TF2Items_SetAttribute(item1, 0, 800, 1.00); // remove patient overheal penalty
+		TF2Items_SetAttribute(item1, 1, 874, 10000.0); // effect bar recharge rate increased 
+		// (temporary recharge workaround until better solution found, the razorback recharge takes around 3 real days or 83 real hours)
+	}
+
+	else if (
 		ItemIsEnabled("rocketjmp") &&
 		StrEqual(class, "tf_weapon_rocketlauncher") &&
 		(index == 237)
@@ -1895,7 +1922,7 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 			}
 
 			{
-				// WIP: powerjack heal on kill
+				// Powerjack heal on kill derived from NotnHeavy's code
 
 				if (
 					client != attacker &&
