@@ -13,6 +13,8 @@ Stuff I reverted:
 10. Expert's Ordnance Item Set bonus (+10% fire dmg resist)
 11. Gas Jockey's Gear Item Set bonus (+10% move speed, +10% bullet vulnerability)
 12. Powerjack (+75 hp on kill, overheals above 175 hp, max 260 hp overheal)
+13. Gunboats to release (-75% blast damage from rocket jumps)
+14. Razorback to pre-Inferno (no recharge, allows for overheals)
 
 Unfinished stuff:
 
