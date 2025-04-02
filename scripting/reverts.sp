@@ -1258,7 +1258,7 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		TF2Items_SetAttribute(item1, 0, 412, 1.00); // dmg taken
 		//these atributes revert back to the old deploy and hoslter speed before Tough Break update
 		TF2Items_SetAttribute(item1, 1, 781, 0.00); // remove the is_a_sword attribute (This Weapon has a large melee range and deploys and holsters slower)
-		TF2Items_SetAttribute(item1, 2, 264, 1.50); // add back sword melee range. 50% increased melee attack range. 48 HU -> 72 HU
+		TF2Items_SetAttribute(item1, 2, 264, 1.00); // add back sword melee range. 50% increased melee attack range. 48 HU -> 72 HU
 
 		
 		//health handled elsewhere
@@ -1362,7 +1362,7 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		TF2Items_SetNumAttributes(item1, 2);
 		//these atributes revert back to the old deploy and hoslter speed before Tough Break update
 		TF2Items_SetAttribute(item1, 0, 781, 0.00); // remove the is_a_sword attribute (This Weapon has a large melee range and deploys and holsters slower)
-		TF2Items_SetAttribute(item1, 1, 264, 1.50); // add back sword melee range. 50% increased melee attack range. 48 HU -> 72 HU
+		TF2Items_SetAttribute(item1, 1, 264, 1.00); // add back sword melee range. 50% increased melee attack range. 48 HU -> 72 HU
 	}
 
 	else if (
@@ -1545,7 +1545,7 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		TF2Items_SetAttribute(item1, 6, 15, 0.0); // no random crits mod
 		//these atributes revert back to the old deploy and hoslter speed before Tough Break update
 		TF2Items_SetAttribute(item1, 7, 781, 0.00); // remove the is_a_sword attribute (This Weapon has a large melee range and deploys and holsters slower)
-		TF2Items_SetAttribute(item1, 8, 264, 1.50); // add back sword melee range. 50% increased melee attack range. 48 HU -> 72 HU
+		TF2Items_SetAttribute(item1, 8, 264, 1.00); // add back sword melee range. 50% increased melee attack range. 48 HU -> 72 HU
 	}
 
 	else if (
@@ -1597,7 +1597,7 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		TF2Items_SetNumAttributes(item1, 2);
 		//these atributes revert back to the old deploy and hoslter speed before Tough Break update
 		TF2Items_SetAttribute(item1, 0, 781, 0.00); // remove the is_a_sword attribute (This Weapon has a large melee range and deploys and holsters slower)
-		TF2Items_SetAttribute(item1, 1, 264, 1.50); // add back sword melee range. 50% increased melee attack range. 48 HU -> 72 HU
+		TF2Items_SetAttribute(item1, 1, 264, 1.00); // add back sword melee range. 50% increased melee attack range. 48 HU -> 72 HU
 	}
 
 	else if (
