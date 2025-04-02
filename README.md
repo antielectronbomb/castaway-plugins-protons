@@ -7,7 +7,7 @@ Stuff I reverted:
 4. Special Delivery set (without hat) +25 HP bonus
 5. Warrior's Spirit pre-Tough Break
 6. Croc-O-Style Item set bonus (survive headshots)
-7. Bushwacka to release version (95% accurate)
+7. Bushwacka to release version
 8. Darwin's Danger Shield to release version
 9. Demoman swords deploy and holster speeds (thanks huutti)
 10. Expert's Ordnance Item Set bonus (+10% fire dmg resist)
