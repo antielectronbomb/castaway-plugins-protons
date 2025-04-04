@@ -1,0 +1,471 @@
+Update Info:
+April 4, 2025
+-Added and updated new info for: 
+	Rocket Jumper
+	Wrangler 
+	Rescue Ranger
+	Disciplinary Action
+	Razorback
+	Warrior's Spirit
+	Cozy Camper
+	Fully reverted Dragons Fury
+	Reverted ramp up for all Heavy Miniguns
+	Reverted deploy and holster speeds for all Demoman swords
+
+March 25, 2025
+-Added new info for Brass Beast
+
+March 10, 2025
+-Added and updated new info for: Saharan Spy Set, L'Etranger, Your Eternal Reward and Cleaner's Carbine
+
+February 26, 2025
+-Added new info for Backburner
+
+February 2, 2025
+-Added new info for Claidheamh Mòr
+
+January 28, 2025
+-Added new info for Tribalman's Shiv
+
+January 27, 2025
+-Added new info for Atomizer, Axtinguisher, and Spy-cicle
+-Revised Bonk! Atomic Punch info
+
+Detailed Weapon Reverts Information
+
+These are all the weapon reverts present on the revert servers. This list can be printed in console in-game using the !reverts command. 
+
+Airblast 
+	Airblast version currently used in this server is the present airblast version (post Jungle Inferno).
+
+All Demoman's Swords
+Reverted to pre-toughbreak, no holster and deploy penalty
+	Swords now deploy and holster 75% faster again - the same as stock Demoman melee speed.
+
+All Heavy's Miniguns
+Reverted to pre-love&war, full damage and accuracy immediately on spinning up
+	User does not need to wait for 1 second for full damage and accuracy to ramp up any more.
+
+Air Strike
+Reverted to pre-toughbreak, no extra blast radius penalty when blast jumping
+	-15% blast damage from rocket jumps
+	Increases attack speed while blast jumping
+	Magazine capacity increased on kill
+	-15% damage penalty
+	-10% explosion radius
+	No blast radius penalty when blast jumping
+
+Ambassador
+Reverted to pre-inferno, deals full headshot damage (102) at all ranges
+	Crits on headshot
+	-15% damage penalty
+	20% slower firing speed
+	No random critical hits
+ 
+Atomizer
+Reverted to pre-inferno, can always triple jump, taking 10 damage each time
+	Grants Triple Jump: The third jump deals 10 damage when used
+	Can always triple jump even when not having the weapon out
+	-30% slower firing speed
+	-20% damage vs players	
+ 
+Axtinguisher
+Reverted to pre-love&war, always deals 195 damage crits to burning targets 
+	100% critical hit vs burning players
+	-50% damage vs non-burning players
+	No critical hits vs non-burning players
+	No random critical hits
+	No speed bonus on kill
+
+Backburner
+Reverted to Hatless Update version
+	100% critical hits from behind
+	Extinguishing teammates restores 20 health
+	+10% increased damage
+	+150% airblast cost
+
+B.A.S.E. Jumper
+Reverted to pre-toughbreak, can redeploy, more air control, fire updraft 
+	Can redeploy parachute more than once
+	More air control by 50%
+	Being on fire causes updraft
+
+Baby Face's Blaster
+Reverted to pre-gunmettle, no boost loss on damage, only -25% on jump
+	On Hit: Builds Boost
+	Run speed increased with Boost
+	-34% clip size
+	10% slower move speed on wearer
+	Boost reduced by -25% on air jumps
+
+Brass Beast
+Reverted to pre-matchmaking, 20% damage resistance when spun up at any health
+	+20% damage bonus
+	20% damage resistance when spun up at any health
+	50% slower spin up time
+	-60% slower move speed while deployed
+
+Beggar's Bazooka
+Reverted to pre-2013, no radius penalty, misfires don't remove ammo 
+	Hold Fire to load up to three rockets
+	Release Fire to unleash the barrage
+	+3 degrees random projectile deviation
+	Overloading the chamber will cause a misfire and not remove ammo from clip
+	Cannot collect ammo from dispensers
+
+Bonk! Atomic Punch
+Reverted to pre-inferno, no longer slows after the effect wears off 
+	Drink to become invulnerable for 8 seconds. Cannot attack during this time. 
+	No slowdown effect when hit after invulnerability wears off.
+
+Booties & Bootlegger
+Reverted to pre-matchmaking, shield not required for speed bonus 
+	+25 max health on wearer
+	+10 move speed on wearer (shield not required)
+	+200% increase in turning control while charging
+	Melee kills refill 25% of your charge meter.
+	
+Chargin' Targe
+Reverted to pre-toughbreak, 40% blast resistance, afterburn immunity 
+	+50% fire damage resistance on wearer
+	+40% explosive damage resistance on wearer
+	Immune to the effects of afterburn
+	Alt-Fire: Gain increased attack power by charging towards your enemies.
+
+Claidheamh Mòr
+Reverted to Gun Mettle version, -15 health, no damage vulnerability 
+	0.5 sec increase in charge duration
+	Melee kills refill 25% of your charge meter.
+	No random critical hits
+	-15 max health on wearer
+	This weapon has a large melee range
+	Same deploy speed as the Eyelander
+	No damage vulnerability
+
+Cleaner's Carbine
+Reverted to release, crits for 3 seconds on kill
+	On Kill: 3 seconds of 100% critical chance
+	-20% clip size
+	35% slower firing speed
+	No random critical hits
+	No "Crikey" charge meter.
+
+Cozy Camper
+Reverted to pre-matchmaking, flinch resist at any charge level
+	+4 health regenerated per second on wearer
+	No flinching when aiming at any charge level
+	Knockback reduced by 20% when aiming
+
+Crit-a-Cola
+Reverted to pre-toughbreak, 25% movespeed, 10% increased damage taken, no mark-for-death on attack 
+	While under the effects,
+	+25% movement speed, your attacks mini-crit, and damage taken increased by 10%.
+	No mark-for-death effect
+
+Dead Ringer
+Reverted to pre-gunmettle, can pick up ammo, 80% dmg resist for 4s
+	Cloak Type: Feign Death 
+	90% damage reduction on hit, then 80% damage reduction for 4 seconds
+	Can tank backstabs and 4-6 stickybombs
+	+80% cloak regen rate
+	+60% cloak drain rate
+	Can pick up ammo packs to refill cloak meter
+	No speed boost on feigned death
+ 
+Degreaser
+Reverted to pre-toughbreak, full switch speed for all weapons, old penalties 
+	65% faster weapon switch for all weapons
+	-10% damage penalty
+	-25% afterburn damage penalty
+
+Disciplinary Action
+Reverted to pre-matchmaking, give allies 3 seconds of speed buff on hit
+	On Hit Teammate: Boosts both players' speed for 3 seconds
+	-25% damage penalty
+
+Dragon's Fury
+Reverted -25% projectile size nerf and center-hit requirement for bonus damage
+	Extinguishing teammates restores 20 health
+	Deals 300% damage to burning players
+	+50% re-pressurization rate on hit
+	-50% repressurization rate on Alt-Fire
+	Fireball projectile size has been increased by 25%.
+	Bonus damage does not require aiming at the direct center of an enemy player's hitbox
+	
+Enforcer
+Reverted to pre-gunmettle, damage bonus while undisguised, no piercing 
+	+20% damage bonus while undisguised
+	20% slower firing speed
+	No random critical hits
+	No piercing effects
+
+Eviction Notice
+Reverted to pre-inferno, no health drain, +20% damage taken 
+	When weapon is active:
+	+40% faster firing speed
+	+15% faster move speed on wearer
+	Gain a speed boost on hit
+	-60% damage penalty
+	+20% damage vulnerability on wearer
+
+Fists of Steel
+Reverted to pre-inferno, no healing penalties 
+	-40% damage from ranged sources while active
+	+100% damage from melee sources while active
+	This weapon holsters 100% slower
+	Can be fully healed with no penalties
+
+Flying Guillotine
+Reverted to pre-inferno, stun crits, distance mini-crits, no recharge 
+	Throw at your enemies to make them bleed!
+	Long distance hits cause mini-crits
+	100% critical hit vs stunned players
+	No random critical hits
+	Recharge time is fixed to 6 seconds
+
+Gloves of Running Urgently
+Reverted to pre-inferno, no health drain, marks for death 
+	+30% faster move speed on wearer
+	-25% damage penalty
+	No health drain on equip
+	You are marked for death while active, and for a short period after switching weapons
+
+Half-Zatoichi
+Reverted to pre-toughbreak, fast switch, less range, old honorbound, full heal, crits 
+	On Kill: Restores you to 100% health.
+	Old Honorbound: Once drawn cannot be sheathed until it kills.
+	Can be fast switched without penalty
+	Short melee hit range
+	Random critical hits enabled
+
+L'Etranger
+Still the same as the modern version, but includes the Saharan Spy item set bonus when equipped with the Your Eternal Reward.
+	+40% cloak duration
+	+15% cloak on hit
+	-20% damage penalty
+	
+	The Saharan Spy
+	L'Etranger
+	Your Eternal Reward
+	
+	Item Set Bonus:
+	Reduced decloak sound volume
+	0.5 sec longer Cloak blink time
+
+Liberty Launcher
+Reverted to release, +40% projectile speed, -25% clip size 
+	+40% projectile speed
+	-25% clip size; 3 rockets clip size
+	No reduced self-blast damage from rocket jumps
+	No damage penalty
+
+Loch n Load
+Reverted to Smissmas 2014, +20% damage against everything 
+	+20% damage bonus
+	+25% projectile speed
+	-25% clip size
+	-25% explosion radius
+	Launched bombs shatter on surfaces
+	
+Loose Cannon
+Reverted to pre-toughbreak, +50% projectile speed, constant 60 dmg impacts
+	+50% projectile speed
+	Constant 60 damage cannon impacts
+	Increased cannonball knockback strength
+
+Market Gardener
+Reverted to pre-toughbreak, no attack speed penalty 
+	Deals crits while the wielder is rocket jumping
+	No firing speed penalty – same as stock shovel
+	No random critical hits
+
+Panic Attack
+Reverted to pre-inferno, hold fire to load shots, let go to release
+	50% faster reload time
+	This weapon deploys 50% faster
+	Hold fire to load up to 4 shells
+	Can be held to fire when full, let go to release
+	Fire rate and spread increases as health decreases
+
+Pomson 6000
+Increased hitbox size (same as Bison), passes through team, full drains 
+	Does not require ammo, increased hitbox size
+	Projectile cannot be deflected, can pass through teammates
+	On Hit: Victim fully loses Medi Gun charge and Cloak
+	Projectile cannot be deflected and only hits once on targets
+	Deals only 20% damage to buildings
+
+Pretty Boy's Pocket Pistol
+Reverted to release, +15 health, no fall damage, slower firing speed, increased fire vuln 
+	+15% max health on wearer
+	No fall damage
+	25% slower firing speed
+	50% fire damage vulnerability on wearer
+	Full 12 clip size
+
+Razorback
+Reverted to pre-inferno, can be overhealed, shield does not regenerate
+	Blocks a single backstab attempt.
+	Can be overhealed.
+	Shield does not regenerate.
+	Must go to the resupply cabinet to get another shield when destroyed.
+
+Rescue Ranger
+Reverted to pre-toughbreak, heals +75 flat, no metal cost, 130 cost long ranged pickups
+	Alt-Fire: Use 130 metal to pick up your targeted building from long range
+	Fires a special bolt that can repair friendly buildings for 75 health
+	-34% clip size
+	-50% max primary ammo on wearer
+	Self mark for death when hauling buildings
+	No metal cost when repairing buildings
+
+Rocket Jumper
+Grants immunity to self-damage from Equalizer/Escape Plan taunt kill
+	Survive Kamikaze taunt kill when equipping the Rocket Jumper
+	Deals upwards knock back
+
+Reserve Shooter
+Reverted to Pre-Inferno. Deals minicrits to airblasted targets again 
+	This weapon deploys 20% faster
+	Mini-crits targets launched airborne by airblast, explosions, grapple hooks or rocket packs
+	-34% clip size (4 ammo in clip)
+
+Righteous Bison
+Increased hitbox size, can hit the same player more times 
+	Does not require ammo
+	Projectiles hit enemy targets more than once
+	Increased projectile hitbox size
+	Projectile cannot be deflected
+	Deals only 20% damage to buildings
+
+Sandman
+Reverted to pre-inferno, stuns players on hit again 
+	-15 max health on wearer
+	Stuns disables players from attacking
+	Stun duration increase with distance for up to 1 to 7 seconds
+	Long-range stuns make players immobile for 7 seconds
+
+Saharan Spy Set
+Restored the item set bonus (pre-2013) without requiring the hat, quiet decloak, 0.5 increased cloak blink time	
+	Item Set Bonus:
+	Reduced decloak sound volume
+	0.5 sec longer Cloak blink time
+	Requires equipping L'Etranger & Your Eternal Reward for the item set bonus to take effect. 
+	The Familiar Fez hat is not required for the item set bonus (due to the hat crafting blueprint not being available to F2Ps). 
+	The hat is now purely cosmetic.
+
+Scottish Resistance
+Reverted to release, 0.4 arm time penalty (from 0.8), no fire rate bonus 
+	0.4 seconds slower bomb arm time
+	No firing rate speed bonus
+	+50% max secondary ammo on wearer
+	+6 max pipebombs out
+	Detonates stickybombs near the crosshair and directly under your feet
+	Able to destroy enemy stickybombs
+
+Short Circuit
+Reverted to post-gunmettle, alt fire destroys projectiles, -cost +speed 
+	Per Shot: -5 ammo
+	Alt-Fire: -10 ammo, destroy projectiles
+	Uses metal for ammo
+	Limited range
+	No reload necessary
+	No random critical hits
+
+Shortstop
+Reverted reload time to release version, with +40% push force 
+	Faster reload time (around 1 second)
+	Added +40% push force
+
+Soda Popper
+Reverted to pre-2013, run to build hype and auto gain minicrits 
+	+25% faster reloading speed
+	+50% firing speed
+	-66% clip size
+	Build 'hype' as you run 
+	When the hype is full, automatically gain mini-crits
+	No random critical hits
+
+Solemn Vow
+Reverted to pre-gunmettle, firing speed penalty removed 
+	Allows you to see enemy health
+	No firing speed penalty
+
+Spy-cicle
+Reverted to pre-gunmettle, fire immunity for 2s, silent killer 
+	Silent Killer: No attack noise from backstabs
+	On Hit by Fire: Become fireproof for 2 seconds
+	Backstab turns victim to ice
+	Melts in fire, regenerates after 15 seconds
+	Cannot pick up ammo packs to regenerate when melted.
+
+Sticky Jumper
+Reverted before Sep 2013 version. Can have 8 stickies out at once again 
+	Can use 8 stickies out at once
+	+200% max secondary ammo on wearer
+	No self inflicted blast damage taken
+	-100% damage penalty
+	No random critical hits
+	Wearer cannot carry the intelligence briefcase
+
+Sydney Sleeper
+Reverted to pre-2018, restored jarate explosion, no headshots 
+	+25% charge rate
+	On Scoped Hit: Jarate target for 2 to 8 seconds based on amount charged
+	Headshots or fully charged shots cause an explosion of Jarate.
+	No random critical hits
+	No headshots
+
+Tide Turner
+Reverted to around 2014. Can deal full crits like other shields again 
+	Critical hits near the end of charging
+	Kills while charging refill 75% of your charge meter.
+	+25% fire damage resistance on wearer
+	+25% explosive damage resistance on wearer
+	Full turning control while charging
+	Taking damage while shield charging reduces remaining charging time.
+
+Tribalman's Shiv
+Reverted to 2010 release version, 8 second bleed, 35% damage penalty
+	On Hit: Bleed for 8 seconds
+	-35% Damage penalty
+
+Ullapool Caber
+Reverted to pre-gunmettle, always deals 175+ damage on melee explosion 
+	Deals around 175+ damage on melee explosion
+	No firing speed penalty
+	No switch speed penalty
+	No random critical hits
+
+Vita-Saw
+Reverted to pre-inferno, always preserves up to 20% uber on death 
+	On death up to 20% of your stored ÜberCharge is retained
+	-10 max health on wearer
+
+Warrior's Spirit
+Reverted to pre-tough break, heals 10 on hit, no damage vuln, -20 max health
+	+30% damage bonus
+	On Hit: Gain up to +10 health
+	-20 max health on wearer
+	No damage vulnerability
+
+Wrangler
+Reverted to pre-gunmettle (shield values only), fully repair and refill while shield is up
+	No 66% repair reduction when shield in active, fully repairs instead
+
+Your Eternal Reward
+Reverted to pre-inferno, cannot disguise, no cloak drain penalty.
+	Equip this weapon with the L'Etranger to gain the Saharan Spy set bonus.
+	No cloak drain penalty
+	Wearer cannot disguise but must stab someone first
+	Rapidly steal the disguise of your backstab victim
+	Silent Killer: No attack noise from backstabs
+	
+	The Saharan Spy
+	L'Etranger
+	Your Eternal Reward
+
+	Item Set Bonus:
+	Reduced decloak sound volume
+	0.5 sec longer Cloak blink time
+	
