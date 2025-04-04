@@ -11,6 +11,7 @@ April 4, 2025
 	Fully reverted Dragons Fury
 	Reverted ramp up for all Heavy Miniguns
 	Reverted deploy and holster speeds for all Demoman swords
+-Updated Scottish Resistance to being the present version now
 
 March 25, 2025
 -Added new info for Brass Beast
@@ -355,7 +356,8 @@ Restored the item set bonus (pre-2013) without requiring the hat, quiet decloak,
 	The hat is now purely cosmetic.
 
 Scottish Resistance
-Reverted to release, 0.4 arm time penalty (from 0.8), no fire rate bonus 
+Now uses the current version.
+Previously, its reverted version had a 0.4 arm time penalty (from 0.8), and no fire rate bonus 
 	0.4 seconds slower bomb arm time
 	No firing rate speed bonus
 	+50% max secondary ammo on wearer
