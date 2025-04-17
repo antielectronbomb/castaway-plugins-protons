@@ -1,4 +1,12 @@
 Weapon Reverts Changelog:
+
+April 5, 2025
+Reverted Black Box to pre-gunmettle, flat +15 per hit, uncapped
+	The Black Box
+	On Hit: +15 health
+	-25% clip size
+
+
 April 4, 2025
 Disabled Scottish Resistance revert. The server now uses the modern Scottish Resistance version.
 
