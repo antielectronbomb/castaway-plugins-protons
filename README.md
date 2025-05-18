@@ -1,25 +1,26 @@
 ## unfinished and untested reverts branch
 
 Stuff I reverted:
+( * means implemented in the main weapon reverts plugin; count: 7)
 1. Release Enforcer
-2. Rocket Jumper picking up intel again
-3. Sticky Jumper picking up intel again
+*2. Rocket Jumper picking up intel again
+*3. Sticky Jumper picking up intel again
 4. Special Delivery set (without hat) +25 HP bonus
-5. Warrior's Spirit pre-Tough Break
+*5. Warrior's Spirit pre-Tough Break
 6. Croc-O-Style Item set bonus (survive headshots)
 7. Bushwacka to release version
 8. Darwin's Danger Shield to release version
-9. Demoman swords deploy and holster speeds (thanks huutti)
+*9. Demoman swords deploy and holster speeds (thanks huutti)
 10. Expert's Ordnance Item Set bonus (+10% fire dmg resist)
 11. Gas Jockey's Gear Item Set bonus (+10% move speed, +10% bullet vulnerability)
-12. Powerjack (+75 hp on kill, overheals above 175 hp, max 260 hp overheal)
+*12. Powerjack (+75 hp on kill, overheals above 175 hp, max 260 hp overheal)
 13. Gunboats to release (-75% blast damage from rocket jumps)
-14. Razorback to pre-Inferno (no recharge, allows for overheals)
+*14. Razorback to pre-Inferno (no recharge, allows for overheals)
 
 Unfinished stuff:
 
 1. Unfinished Persian Persuader (Ammo collected from ammo boxes becomes health attribute does not work anymore, find a workaround.)
-2. Splendid Screen revert. Need to find a way to not get rid of debuffs while charging
+*2. Splendid Screen revert. Need to find a way to not get rid of debuffs while charging (finished revert in the main castaway plugin)
 
 ## Introduction
 Repository for plugins used on [castaway.tf](https://castaway.tf/)
