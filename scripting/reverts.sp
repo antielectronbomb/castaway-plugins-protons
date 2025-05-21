@@ -333,6 +333,7 @@ public void OnPluginStart() {
 	ItemDefine("Market Gardener", "gardener", "Reverted to pre-toughbreak, no attack speed penalty", CLASSFLAG_SOLDIER);
 	ItemDefine("Natascha", "natascha", "Reverted to pre-matchmaking, 20% damage resistance when spun up at any health", CLASSFLAG_HEAVY);
 	ItemDefine("Panic Attack", "panic", "Reverted to pre-inferno, hold fire to load, let go to release, fire faster with bigger spread on lower health", CLASSFLAG_SOLDIER | CLASSFLAG_PYRO | CLASSFLAG_HEAVY | CLASSFLAG_ENGINEER);
+	ItemDefine("Persian Persuader", "persuader", "Reverted to pre-toughbreak, picks up ammo as health, +100% charge rate, no crits", CLASSFLAG_DEMOMAN);	
 	ItemDefine("Pomson 6000", "pomson", "Increased hitbox size (same as Bison), passes through team, no uber & cloak drain fall-off at any range", CLASSFLAG_ENGINEER);
 	ItemDefine("Powerjack", "powerjack", "Reverted to pre-gunmettle, +75 HP on kill with overheal, +15% move speed & 20% dmg vuln while active", CLASSFLAG_PYRO);
 	ItemDefine("Pretty Boy's Pocket Pistol", "pocket", "Reverted to release, +15 health, no fall damage, slower firing speed, increased fire vuln", CLASSFLAG_SCOUT);
@@ -1931,6 +1932,27 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		TF2Items_SetNumAttributes(item1, 1);
 		TF2Items_SetAttribute(item1, 0, 180, 0.0); // remove +25 hp on kill attribute
 		// health bonus with overheal handled elsewhere
+	}
+
+	else if (
+		ItemIsEnabled("persuader") &&
+		StrEqual(class, "tf_weapon_sword") &&
+		(index == 404)
+	) {
+		item1 = TF2Items_CreateItem(0);
+		TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
+		bool swords = ItemIsEnabled("swords");
+		TF2Items_SetNumAttributes(item1, swords ? 8 : 6);
+		TF2Items_SetAttribute(item1, 0, 77, 1.00); // -0% max primary ammo on wearer  
+		TF2Items_SetAttribute(item1, 1, 79, 1.00); // -0% max secondary ammo on wearer 
+		TF2Items_SetAttribute(item1, 2, 778, 0.00); // remove "Melee hits refill 20% of your charge meter" attribute
+		TF2Items_SetAttribute(item1, 3, 782, 0.0); // remove "Ammo boxes collected also give Charge"
+		TF2Items_SetAttribute(item1, 4, 249, 2.00); // +100% increase in charge recharge rate, shields should take around 6 seconds to charge with persuader
+		TF2Items_SetAttribute(item1, 5, 258, 1.0); // Ammo collected from ammo boxes becomes health (doesn't work! still picks up ammo. i think gun mettle update is the cause)
+		if(swords) {
+			TF2Items_SetAttribute(item1, 6, 781, 0.0); // is a sword
+			TF2Items_SetAttribute(item1, 7, 264, 1.0); // melee range multiplier; 1.0 somehow corresponds to 72 hammer units from testing
+		}		
 	}
 
 	else if (
