@@ -2649,7 +2649,8 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 				{
 					TF2Attrib_SetByDefIndex(client, 159, 0.0); // SET BONUS: cloak blink time penalty
 					TF2Attrib_SetByDefIndex(client, 160, 0.0); // SET BONUS: quiet unstealth
-					if(GetItemVariant(Wep_Saharan) == 1) TF2Attrib_SetByDefIndex(client, 82, 0.00);	// bring back +40% cloak duration bonus from L'Etranger; mult_cloak_meter_consume_rate 
+					if(GetItemVariant(Wep_Saharan) == 1)
+						TF2Attrib_SetByDefIndex(client, 83, 1.00);	// resets cloak duration to default; mult_cloak_meter_consume_rate; inverted_percentage 
 				}
 			}
 
@@ -2711,7 +2712,10 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 							player_weapons[client][Wep_Saharan] = true;
 							TF2Attrib_SetByDefIndex(client, 159, 0.5); // SET BONUS: cloak blink time penalty
 							TF2Attrib_SetByDefIndex(client, 160, 1.0); // SET BONUS: quiet unstealth
-							if(GetItemVariant(Wep_Saharan) == 1) TF2Attrib_SetByDefIndex(client, 82, 0.40); // counteract -40% cloak duration bonus from L'Etranger, mult_cloak_meter_consume_rate
+							if(GetItemVariant(Wep_Saharan) == 1)
+								TF2Attrib_SetByDefIndex(client, 83, 1.60); // remove -40% cloak bonus from L'Etranger; mult_cloak_meter_consume_rate; inverted_percentage 
+								// why doesn't this make it 10 seconds again when set to 1.40???
+								// i set this to 1.60 and it's not exactly 10 seconds but just near 10 seconds. why?
 						}
 					}
 				}
