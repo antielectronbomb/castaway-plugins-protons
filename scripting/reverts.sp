@@ -470,6 +470,7 @@ public void OnPluginStart() {
 	ItemDefine("Rocket Jumper", "rocketjmp", "Reverted to pre-2013, grants immunity to self-damage from Equalizer/Escape Plan taunt", CLASSFLAG_SOLDIER, Wep_RocketJumper);
 	ItemVariant(Wep_RocketJumper, "Reverted to pre-2013, grants immunity to self-damage from Equalizer/Escape Plan taunt, wearer can pick up intel");
 	ItemDefine("Saharan Spy", "saharan", "Restored release item set bonus, quiet decloak, 0.5s longer cloak blink time. Equip the L'Etranger and YER to gain the bonus, Familiar Fez not required", CLASSFLAG_SPY, Wep_Saharan);
+	ItemVariant(Wep_Saharan, "Restored release item set bonus, quiet decloak, 0.5s longer cloak blink time, no L'Etranger cloak duration bonus. Equip the L'Etranger and YER to gain the bonus, Familiar Fez not required");
 	ItemDefine("Sandman", "sandman", "Reverted to pre-inferno, stuns players on hit again, 15 sec ball recharge time", CLASSFLAG_SCOUT, Wep_Sandman);
 	ItemDefine("Scottish Resistance", "scottish", "Reverted to release, 0.4 arm time penalty (from 0.8), no fire rate bonus", CLASSFLAG_DEMOMAN, Wep_Scottish);
 	ItemDefine("Short Circuit", "circuit", "Reverted to pre-matchmaking, alt-fire destroys projectiles in front, costs 15 metal per shot", CLASSFLAG_ENGINEER, Wep_ShortCircuit);
@@ -2648,6 +2649,8 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 				{
 					TF2Attrib_SetByDefIndex(client, 159, 0.0); // SET BONUS: cloak blink time penalty
 					TF2Attrib_SetByDefIndex(client, 160, 0.0); // SET BONUS: quiet unstealth
+					if(GetItemVariant(Wep_Saharan) == 1) TF2Attrib_SetByDefIndex(client, 83, 1.40);	// bring back +40% cloak duration bonus from L'Etranger; 
+					// mult_cloak_meter_consume_rate; inverted_percentage 
 				}
 			}
 
@@ -2709,6 +2712,8 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 							player_weapons[client][Wep_Saharan] = true;
 							TF2Attrib_SetByDefIndex(client, 159, 0.5); // SET BONUS: cloak blink time penalty
 							TF2Attrib_SetByDefIndex(client, 160, 1.0); // SET BONUS: quiet unstealth
+							if(GetItemVariant(Wep_Saharan) == 1) TF2Attrib_SetByDefIndex(client, 83, 1.00); // 0% cloak duration bonus; remove cloak bonus from L'Etranger
+							// mult_cloak_meter_consume_rate; inverted_percentage 
 						}
 					}
 				}
