@@ -2649,8 +2649,7 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 				{
 					TF2Attrib_SetByDefIndex(client, 159, 0.0); // SET BONUS: cloak blink time penalty
 					TF2Attrib_SetByDefIndex(client, 160, 0.0); // SET BONUS: quiet unstealth
-					if(GetItemVariant(Wep_Saharan) == 1) TF2Attrib_SetByDefIndex(client, 83, 1.40);	// bring back +40% cloak duration bonus from L'Etranger; 
-					// mult_cloak_meter_consume_rate; inverted_percentage 
+					if(GetItemVariant(Wep_Saharan) == 1) TF2Attrib_SetByDefIndex(client, 82, 0.00);	// bring back +40% cloak duration bonus from L'Etranger; mult_cloak_meter_consume_rate 
 				}
 			}
 
@@ -2712,8 +2711,7 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 							player_weapons[client][Wep_Saharan] = true;
 							TF2Attrib_SetByDefIndex(client, 159, 0.5); // SET BONUS: cloak blink time penalty
 							TF2Attrib_SetByDefIndex(client, 160, 1.0); // SET BONUS: quiet unstealth
-							if(GetItemVariant(Wep_Saharan) == 1) TF2Attrib_SetByDefIndex(client, 83, 1.00); // 0% cloak duration bonus; remove cloak bonus from L'Etranger
-							// mult_cloak_meter_consume_rate; inverted_percentage 
+							if(GetItemVariant(Wep_Saharan) == 1) TF2Attrib_SetByDefIndex(client, 82, 0.40); // counteract -40% cloak duration bonus from L'Etranger, mult_cloak_meter_consume_rate
 						}
 					}
 				}
