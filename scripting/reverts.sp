@@ -447,7 +447,9 @@ public void OnPluginStart() {
 	ItemVariant(Wep_Pickaxe, "Merged back to release; while active: blocks Medic healing, can't call for Medics, no mark-for-death; if 200 max hp: 125 dmg at 58 hp, 150 dmg at 20 hp, 162 dmg at 1 hp");
 	ItemDefine("Eviction Notice", "eviction", "Reverted to pre-inferno, no health drain, +20% damage taken", CLASSFLAG_HEAVY, Wep_Eviction);
 	ItemVariant(Wep_Eviction, "Reverted to gunmettle, +50% faster firing speed, no 20% dmg vuln, no health drain, no move speed bonus");
-	ItemDefine("Fists of Steel", "fiststeel", "Reverted to pre-inferno, no healing penalties", CLASSFLAG_HEAVY, Wep_FistsSteel);
+	ItemDefine("Fists of Steel", "fiststeel", "Reverted to pre-inferno, no healing penalties, while active: -40% ranged damage, 100% melee damage vuln", CLASSFLAG_HEAVY, Wep_FistsSteel);
+	ItemVariant(Wep_FistsSteel, "Reverted to pre-tough break, 20% longer weapon switch, no healing and holster penalties, while active: -40% ranged damage, 100% melee damage vuln");
+	ItemVariant(Wep_FistsSteel, "Reverted to release, no healing and holster penalties, while active: -60% ranged damage, 100% melee damage vuln");
 	ItemDefine("Flying Guillotine", "guillotine", "Reverted to pre-inferno, stun crits, distance mini-crits, no recharge", CLASSFLAG_SCOUT, Wep_Cleaver);
 	ItemDefine("Gloves of Running Urgently", "glovesru", "Reverted to pre-toughbreak, no health drain or holster penalty, marks for death, -25% damage", CLASSFLAG_HEAVY, Wep_GRU);
 	ItemVariant(Wep_GRU, "Reverted to pre-pyromania, no health drain, no mark-for-death, 50% dmg penalty, -6hp/s while active, jump a bit higher every -6hp/s");
@@ -1987,9 +1989,20 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		case 331: { if (ItemIsEnabled(Wep_FistsSteel)) {
 			item1 = TF2Items_CreateItem(0);
 			TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
-			TF2Items_SetNumAttributes(item1, 2);
+			bool variants = (GetItemVariant(Wep_FistsSteel) == 1 || GetItemVariant(Wep_FistsSteel) == 2);
+			TF2Items_SetNumAttributes(item1, variants ? 4 : 2);
 			TF2Items_SetAttribute(item1, 0, 853, 1.0); // mult patient overheal penalty active
 			TF2Items_SetAttribute(item1, 1, 854, 1.0); // mult health fromhealers penalty active
+			// Pre-Tough Break FoS
+			if (GetItemVariant(Wep_FistsSteel == 1)) {
+				TF2Items_SetAttribute(item1, 2, 772, 1.0); // single wep holster time increased; mult_switch_from_wep_deploy_time
+				TF2Items_SetAttribute(item1, 3, 177, 1.20); // 20% longer weapon switch; mult_deploy_time
+			}
+			// Release FoS
+			if (GetItemVariant(Wep_FistsSteel == 2)) {
+				TF2Items_SetAttribute(item1, 2, 772, 1.0); // single wep holster time increased; mult_switch_from_wep_deploy_time
+				TF2Items_SetAttribute(item1, 3, 205, 0.40); // -60% damage from ranged sources while active; dmg_from_ranged
+			}			
 		}}
 		case 416: { if (ItemIsEnabled(Wep_MarketGardener)) {
 			item1 = TF2Items_CreateItem(0);
