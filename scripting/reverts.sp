@@ -492,8 +492,8 @@ public void OnPluginStart() {
 	ItemVariant(Wep_ShortCircuit, "Reverted to pre-gunmettle, primary fire destroys projectiles, no metal from dispensers when active, no alt-fire");
 	ItemDefine("Shortstop", "shortstop", "Reverted to pre-Manniversary, fast reload, no push force penalty, shares pistol ammo, no shove", CLASSFLAG_SCOUT, Wep_Shortstop);
 	ItemVariant(Wep_Shortstop, "Reverted to pre-Manniversary, fast reload, no push force penalty, shares pistol ammo; modern shove is kept");
-	ItemVariant(Wep_Shortstop, "Reverted to pre-gunmettle, +20% bonus healing from all sources, 40% knockback vulnerability while deployed, shares pistol ammo");
-	ItemVariant(Wep_Shortstop, "Reverted to pre-gunmettle, +20% bonus healing from all sources, 40% knockback vulnerability while deployed, shares pistol ammo; modern shove is kept");
+	ItemVariant(Wep_Shortstop, "Reverted to pre-gunmettle, +20% bonus healing from all sources while active, 40% more knockback vuln at all times, shares pistol ammo");
+	ItemVariant(Wep_Shortstop, "Reverted to pre-gunmettle, +20% bonus healing from all sources while active, 40% more knockback vuln at all times, shares pistol ammo; modern shove is kept");
 	ItemDefine("Soda Popper", "sodapop", "Reverted to pre-Smissmas 2013, run to build hype and auto gain minicrits", CLASSFLAG_SCOUT, Wep_SodaPopper);
 	ItemVariant(Wep_SodaPopper, "Reverted to pre-matchmaking, run to build hype");
 	ItemDefine("Solemn Vow", "solemn", "Reverted to pre-gunmettle, firing speed penalty removed", CLASSFLAG_MEDIC, Wep_Solemn);
