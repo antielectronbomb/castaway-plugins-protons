@@ -2232,7 +2232,7 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 			item1 = TF2Items_CreateItem(0);
 			TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
 			bool preGunMettle = GetItemVariant(Wep_Shortstop) <= 2;
-			TF2Items_SetNumAttributes(item1, 5);
+			TF2Items_SetNumAttributes(item1, preGunMettle ? 6 : 5);
 			TF2Items_SetAttribute(item1, 0, 76, 1.125); // 12.5% max primary ammo on wearer, reverts max ammo back to 36, required for ammo sharing to work
 			if(!preGunMettle) {
 				TF2Items_SetAttribute(item1, 1, 241, 1.0); // reload time increased hidden
@@ -2245,6 +2245,7 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 				TF2Items_SetAttribute(item1, 2, 534, 1.40); // airblast vulnerability multiplier hidden
 				TF2Items_SetAttribute(item1, 3, 535, 1.40); // damage force increase hidden
 				TF2Items_SetAttribute(item1, 4, 536, 1.40); // damage force increase text
+				TF2Items_SetAttribute(item1, 5, 128, 0.0); // disable provide on active
 			}
 		}}
 		case 230: { if (ItemIsEnabled(Wep_SydneySleeper)) {
