@@ -493,6 +493,7 @@ public void OnPluginStart() {
 	ItemDefine("Shortstop", "shortstop", "Reverted to pre-Manniversary, fast reload, no push force penalty, shares pistol ammo, no shove", CLASSFLAG_SCOUT, Wep_Shortstop);
 	ItemVariant(Wep_Shortstop, "Reverted to pre-Manniversary, fast reload, no push force penalty, shares pistol ammo; modern shove is kept");
 	ItemVariant(Wep_Shortstop, "Reverted to pre-gunmettle, +20% bonus healing from all sources, 40% knockback vulnerability while deployed, shares pistol ammo");
+	ItemVariant(Wep_Shortstop, "Reverted to pre-gunmettle, +20% bonus healing from all sources, 40% knockback vulnerability while deployed, shares pistol ammo; modern shove is kept");
 	ItemDefine("Soda Popper", "sodapop", "Reverted to pre-Smissmas 2013, run to build hype and auto gain minicrits", CLASSFLAG_SCOUT, Wep_SodaPopper);
 	ItemVariant(Wep_SodaPopper, "Reverted to pre-matchmaking, run to build hype");
 	ItemDefine("Solemn Vow", "solemn", "Reverted to pre-gunmettle, firing speed penalty removed", CLASSFLAG_MEDIC, Wep_Solemn);
@@ -1042,7 +1043,7 @@ public void OnGameFrame() {
 					{
 						// shortstop shove
 
-						if (GetItemVariant(Wep_Shortstop) == 0) {
+						if (GetItemVariant(Wep_Shortstop) == 0 || GetItemVariant(Wep_Shortstop) == 2) {
 							weapon = GetEntPropEnt(idx, Prop_Send, "m_hActiveWeapon");
 
 							if (weapon > 0) {
@@ -2230,7 +2231,7 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		case 220: { if (ItemIsEnabled(Wep_Shortstop)) {
 			item1 = TF2Items_CreateItem(0);
 			TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
-			bool preGunMettle = GetItemVariant(Wep_Shortstop) == 2;
+			bool preGunMettle = GetItemVariant(Wep_Shortstop) <= 2;
 			TF2Items_SetNumAttributes(item1, 5);
 			TF2Items_SetAttribute(item1, 0, 76, 1.125); // 12.5% max primary ammo on wearer, reverts max ammo back to 36, required for ammo sharing to work
 			if(!preGunMettle) {
@@ -2239,7 +2240,7 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 				TF2Items_SetAttribute(item1, 3, 535, 1.00); // damage force increase hidden
 				TF2Items_SetAttribute(item1, 4, 536, 1.00); // damage force increase text
 			}
-			if(preGunMettle) {
+			else if(preGunMettle) {
 				TF2Items_SetAttribute(item1, 1, 526, 1.20); // 20% bonus healing from all sources
 				TF2Items_SetAttribute(item1, 2, 534, 1.40); // airblast vulnerability multiplier hidden
 				TF2Items_SetAttribute(item1, 3, 535, 1.40); // damage force increase hidden
