@@ -565,8 +565,16 @@
 	}
 	"FistSteel_0"
 	{
-		"en"	"Reverted to pre-inferno, no healing penalties"
+		"en"	"Reverted to pre-inferno, no healing penalties, while active: -40% ranged damage, 100% melee damage vuln"
 	}
+	"FistSteel_1"
+	{
+		"en"	"Reverted to pre-tough break, 20% longer weapon switch, no healing and holster penalties, while active: -40% ranged damage, 100% melee damage vuln"
+	}
+	"FistSteel_2"
+	{
+		"en"	"Reverted to release, no healing and holster penalties, while active: -60% ranged damage, 100% melee damage vuln"
+	}	
 	"Guillotine_0"
 	{
 		"en"	"Reverted to pre-inferno, stun crits, distance mini-crits, no recharge"
@@ -714,6 +722,14 @@
 	"Shortstop_1"
 	{
 		"en"	"Reverted to pre-Manniversary, fast reload, no push force penalty, shares pistol ammo; modern shove is kept"
+	}
+	"Shortstop_2"
+	{
+		"en"	"Reverted to pre-gunmettle, +20% bonus healing from all sources while active, 40% more knockback vuln at all times, shares pistol ammo"
+	}
+	"Shortstop_3"
+	{
+		"en"	"Reverted to pre-gunmettle, +20% bonus healing from all sources while active, 40% more knockback vuln at all times, shares pistol ammo; modern shove is kept"
 	}
 	"Sodapop_0"
 	{

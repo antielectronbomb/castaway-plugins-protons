@@ -450,6 +450,8 @@ public void OnPluginStart() {
 	ItemDefine("eviction", "Eviction_0", CLASSFLAG_HEAVY, Wep_Eviction);
 	ItemVariant(Wep_Eviction, "Eviction_1");
 	ItemDefine("fiststeel", "FistSteel_0", CLASSFLAG_HEAVY, Wep_FistsSteel);
+	ItemVariant(Wep_FistsSteel, "FistSteel_1");
+	ItemVariant(Wep_FistsSteel, "FistSteel_2");
 	ItemDefine("guillotine", "Guillotine_0", CLASSFLAG_SCOUT, Wep_Cleaver);
 	ItemDefine("glovesru", "GlovesRU_0", CLASSFLAG_HEAVY, Wep_GRU);
 	ItemVariant(Wep_GRU, "GlovesRU_1");
@@ -492,6 +494,8 @@ public void OnPluginStart() {
 	ItemVariant(Wep_ShortCircuit, "Circuit_1");
 	ItemDefine("shortstop", "Shortstop_0", CLASSFLAG_SCOUT, Wep_Shortstop);
 	ItemVariant(Wep_Shortstop, "Shortstop_1");
+	ItemVariant(Wep_Shortstop, "Shortstop_2");
+	ItemVariant(Wep_Shortstop, "Shortstop_3");
 	ItemDefine("sodapop", "Sodapop_0", CLASSFLAG_SCOUT, Wep_SodaPopper);
 	ItemVariant(Wep_SodaPopper, "Sodapop_1");
 	ItemDefine("solemn", "Solemn_0", CLASSFLAG_MEDIC, Wep_Solemn);
@@ -1033,7 +1037,7 @@ public void OnGameFrame() {
 					{
 						// shortstop shove
 
-						if (GetItemVariant(Wep_Shortstop) == 0) {
+						if (GetItemVariant(Wep_Shortstop) == 0 || GetItemVariant(Wep_Shortstop) == 2) {
 							weapon = GetEntPropEnt(idx, Prop_Send, "m_hActiveWeapon");
 
 							if (weapon > 0) {
@@ -2017,9 +2021,21 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		case 331: { if (ItemIsEnabled(Wep_FistsSteel)) {
 			item1 = TF2Items_CreateItem(0);
 			TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
-			TF2Items_SetNumAttributes(item1, 2);
+			bool variants = (GetItemVariant(Wep_FistsSteel) == 1 || GetItemVariant(Wep_FistsSteel) == 2);
+			TF2Items_SetNumAttributes(item1, variants ? 4 : 2);
+			// Pre-Inferno FoS
 			TF2Items_SetAttribute(item1, 0, 853, 1.0); // mult patient overheal penalty active
 			TF2Items_SetAttribute(item1, 1, 854, 1.0); // mult health fromhealers penalty active
+			// Pre-Tough Break FoS
+			if (GetItemVariant(Wep_FistsSteel == 1)) {
+				TF2Items_SetAttribute(item1, 2, 772, 1.0); // single wep holster time increased; mult_switch_from_wep_deploy_time
+				TF2Items_SetAttribute(item1, 3, 177, 1.20); // 20% longer weapon switch; mult_deploy_time
+			}
+			// Release FoS
+			else if (GetItemVariant(Wep_FistsSteel == 2)) {
+				TF2Items_SetAttribute(item1, 2, 772, 1.0); // single wep holster time increased; mult_switch_from_wep_deploy_time
+				TF2Items_SetAttribute(item1, 3, 205, 0.40); // -60% damage from ranged sources while active; dmg_from_ranged
+			}			
 		}}
 		case 416: { if (ItemIsEnabled(Wep_MarketGardener)) {
 			item1 = TF2Items_CreateItem(0);
@@ -2245,12 +2261,22 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		case 220: { if (ItemIsEnabled(Wep_Shortstop)) {
 			item1 = TF2Items_CreateItem(0);
 			TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
-			TF2Items_SetNumAttributes(item1, 5);
-			TF2Items_SetAttribute(item1, 0, 241, 1.0); // reload time increased hidden
-			TF2Items_SetAttribute(item1, 1, 534, 1.00); // airblast vulnerability multiplier hidden
-			TF2Items_SetAttribute(item1, 2, 535, 1.00); // damage force increase hidden
-			TF2Items_SetAttribute(item1, 3, 536, 1.00); // damage force increase text
-			TF2Items_SetAttribute(item1, 4, 76, 1.125); // 12.5% max primary ammo on wearer, reverts max ammo back to 36, required for ammo sharing to work
+			bool preGunMettle = GetItemVariant(Wep_Shortstop) <= 2;
+			TF2Items_SetNumAttributes(item1, preGunMettle ? 6 : 5);
+			TF2Items_SetAttribute(item1, 0, 76, 1.125); // 12.5% max primary ammo on wearer, reverts max ammo back to 36, required for ammo sharing to work
+			if(!preGunMettle) {
+				TF2Items_SetAttribute(item1, 1, 241, 1.0); // reload time increased hidden
+				TF2Items_SetAttribute(item1, 2, 534, 1.00); // airblast vulnerability multiplier hidden
+				TF2Items_SetAttribute(item1, 3, 535, 1.00); // damage force increase hidden
+				TF2Items_SetAttribute(item1, 4, 536, 1.00); // damage force increase text
+			}
+			else if(preGunMettle) {
+				TF2Items_SetAttribute(item1, 1, 526, 1.20); // 20% bonus healing from all sources
+				TF2Items_SetAttribute(item1, 2, 534, 1.40); // airblast vulnerability multiplier hidden
+				TF2Items_SetAttribute(item1, 3, 535, 1.40); // damage force increase hidden
+				TF2Items_SetAttribute(item1, 4, 536, 1.40); // damage force increase text
+				TF2Items_SetAttribute(item1, 5, 128, 0.0); // disable provide on active
+			}
 		}}
 		case 230: { if (ItemIsEnabled(Wep_SydneySleeper)) {
 			item1 = TF2Items_CreateItem(0);
