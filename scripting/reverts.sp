@@ -2021,7 +2021,7 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		case 331: { if (ItemIsEnabled(Wep_FistsSteel)) {
 			item1 = TF2Items_CreateItem(0);
 			TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
-			bool variants = (GetItemVariant(Wep_FistsSteel) == 1 || GetItemVariant(Wep_FistsSteel) == 2);
+			bool variants = (GetItemVariant(Wep_FistsSteel) <= 1);
 			TF2Items_SetNumAttributes(item1, variants ? 4 : 2);
 			// Pre-Inferno FoS
 			TF2Items_SetAttribute(item1, 0, 853, 1.0); // mult patient overheal penalty active
