@@ -2045,6 +2045,38 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 				TF2Items_SetAttribute(item1, 3, 205, 0.40); // -60% damage from ranged sources while active; dmg_from_ranged
 			}			
 		}}
+		/*
+		EVEN TURNING IT INTO A SWITCH CASE STATEMENT DOESN'T WORK, WHY?????????????
+		case 331: { if (ItemIsEnabled(Wep_FistsSteel)) {
+			item1 = TF2Items_CreateItem(0);
+			TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
+			switch(Wep_FistsSteel) {
+				// Pre-Inferno FoS
+				case 0: {
+					TF2Items_SetNumAttributes(item1, 2);
+					TF2Items_SetAttribute(item1, 0, 853, 1.0); // mult patient overheal penalty active
+					TF2Items_SetAttribute(item1, 1, 854, 1.0); // mult health fromhealers penalty active
+				}
+				// ATTRIB 772 AND 177 DOESN'T WORK FOR SOME REASON FOR THE VARIANTS BELOW, WHY?
+				// Pre-Tough Break FoS
+				case 1: {
+					TF2Items_SetNumAttributes(item1, 4);
+					TF2Items_SetAttribute(item1, 0, 853, 1.0); // mult patient overheal penalty active
+					TF2Items_SetAttribute(item1, 1, 854, 1.0); // mult health fromhealers penalty active
+					TF2Items_SetAttribute(item1, 2, 772, 1.0); // single wep holster time increased; mult_switch_from_wep_deploy_time
+					TF2Items_SetAttribute(item1, 3, 177, 1.20); // 20% longer weapon switch; mult_deploy_time
+				}
+				// Release FoS
+				case 2: {
+					TF2Items_SetNumAttributes(item1, 4);
+					TF2Items_SetAttribute(item1, 0, 853, 1.0); // mult patient overheal penalty active
+					TF2Items_SetAttribute(item1, 1, 854, 1.0); // mult health fromhealers penalty active
+					TF2Items_SetAttribute(item1, 2, 772, 1.0); // single wep holster time increased; mult_switch_from_wep_deploy_time
+					TF2Items_SetAttribute(item1, 3, 205, 0.40); // -60% damage from ranged sources while active; dmg_from_ranged
+				}	
+			}			
+		}}
+		*/	
 		case 416: { if (ItemIsEnabled(Wep_MarketGardener)) {
 			item1 = TF2Items_CreateItem(0);
 			TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
