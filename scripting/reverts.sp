@@ -2027,6 +2027,7 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 				TF2Items_SetAttribute(item1, 0, 853, 1.0); // mult patient overheal penalty active
 				TF2Items_SetAttribute(item1, 1, 854, 1.0); // mult health fromhealers penalty active
 			}
+			// ATTRIB 772 DOESN'T WORK FOR SOME REASON FOR THE VARIANTS BELOW, WHY?
 			// Pre-Tough Break FoS
 			else if (GetItemVariant(Wep_FistsSteel == 1)) {
 				TF2Items_SetNumAttributes(item1, 4);
