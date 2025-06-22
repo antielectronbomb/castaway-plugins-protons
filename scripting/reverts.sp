@@ -2021,18 +2021,25 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		case 331: { if (ItemIsEnabled(Wep_FistsSteel)) {
 			item1 = TF2Items_CreateItem(0);
 			TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
-			bool variants = (GetItemVariant(Wep_FistsSteel) <= 1);
-			TF2Items_SetNumAttributes(item1, variants ? 4 : 2);
 			// Pre-Inferno FoS
-			TF2Items_SetAttribute(item1, 0, 853, 1.0); // mult patient overheal penalty active
-			TF2Items_SetAttribute(item1, 1, 854, 1.0); // mult health fromhealers penalty active
+			if (GetItemVariant(Wep_FistsSteel == 0)) {
+				TF2Items_SetNumAttributes(item1, 2);
+				TF2Items_SetAttribute(item1, 0, 853, 1.0); // mult patient overheal penalty active
+				TF2Items_SetAttribute(item1, 1, 854, 1.0); // mult health fromhealers penalty active
+			}
 			// Pre-Tough Break FoS
-			if (GetItemVariant(Wep_FistsSteel == 1)) {
+			else if (GetItemVariant(Wep_FistsSteel == 1)) {
+				TF2Items_SetNumAttributes(item1, 4);
+				TF2Items_SetAttribute(item1, 0, 853, 1.0); // mult patient overheal penalty active
+				TF2Items_SetAttribute(item1, 1, 854, 1.0); // mult health fromhealers penalty active
 				TF2Items_SetAttribute(item1, 2, 772, 1.0); // single wep holster time increased; mult_switch_from_wep_deploy_time
 				TF2Items_SetAttribute(item1, 3, 177, 1.20); // 20% longer weapon switch; mult_deploy_time
 			}
 			// Release FoS
 			else if (GetItemVariant(Wep_FistsSteel == 2)) {
+				TF2Items_SetNumAttributes(item1, 4);
+				TF2Items_SetAttribute(item1, 0, 853, 1.0); // mult patient overheal penalty active
+				TF2Items_SetAttribute(item1, 1, 854, 1.0); // mult health fromhealers penalty active
 				TF2Items_SetAttribute(item1, 2, 772, 1.0); // single wep holster time increased; mult_switch_from_wep_deploy_time
 				TF2Items_SetAttribute(item1, 3, 205, 0.40); // -60% damage from ranged sources while active; dmg_from_ranged
 			}			
@@ -2261,16 +2268,18 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		case 220: { if (ItemIsEnabled(Wep_Shortstop)) {
 			item1 = TF2Items_CreateItem(0);
 			TF2Items_SetFlags(item1, (OVERRIDE_ATTRIBUTES|PRESERVE_ATTRIBUTES));
-			bool preGunMettle = GetItemVariant(Wep_Shortstop) <= 2;
-			TF2Items_SetNumAttributes(item1, preGunMettle ? 6 : 5);
-			TF2Items_SetAttribute(item1, 0, 76, 1.125); // 12.5% max primary ammo on wearer, reverts max ammo back to 36, required for ammo sharing to work
-			if(!preGunMettle) {
+			// Pre-Manniversary Shortstop
+			if(GetItemVariant(Wep_Shortstop) == 0 || GetItemVariant(Wep_Shortstop) == 1) {
+				TF2Items_SetNumAttributes(item1, 5);
+				TF2Items_SetAttribute(item1, 0, 76, 1.125); // 12.5% max primary ammo on wearer, reverts max ammo back to 36, required for ammo sharing to work
 				TF2Items_SetAttribute(item1, 1, 241, 1.0); // reload time increased hidden
 				TF2Items_SetAttribute(item1, 2, 534, 1.00); // airblast vulnerability multiplier hidden
 				TF2Items_SetAttribute(item1, 3, 535, 1.00); // damage force increase hidden
 				TF2Items_SetAttribute(item1, 4, 536, 1.00); // damage force increase text
 			}
-			else if(preGunMettle) {
+			// Pre-Gun Mettle Shortstop
+			else if(GetItemVariant(Wep_Shortstop) == 2 || GetItemVariant(Wep_Shortstop) == 3) {
+				TF2Items_SetNumAttributes(item1, 6);
 				TF2Items_SetAttribute(item1, 1, 526, 1.20); // 20% bonus healing from all sources
 				TF2Items_SetAttribute(item1, 2, 534, 1.40); // airblast vulnerability multiplier hidden
 				TF2Items_SetAttribute(item1, 3, 535, 1.40); // damage force increase hidden
