@@ -725,11 +725,11 @@
 	}
 	"Shortstop_2"
 	{
-		"en"	"Reverted to pre-gunmettle, +20%% bonus healing from all sources while active, 40%% more knockback vuln at all times, shares pistol ammo"
+		"en"	"Reverted to pre-gunmettle, +20%% bonus healing from health packs while active, 40%% more knockback vuln at all times, shares pistol ammo"
 	}
 	"Shortstop_3"
 	{
-		"en"	"Reverted to pre-gunmettle, +20%% bonus healing from all sources while active, 40%% more knockback vuln at all times, shares pistol ammo; modern shove is kept"
+		"en"	"Reverted to pre-gunmettle, +20%% bonus healing from health packs while active, 40%% more knockback vuln at all times, shares pistol ammo; modern shove is kept"
 	}
 	"Sodapop_0"
 	{

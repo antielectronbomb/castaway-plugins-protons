@@ -2027,7 +2027,7 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 				TF2Items_SetAttribute(item1, 0, 853, 1.0); // mult patient overheal penalty active
 				TF2Items_SetAttribute(item1, 1, 854, 1.0); // mult health fromhealers penalty active
 			}
-			// ATTRIB 772 DOESN'T WORK FOR SOME REASON FOR THE VARIANTS BELOW, WHY?
+			// ATTRIB 772 AND 177 DOESN'T WORK FOR SOME REASON FOR THE VARIANTS BELOW, WHY?
 			// Pre-Tough Break FoS
 			else if (GetItemVariant(Wep_FistsSteel == 1)) {
 				TF2Items_SetNumAttributes(item1, 4);
@@ -2285,7 +2285,7 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 				TF2Items_SetAttribute(item1, 2, 534, 1.40); // airblast vulnerability multiplier hidden
 				TF2Items_SetAttribute(item1, 3, 535, 1.40); // damage force increase hidden
 				TF2Items_SetAttribute(item1, 4, 536, 1.40); // damage force increase text
-				TF2Items_SetAttribute(item1, 5, 128, 0.0); // disable provide on active
+				TF2Items_SetAttribute(item1, 5, 128, 0.0); // disable provide_on_active so push force penalty is active at all times
 			}
 		}}
 		case 230: { if (ItemIsEnabled(Wep_SydneySleeper)) {
