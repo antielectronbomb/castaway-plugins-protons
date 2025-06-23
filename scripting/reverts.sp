@@ -3537,10 +3537,12 @@ Action SDKHookCB_OnTakeDamage(
 							(ItemIsEnabled(Wep_Pomson) && StrEqual(class, "tf_weapon_drg_pomson") && GetItemVariant(Wep_Pomson) == 1)	// Release Pomson
 						) {
 							// Do not use internal rampup/falloff.
-							damage_type ^= DMG_USEDISTANCEMOD; 
+							damage_type ^= DMG_USEDISTANCEMOD;
 							// Change to some damage type that ignores Vaccinator resistance and does not cause knockback, this is what I found that does both of those.
 							damage_type = DMG_PREVENT_PHYSICS_FORCE; 
 							// Deal 16 base damage with 125% rampup, 75% falloff. This seems to be pre-Tough Break(?) damage values based from the TF2 Wiki. It is certain that these are pre-MyM values though.
+							// Damage falloff doesn't work. Why?
+							// https://wiki.teamfortress.com/w/index.php?title=Righteous_Bison&oldid=1973032
 							damage = 16.00 * RemapValClamped(min(0.35, GetGameTime() - entities[players[victim].most_recent_projectile_encounter].spawn_timestamp), 0.35 / 2, 0.35, 1.25, 0.75);
 
 							return Plugin_Changed;
@@ -3549,13 +3551,17 @@ Action SDKHookCB_OnTakeDamage(
 						if (
 							(ItemIsEnabled(Wep_Pomson) && StrEqual(class, "tf_weapon_drg_pomson") && GetItemVariant(Wep_Pomson) == 2)	// Pre-Gun Mettle Pomson
 						) {
+							
 							// Do not use internal rampup/falloff.
-							damage_type ^= DMG_USEDISTANCEMOD; 
+							damage_type ^= DMG_USEDISTANCEMOD;
 							// Change to some damage type that ignores Vaccinator resistance and does not cause knockback, this is what I found that does both of those.
-							damage_type = DMG_PREVENT_PHYSICS_FORCE; 
+							damage_type = DMG_PREVENT_PHYSICS_FORCE;
+							//damage_type = DMG_PREVENT_PHYSICS_FORCE + DMG_USEDISTANCEMOD;
 							// Deal 48 base damage with 125% rampup, 75% falloff.
+							// Damage falloff doesn't work. Why?
+							// https://wiki.teamfortress.com/w/index.php?title=Pomson_6000&oldid=1922218
 							damage = 48.00 * RemapValClamped(min(0.35, GetGameTime() - entities[players[victim].most_recent_projectile_encounter].spawn_timestamp), 0.35 / 2, 0.35, 1.25, 0.75);
-
+							
 							return Plugin_Changed;
 						}
 
