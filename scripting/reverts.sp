@@ -470,6 +470,7 @@ public void OnPluginStart() {
 	ItemDefine("persuader", "Persuader_0", CLASSFLAG_DEMOMAN, Wep_Persian);
 	ItemDefine("pomson", "Pomson_0", CLASSFLAG_ENGINEER, Wep_Pomson);
 	ItemVariant(Wep_Pomson, "Pomson_1");
+	ItemVariant(Wep_Pomson, "Pomson_2");
 	ItemDefine("powerjack", "Powerjack_0", CLASSFLAG_PYRO, Wep_Powerjack);
 	ItemVariant(Wep_Powerjack, "Powerjack_1");
 	ItemVariant(Wep_Powerjack, "Powerjack_2");	
@@ -488,6 +489,7 @@ public void OnPluginStart() {
 	ItemDefine("reserve", "Reserve_0", CLASSFLAG_SOLDIER | CLASSFLAG_PYRO, Wep_ReserveShooter);
 	ItemVariant(Wep_ReserveShooter, "Reserve_1");
 	ItemDefine("bison", "Bison_0", CLASSFLAG_SOLDIER, Wep_Bison);
+	ItemVariant(Wep_Bison, "Bison_1");
 	ItemDefine("rocketjmp", "RocketJmp_0", CLASSFLAG_SOLDIER, Wep_RocketJumper);
 	ItemVariant(Wep_RocketJumper, "RocketJmp_1");
 	ItemDefine("saharan", "Saharan_0", CLASSFLAG_SPY, Set_Saharan);
@@ -2966,7 +2968,7 @@ Action SDKHookCB_Touch(int entity, int other) {
 	{
 		// pomson pass thru team
 
-		if (StrEqual(class, "tf_projectile_energy_ring")) {
+		if (StrEqual(class, "tf_projectile_energy_ring") && GetItemVariant(Wep_Pomson) != 2) {
 			if (
 				other >= 1 &&
 				other <= MaxClients
@@ -3521,34 +3523,41 @@ Action SDKHookCB_OnTakeDamage(
 				}
 			}
 
-			{
-				// change damage type for bison/pomson to untyped damage so it ignore vaccinator resistances and uses old damage mechanics
-				// code taken from NotnHeavy
-
-				if (StrEqual(class, "tf_projectile_energy_ring")) {
-					GetEntityClassname(weapon, class, sizeof(class));
-					
-					if (
-						(ItemIsEnabled(Wep_Bison) && StrEqual(class, "tf_weapon_raygun")) ||
-						(ItemIsEnabled(Wep_Pomson) && StrEqual(class, "tf_weapon_drg_pomson"))
-					) {
-						// Damage numbers.
-						damage_type ^= DMG_USEDISTANCEMOD; // Do not use internal rampup/falloff.
-						damage = 16.00 * RemapValClamped(min(0.35, GetGameTime() - entities[players[victim].most_recent_projectile_encounter].spawn_timestamp), 0.35 / 2, 0.35, 1.25, 0.75); // Deal 16 base damage with 125% rampup, 75% falloff.
-
-						return Plugin_Changed;
-					}
-				}
-			}
-
 			if (inflictor > MaxClients) {
 				GetEntityClassname(inflictor, class, sizeof(class));
 
 				{
 					// bison/pomson stuff
-
+					
 					if (StrEqual(class, "tf_projectile_energy_ring")) {
 						GetEntityClassname(weapon, class, sizeof(class));
+						
+						if (
+							(ItemIsEnabled(Wep_Bison) && StrEqual(class, "tf_weapon_raygun") && GetItemVariant(Wep_Bison) == 1) ||		// Pre-MyM Bison
+							(ItemIsEnabled(Wep_Pomson) && StrEqual(class, "tf_weapon_drg_pomson") && GetItemVariant(Wep_Pomson) == 1)	// Release Pomson
+						) {
+							// Do not use internal rampup/falloff.
+							damage_type ^= DMG_USEDISTANCEMOD; 
+							// Change to some damage type that ignores Vaccinator resistance and does not cause knockback, this is what I found that does both of those.
+							damage_type = DMG_PREVENT_PHYSICS_FORCE; 
+							// Deal 16 base damage with 125% rampup, 75% falloff. This seems to be pre-Tough Break(?) damage values based from the TF2 Wiki. It is certain that these are pre-MyM values though.
+							damage = 16.00 * RemapValClamped(min(0.35, GetGameTime() - entities[players[victim].most_recent_projectile_encounter].spawn_timestamp), 0.35 / 2, 0.35, 1.25, 0.75);
+
+							return Plugin_Changed;
+						}
+
+						if (
+							(ItemIsEnabled(Wep_Pomson) && StrEqual(class, "tf_weapon_drg_pomson") && GetItemVariant(Wep_Pomson) == 2)	// Pre-Gun Mettle Pomson
+						) {
+							// Do not use internal rampup/falloff.
+							damage_type ^= DMG_USEDISTANCEMOD; 
+							// Change to some damage type that ignores Vaccinator resistance and does not cause knockback, this is what I found that does both of those.
+							damage_type = DMG_PREVENT_PHYSICS_FORCE; 
+							// Deal 48 base damage with 125% rampup, 75% falloff.
+							damage = 48.00 * RemapValClamped(min(0.35, GetGameTime() - entities[players[victim].most_recent_projectile_encounter].spawn_timestamp), 0.35 / 2, 0.35, 1.25, 0.75);
+
+							return Plugin_Changed;
+						}
 
 						if (
 							(ItemIsEnabled(Wep_Bison) && StrEqual(class, "tf_weapon_raygun")) ||

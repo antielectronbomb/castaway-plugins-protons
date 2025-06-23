@@ -625,8 +625,12 @@
 	}
 	"Pomson_1"
 	{
-		"en"	"Reverted to release, same dmg as Bison, bigger hitbox size, passes thru players, no uber & cloak drain fall-off at any range"
+		"en"	"Reverted to release, same dmg as Bison, bigger hitbox size, passes thru players, no uber & cloak drain fall-off at any range, untyped damage (ignores Vaccinator resists)"
 	}
+	"Pomson_2"
+	{
+		"en"	"Reverted to pre-gunmettle, old damage values, bigger hitbox size, does not pass thru players, no uber & cloak drain fall-off at any range, untyped damage (ignores Vaccinator resists)"
+	}	
 	"Powerjack_0"
 	{
 		"en"	"Reverted to pre-gunmettle, same vanilla stats but kills restore 75 health with overheal"
@@ -679,6 +683,10 @@
 	{
 		"en"	"Reverted to pre-matchmaking, increased hitbox size, can hit the same player more times"
 	}
+	"Bison_1"
+	{
+		"en"	"Reverted to pre-matchmaking, increased hitbox size, can hit the same player more times, untyped damage (ignore Vaccinator resists), old damage values"
+	}	
 	"RocketJmp_0"
 	{
 		"en"	"Reverted to pre-2013, grants immunity to self-damage from Equalizer/Escape Plan taunt"
