@@ -3521,7 +3521,7 @@ Action SDKHookCB_OnTakeDamage(
 				}
 			}
 
-			{				
+			{
 				// change damage type for bison/pomson to untyped damage so it ignore vaccinator resistances and uses old damage mechanics
 				// code taken from NotnHeavy
 
@@ -3538,6 +3538,7 @@ Action SDKHookCB_OnTakeDamage(
 
 						return Plugin_Changed;
 					}
+				}
 			}
 
 			if (inflictor > MaxClients) {
