@@ -176,6 +176,7 @@ enum struct Player {
 	int fall_dmg_tick;
 	int ticks_since_switch;
 	bool player_jumped;
+	int most_recent_projectile_encounter;
 }
 
 //item sets
@@ -185,6 +186,7 @@ enum struct Entity {
 	bool exists;
 	float spawn_time;
 	bool is_demo_shield;
+	float spawn_timestamp;
 }
 
 ConVar cvar_enable;
@@ -3033,7 +3035,7 @@ Action SDKHookCB_OnTakeDamage(
 	int health_max;
 	int health_new;
 	int weapon1;
-
+	
 	if (
 		victim >= 1 &&
 		victim <= MaxClients
@@ -3517,6 +3519,25 @@ Action SDKHookCB_OnTakeDamage(
 						}
 					}
 				}
+			}
+
+			{				
+				// change damage type for bison/pomson to untyped damage so it ignore vaccinator resistances and uses old damage mechanics
+				// code taken from NotnHeavy
+
+				if (StrEqual(class, "tf_projectile_energy_ring")) {
+					GetEntityClassname(weapon, class, sizeof(class));
+					
+					if (
+						(ItemIsEnabled(Wep_Bison) && StrEqual(class, "tf_weapon_raygun")) ||
+						(ItemIsEnabled(Wep_Pomson) && StrEqual(class, "tf_weapon_drg_pomson"))
+					) {
+						// Damage numbers.
+						damage_type ^= DMG_USEDISTANCEMOD; // Do not use internal rampup/falloff.
+						damage = 16.00 * RemapValClamped(min(0.35, GetGameTime() - entities[players[victim].most_recent_projectile_encounter].spawn_timestamp), 0.35 / 2, 0.35, 1.25, 0.75); // Deal 16 base damage with 125% rampup, 75% falloff.
+
+						return Plugin_Changed;
+					}
 			}
 
 			if (inflictor > MaxClients) {
@@ -4893,4 +4914,40 @@ int GetEntityFromAddress(Address pEntity) // From nosoop's stocksoup framework.
 	// offset seems right, cache it for the next call
 	offs_RefEHandle = offs_angRotation + 0x0C;
 	return GetEntityFromAddress(pEntity);
+}
+
+// Functions used for Bison/Pomson untyped damage, from NotnHeavy
+
+/**
+ * Get the smaller floating point value.
+ * 
+ * @param x		Floating point value x.
+ * @param y		Floating point value y.
+ * @return		The smaller value between x and y.
+ */
+float min(float x, float y)
+{
+    return x > y ? y : x;
+}
+
+float RemapValClamped(float val, float A, float B, float C, float D)
+{
+	if ( A == B )
+		return val >= B ? D : C;
+	float cVal = (val - A) / (B - A);
+	cVal = clamp( cVal, 0.0, 1.0 );
+
+	return C + (D - C) * cVal;
+}
+
+float clamp(float val, float minVal, float maxVal)
+{
+	if ( maxVal < minVal )
+		return maxVal;
+	else if( val < minVal )
+		return minVal;
+	else if( val > maxVal )
+		return maxVal;
+	else
+		return val;
 }
