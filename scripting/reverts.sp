@@ -3121,11 +3121,12 @@ Action SDKHookCB_Touch(int entity, int other) {
 					owner > 0 &&
 					weapon > 0
 				) {
-					// Pomson and Bison lights up friendly Huntsman arrows
-					// If the teammate has a Huntsman, set it alight.
-					// arrows light up, but for some reason the pomson doesn't go through teammates who are actively using huntsman
+					// Bison lighting up friendly Huntsman arrows
+					// Is there a way to do this without repeating code?
+					GetEntityClassname(weapon, class, sizeof(class));
+
 					if (
-						ItemIsEnabled(Wep_Pomson) && ItemIsEnabled(Wep_Bison) &&
+						ItemIsEnabled(Wep_Bison) && StrEqual(class, "tf_weapon_raygun") &&
 						TF2_GetClientTeam(other) == TF2_GetClientTeam(GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity"))
 					) {
 						weapon = GetEntPropEnt(other, Prop_Send, "m_hActiveWeapon");
@@ -3139,14 +3140,27 @@ Action SDKHookCB_Touch(int entity, int other) {
 						}
 					}
 
-					GetEntityClassname(weapon, class, sizeof(class));
-
 					if (StrEqual(class, "tf_weapon_drg_pomson")) {
 						if (
-							ItemIsEnabled(Wep_Pomson) && GetItemVariant(Wep_Pomson) != 2 && // Check if variant isn't the historical pre-GM Pomson
+							ItemIsEnabled(Wep_Pomson) &&
 							TF2_GetClientTeam(owner) == TF2_GetClientTeam(other)
 						) {
-							return Plugin_Handled;
+							// Pomson lighting friendly Huntsman arrows
+							// I have to put it here for the Pomson because if I don't the projectile doesn't pass through teammates
+							if (TF2_GetClientTeam(other) == TF2_GetClientTeam(GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity"))) 
+							{
+								weapon = GetEntPropEnt(other, Prop_Send, "m_hActiveWeapon");
+								if (weapon > 0) {
+									GetEntityClassname(weapon, class, sizeof(class));
+									if (StrEqual(class, "tf_weapon_compound_bow")) {
+										if (weapon == GetEntPropEnt(other, Prop_Send, "m_hActiveWeapon")) {
+											SetEntProp(weapon, Prop_Send, "m_bArrowAlight", true);
+										}						
+									}
+								}
+							}
+							if (GetItemVariant(Wep_Pomson) != 2) // Check if variant isn't the historical pre-GM Pomson. If it is, block projectile passing through teammates.
+								return Plugin_Handled;
 						}
 					}
 				}
