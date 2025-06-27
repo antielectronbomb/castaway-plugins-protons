@@ -2250,9 +2250,9 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 			TF2Items_SetAttribute(itemNew, 0, 42, 0.0); // sniper no headshots
 			TF2Items_SetAttribute(itemNew, 1, 175, 0.0); // jarate duration
 			if (releaseVer) {
-				TF2Items_SetAttribute(itemNew, 2, 15, 1.0); // enable random crits
+				TF2Items_SetAttribute(itemNew, 2, 28, 1.0); // crit mod disabled; doesn't work
 				TF2Items_SetAttribute(itemNew, 3, 41, 1.0); // no charge rate increase
-				TF2Items_SetAttribute(itemNew, 4, 308, 1.0); // sniper_penetrate_players_when_charged; 
+				TF2Items_SetAttribute(itemNew, 4, 308, 1.0); // sniper_penetrate_players_when_charged
 				// temporary penetration attribute used for penetration until a way to penetrate targets when above 75% charge is found
 			}
 		}}
@@ -3551,7 +3551,7 @@ Action SDKHookCB_OnTakeDamage(
 				) {
 					if (
 						GetEntPropFloat(weapon, Prop_Send, "m_flChargedDamage") > 0.1 &&
-						(GetItemVariant(Wep_SydneySleeper) == 2 ? PlayerIsInvulnerable(victim) == true : PlayerIsInvulnerable(victim) == false)
+						PlayerIsInvulnerable(victim) == false
 					) {
 						charge = GetEntPropFloat(weapon, Prop_Send, "m_flChargedDamage");
 
@@ -3562,8 +3562,12 @@ Action SDKHookCB_OnTakeDamage(
 						}
 						else if (GetItemVariant(Wep_SydneySleeper) == 1 || GetItemVariant(Wep_SydneySleeper) == 2) {
 							// cause 8 seconds of jarate regardless when above 50% charge
-							// for release and pre-GM sydney sleeper variants
-							players[attacker].sleeper_piss_duration = ValveRemapVal(50.0, 50.0, 150.0, 8.0, 8.0);
+							// 50% charge corresponds to 100 charge damage
+							// figure out how to apply jarate to invuln players for release version
+							if (charge >= 100.0)
+								players[attacker].sleeper_piss_duration = 8.0;
+							else if (charge < 100.0)
+								players[attacker].sleeper_piss_duration = 0.0;
 						}
 						players[attacker].sleeper_piss_explode = false;
 
@@ -3911,14 +3915,23 @@ Action SDKHookCB_OnTakeDamageAlive(
 				// condition must be added in OnTakeDamageAlive, otherwise initial shot will crit
 				TF2_AddCondition(victim, TFCond_Jarated, players[attacker].sleeper_piss_duration, 0);
 
-				if (players[attacker].sleeper_piss_explode) {
+				if (players[attacker].sleeper_piss_explode && GetItemVariant(Wep_SydneySleeper) == 0) {
 					// call into game code to cause a jarate explosion on the target
 					SDKCall(
 						sdkcall_JarExplode, victim, attacker, inflictor, inflictor, damage_position, GetClientTeam(attacker),
 						100.0, TFCond_Jarated, players[attacker].sleeper_piss_duration, "peejar_impact", "Jar.Explode"
 					);
 				} else {
-					ParticleShowSimple("peejar_impact_small", damage_position);
+					if (GetItemVariant(Wep_SydneySleeper) == 1 || GetItemVariant(Wep_SydneySleeper) == 2)
+					{
+						// spawn jarate particle if scoped charge level is above 50% (100 dmg)
+						float charge;
+						charge = GetEntPropFloat(weapon, Prop_Send, "m_flChargedDamage");
+						if (charge >= 100.0)
+							ParticleShowSimple("peejar_impact_small", damage_position);
+					}
+					else
+						ParticleShowSimple("peejar_impact_small", damage_position);
 				}
 			}
 		}
