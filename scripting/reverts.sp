@@ -3121,6 +3121,24 @@ Action SDKHookCB_Touch(int entity, int other) {
 					owner > 0 &&
 					weapon > 0
 				) {
+					// Pomson and Bison lights up friendly Huntsman arrows
+					// If the teammate has a Huntsman, set it alight.
+					// arrows light up, but for some reason the pomson doesn't go through teammates who are actively using huntsman
+					if (
+						ItemIsEnabled(Wep_Pomson) && ItemIsEnabled(Wep_Bison) &&
+						TF2_GetClientTeam(other) == TF2_GetClientTeam(GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity"))
+					) {
+						weapon = GetEntPropEnt(other, Prop_Send, "m_hActiveWeapon");
+						if (weapon > 0) {
+							GetEntityClassname(weapon, class, sizeof(class));
+							if (StrEqual(class, "tf_weapon_compound_bow")) {
+								if (weapon == GetEntPropEnt(other, Prop_Send, "m_hActiveWeapon")) {
+									SetEntProp(weapon, Prop_Send, "m_bArrowAlight", true);
+								}						
+							}
+						}
+					}
+
 					GetEntityClassname(weapon, class, sizeof(class));
 
 					if (StrEqual(class, "tf_weapon_drg_pomson")) {
