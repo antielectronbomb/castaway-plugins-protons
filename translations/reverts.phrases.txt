@@ -851,6 +851,14 @@
 	{
 		"en"	"Reverted to pre-2018, headshots and fully charged shots splash jarate, no cooldown reduction"
 	}
+	"Sleeper_PreGM"
+	{
+		"en"	"Reverted to pre-gunmettle, apply jarate for 8 secs when charge is above 50% to target, no headshot bonuses"
+	}
+	"Sleeper_Release"
+	{
+		"en"	"Reverted to release, apply jarate for 8 secs when charge is above 50% to target (even if target is invuln), penetrates targets when fully charged, random crits, no charge rate increase, no headshot bonuses"
+	}		
 	"Turner_PreTB"
 	{
 		"en"	"Reverted to pre-toughbreak, can deal full crits, 25%% blast and fire resist, crit after bash, no debuff removal"

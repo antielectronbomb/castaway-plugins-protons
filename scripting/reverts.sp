@@ -515,6 +515,8 @@ public void OnPluginStart() {
 	ItemDefine("stkjumper", "StkJumper_Pre2013", CLASSFLAG_DEMOMAN, Wep_StickyJumper);
 	ItemVariant(Wep_StickyJumper, "StkJumper_Pre2013_Intel");
 	ItemDefine("sleeper", "Sleeper_PreBM", CLASSFLAG_SNIPER, Wep_SydneySleeper);
+	ItemVariant(Wep_SydneySleeper, "Sleeper_PreGM");
+	ItemVariant(Wep_SydneySleeper, "Sleeper_Release");
 	ItemDefine("turner", "Turner_PreTB", CLASSFLAG_DEMOMAN, Wep_TideTurner);
 	ItemDefine("tomislav", "Tomislav_PrePyro", CLASSFLAG_HEAVY, Wep_Tomislav);
 	ItemVariant(Wep_Tomislav, "Tomislav_Release");
@@ -1221,7 +1223,7 @@ public void OnGameFrame() {
 								ammo = GetEntProp(idx, Prop_Send, "m_iAmmo", 4, 1);
 
 								if (
-									ItemIsEnabled(Wep_SydneySleeper) &&
+									ItemIsEnabled(Wep_SydneySleeper) && (GetItemVariant(Wep_SydneySleeper) == 0) &&
 									ammo == (players[idx].sleeper_ammo - 1)
 								) {
 									GetClientEyePosition(idx, pos1);
@@ -2243,9 +2245,16 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 			}	
 		}}
 		case 230: { if (ItemIsEnabled(Wep_SydneySleeper)) {
-			TF2Items_SetNumAttributes(itemNew, 2);
+			bool releaseVer = GetItemVariant(Wep_SydneySleeper) == 2;
+			TF2Items_SetNumAttributes(itemNew, releaseVer ? 5 : 2);
 			TF2Items_SetAttribute(itemNew, 0, 42, 0.0); // sniper no headshots
 			TF2Items_SetAttribute(itemNew, 1, 175, 0.0); // jarate duration
+			if (releaseVer) {
+				TF2Items_SetAttribute(itemNew, 2, 15, 1.0); // enable random crits
+				TF2Items_SetAttribute(itemNew, 3, 41, 1.0); // no charge rate increase
+				TF2Items_SetAttribute(itemNew, 4, 308, 1.0); // sniper_penetrate_players_when_charged; 
+				// temporary penetration attribute used for penetration until a way to penetrate targets when above 75% charge is found
+			}
 		}}
 		case 448: { if (ItemIsEnabled(Wep_SodaPopper)) {
 			bool minicrits = GetItemVariant(Wep_SodaPopper) == 0;
@@ -3542,16 +3551,24 @@ Action SDKHookCB_OnTakeDamage(
 				) {
 					if (
 						GetEntPropFloat(weapon, Prop_Send, "m_flChargedDamage") > 0.1 &&
-						PlayerIsInvulnerable(victim) == false
+						(GetItemVariant(Wep_SydneySleeper) == 2 ? PlayerIsInvulnerable(victim) == true : PlayerIsInvulnerable(victim) == false)
 					) {
 						charge = GetEntPropFloat(weapon, Prop_Send, "m_flChargedDamage");
 
 						// this should cause a jarate application
 						players[attacker].sleeper_piss_frame = GetGameTickCount();
-						players[attacker].sleeper_piss_duration = ValveRemapVal(charge, 50.0, 150.0, 2.0, 8.0);
+						if (GetItemVariant(Wep_SydneySleeper) == 0) {
+							players[attacker].sleeper_piss_duration = ValveRemapVal(charge, 50.0, 150.0, 2.0, 8.0);
+						}
+						else if (GetItemVariant(Wep_SydneySleeper) == 1 || GetItemVariant(Wep_SydneySleeper) == 2) {
+							// cause 8 seconds of jarate regardless when above 50% charge
+							// for release and pre-GM sydney sleeper variants
+							players[attacker].sleeper_piss_duration = ValveRemapVal(50.0, 50.0, 150.0, 8.0, 8.0);
+						}
 						players[attacker].sleeper_piss_explode = false;
 
 						if (
+							GetItemVariant(Wep_SydneySleeper) == 0 &&
 							GetEntPropFloat(weapon, Prop_Send, "m_flChargedDamage") > 149.0 ||
 							players[attacker].headshot_frame == GetGameTickCount()
 						) {
