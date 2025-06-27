@@ -412,6 +412,7 @@ public void OnPluginStart() {
 	ItemDefine("bonk", "Bonk_PreJI", CLASSFLAG_SCOUT, Wep_Bonk);
 	ItemDefine("booties", "Booties_PreMYM", CLASSFLAG_DEMOMAN, Wep_Booties);
 	ItemDefine("brassbeast", "BrassBeast_PreMYM", CLASSFLAG_HEAVY, Wep_BrassBeast);
+	ItemVariant(Wep_BrassBeast, "BrassBeast_PreGM");
 	ItemDefine("bushwacka", "Bushwacka_PreLW", CLASSFLAG_SNIPER, Wep_Bushwacka);
 	ItemDefine("buffalosteak", "BuffaloSteak_PreMYM", CLASSFLAG_HEAVY, Wep_BuffaloSteak);
 	ItemVariant(Wep_BuffaloSteak, "BuffaloSteak_Release");
@@ -3897,7 +3898,7 @@ Action SDKHookCB_OnTakeDamageAlive(
 		}
 		{
 			if (
-				((ItemIsEnabled(Wep_BrassBeast) && player_weapons[victim][Wep_BrassBeast]) ||
+				((ItemIsEnabled(Wep_BrassBeast) && GetItemVariant(Wep_BrassBeast) == 0 && player_weapons[victim][Wep_BrassBeast]) ||
 				(ItemIsEnabled(Wep_Natascha) && player_weapons[victim][Wep_Natascha])) &&
 				TF2_IsPlayerInCondition(victim, TFCond_Slowed) &&
 				TF2_GetPlayerClass(victim) == TFClass_Heavy

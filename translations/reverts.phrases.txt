@@ -495,6 +495,10 @@
 	{
 		"en"	"Reverted to pre-matchmaking, 20%% damage resistance (6.7%% against crits) when spun up at any health"
 	}
+	"BrassBeast_PreGM"
+	{
+		"en"	"Reverted to pre-gunmettle, no damage resistance when spun up"
+	}
 	"Bushwacka_PreLW"
 	{
 		"en"	"Reverted to pre-love&war, 20%% fire vuln at all times, random crits enabled"
