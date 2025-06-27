@@ -268,7 +268,11 @@
 	"jag"
 	{
 		"en"	"Jag"
-	}	
+	}
+	"letranger"
+	{
+		"en"	"L'Etranger"
+	}
 	"liberty"
 	{
 		"en"	"Liberty Launcher"
@@ -666,7 +670,11 @@
 	"Jag_PreGM"
 	{
 		"en"	"Reverted to pre-gunmettle, no damage penalty against buildings (destroy Sappers in 2 hits), no repair rate penalty, no faster firing speed bonus"
-	}	
+	}
+	"LEtranger_Release"
+	{
+		"en"	"Reverted to release, no cloak duration bonus"
+	}
 	"Liberty_Release"
 	{
 		"en"	"Reverted to release, +40%% projectile speed, -25%% clip size"

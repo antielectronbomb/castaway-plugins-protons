@@ -313,6 +313,7 @@ enum
 	Wep_Gunboats,
 	Wep_Zatoichi, // Half-Zatoichi
 	Wep_Jag,
+	Wep_LEtranger,
 	Wep_LibertyLauncher,
 	Wep_LochLoad,
 	Wep_LooseCannon,
@@ -464,6 +465,7 @@ public void OnPluginStart() {
 	ItemDefine("hibernate", "Hibernate_Release", CLASSFLAG_HEAVY, Set_Hibernate);
 	ItemDefine("jag", "Jag_PreTB", CLASSFLAG_ENGINEER, Wep_Jag);
 	ItemVariant(Wep_Jag, "Jag_PreGM");  
+	ItemDefine("letranger", "LEtranger_Release", CLASSFLAG_SPY, Wep_LEtranger);
 	ItemDefine("liberty", "Liberty_Release", CLASSFLAG_SOLDIER, Wep_LibertyLauncher);
 	ItemDefine("lochload", "LochLoad_PreGM", CLASSFLAG_DEMOMAN, Wep_LochLoad);
 	ItemVariant(Wep_LochLoad, "LochLoad_2013");
@@ -2064,6 +2066,10 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 				TF2Items_SetAttribute(itemNew, 1, 6, 1.00); // +0% faster firing speed
 				TF2Items_SetAttribute(itemNew, 2, 95, 1.00); // -0% slower repair rate
 			}
+		}}
+		case 224: { if (ItemIsEnabled(Wep_LEtranger)) {
+			TF2Items_SetNumAttributes(itemNew, 1);
+			TF2Items_SetAttribute(itemNew, 0, 83, 1.0); // +0% cloak duration bonus
 		}}		
 		case 414: { if (ItemIsEnabled(Wep_LibertyLauncher)) {
 			TF2Items_SetNumAttributes(itemNew, 4);
