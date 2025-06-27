@@ -520,6 +520,7 @@ public void OnPluginStart() {
 	ItemDefine("caber", "Caber_PreGM", CLASSFLAG_DEMOMAN, Wep_Caber);
 	ItemDefine("vitasaw", "VitaSaw_PreJI", CLASSFLAG_MEDIC, Wep_VitaSaw);
 	ItemDefine("warrior", "Warrior_PreTB", CLASSFLAG_HEAVY, Wep_WarriorSpirit);
+	ItemVariant(Wep_WarriorSpirit, "Warrior_PreGM");
 #if defined MEMORY_PATCHES
 	ItemDefine("wrangler", "Wrangler_PreGM", CLASSFLAG_ENGINEER, Wep_Wrangler);
 #endif
@@ -2301,12 +2302,14 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 			TF2Items_SetAttribute(itemNew, 1, 811, 0.0); // ubercharge preserved on spawn max
 		}}
 		case 310: { if (ItemIsEnabled(Wep_WarriorSpirit)) {
-			TF2Items_SetNumAttributes(itemNew, 5);
+			bool preGunMettle = GetItemVariant(Wep_WarriorSpirit) == 1;
+			TF2Items_SetNumAttributes(itemNew, preGunMettle ? 4 : 5);
 			TF2Items_SetAttribute(itemNew, 0, 412, 1.0); // damage vuln
 			TF2Items_SetAttribute(itemNew, 1, 180, 0.0); // heal on kill
-			TF2Items_SetAttribute(itemNew, 2, 110, 10.0); // heal on hit
-			TF2Items_SetAttribute(itemNew, 3, 128, 0.0); // provide on active
-			TF2Items_SetAttribute(itemNew, 4, 125, -20.0); // max health additive penalty
+			TF2Items_SetAttribute(itemNew, 2, 128, 0.0); // provide on active
+			TF2Items_SetAttribute(itemNew, 3, 125, -20.0); // max health additive penalty
+			if(!preGunMettle)
+				TF2Items_SetAttribute(itemNew, 4, 110, 10.0); // heal on hit
 		}}
 		case 357: { if (ItemIsEnabled(Wep_Zatoichi)) {
 			TF2Items_SetNumAttributes(itemNew, 4);
