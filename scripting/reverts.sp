@@ -1425,6 +1425,15 @@ public void OnGameFrame() {
 						}
 					}
 				}
+
+				// pre-gun mettle sydney sleeper track time since scoped in
+				if(
+					(GetItemVariant(Wep_SydneySleeper) == 1 || GetItemVariant(Wep_SydneySleeper) == 2) &&
+					TF2_GetPlayerClass(idx) == TFClass_Sniper && TF2_IsPlayerInCondition(idx, TFCond_Slowed) &&
+					GetPlayerWeaponSlot(idx, TFWeaponSlot_Primary) == GetEntPropEnt(idx, Prop_Send, "m_hActiveWeapon")
+				) {
+					players[idx].sleeper_time_since_scoping = GetGameTime();
+				}
 			} else {
 				// reset if player is dead
 				players[idx].spy_is_feigning = false;
@@ -3561,15 +3570,22 @@ Action SDKHookCB_OnTakeDamage(
 						if (GetItemVariant(Wep_SydneySleeper) == 0) {
 							players[attacker].sleeper_piss_duration = ValveRemapVal(charge, 50.0, 150.0, 2.0, 8.0);
 						}
-						else if (
-							(GetItemVariant(Wep_SydneySleeper) == 1 || GetItemVariant(Wep_SydneySleeper) == 2) &&
-							GetGameTime() - players[attacker].sleeper_time_since_scoping >= 1.0 && 
-							TF2_IsPlayerInCondition(attacker, TFCond_Slowed)
-						) {
+						else if (GetItemVariant(Wep_SydneySleeper) == 1 || GetItemVariant(Wep_SydneySleeper) == 2)
+						{
 							// cause 8 seconds of jarate regardless when above 50% charge / 1 sec has passed since scoping in
 							// figure out how to apply jarate to invuln players for release version
-							//players[attacker].sleeper_piss_duration = 8.0; // why is this used again? because initial shot will crit if addcondition is used?
-							TF2_AddCondition(victim, TFCond_Jarated, 8.0);
+							if (
+								((GetGameTime() - players[attacker].sleeper_time_since_scoping) >= 1.0) && 
+								TF2_IsPlayerInCondition(attacker, TFCond_Slowed)
+							) {
+								players[attacker].sleeper_piss_duration = 8.0;
+								TF2_AddCondition(victim, TFCond_Jarated, 8.0);
+							}
+							else if (
+								((GetGameTime() - players[attacker].sleeper_time_since_scoping) < 1.0) && 
+								TF2_IsPlayerInCondition(attacker, TFCond_Slowed)
+							)
+								players[attacker].sleeper_piss_duration = 0.0;
 						}
 						players[attacker].sleeper_piss_explode = false;
 
@@ -3926,11 +3942,20 @@ Action SDKHookCB_OnTakeDamageAlive(
 				} else {
 					if (GetItemVariant(Wep_SydneySleeper) == 1 || GetItemVariant(Wep_SydneySleeper) == 2)
 					{
+						/*
 						// spawn jarate particle if scoped charge level is above 50% (100 dmg)
 						float charge;
 						charge = GetEntPropFloat(weapon, Prop_Send, "m_flChargedDamage");
 						if (charge >= 100.0)
 							ParticleShowSimple("peejar_impact_small", damage_position);
+						*/
+						if (
+							((GetGameTime() - players[attacker].sleeper_time_since_scoping) >= 1.0) && 
+							TF2_IsPlayerInCondition(attacker, TFCond_Slowed)
+						) {
+							TF2_AddCondition(victim, TFCond_Jarated, 8.0, 0);
+							ParticleShowSimple("peejar_impact_small", damage_position);
+						}
 					}
 					else
 						ParticleShowSimple("peejar_impact_small", damage_position);
