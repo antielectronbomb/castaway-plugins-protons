@@ -3936,7 +3936,7 @@ Action SDKHookCB_OnTakeDamageAlive(
 			}
 		}
 		{
-			// sleeper (pre-gun mettle) jarate effect
+			// sydney sleeper (pre-gun mettle & release) jarate effect
 			GetEntityClassname(weapon, class, sizeof(class));
 			if (
 				ItemIsEnabled(Wep_SydneySleeper) &&
@@ -3946,7 +3946,12 @@ Action SDKHookCB_OnTakeDamageAlive(
 				GetGameTime() - players[attacker].sleeper_time_since_scoping >= 1.0 && 
 				TF2_IsPlayerInCondition(attacker, TFCond_Slowed)
 			) {
-				TF2_AddCondition(victim, TFCond_Jarated, 8.0);
+				if ((GetItemVariant(Wep_SydneySleeper) == 1 && !PlayerIsInvulnerable(victim)) || GetItemVariant(Wep_SydneySleeper) == 2)
+				{
+					// prevent jarate effect on invulnerable targets for pre-gun mettle sydney sleeper
+					// only apply jarate effect on invulnerable targets for release sydney sleeper for historical accuracy
+					TF2_AddCondition(victim, TFCond_Jarated, 8.0);
+				}
 			}
 
 		}
