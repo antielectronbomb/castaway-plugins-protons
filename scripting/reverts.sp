@@ -159,6 +159,7 @@ enum struct Player {
 	int sleeper_piss_frame;
 	float sleeper_piss_duration;
 	bool sleeper_piss_explode;
+	float sleeper_time_since_scoping;	
 	int medic_medigun_defidx;
 	float medic_medigun_charge;
 	float parachute_cond_time;
@@ -3560,14 +3561,15 @@ Action SDKHookCB_OnTakeDamage(
 						if (GetItemVariant(Wep_SydneySleeper) == 0) {
 							players[attacker].sleeper_piss_duration = ValveRemapVal(charge, 50.0, 150.0, 2.0, 8.0);
 						}
-						else if (GetItemVariant(Wep_SydneySleeper) == 1 || GetItemVariant(Wep_SydneySleeper) == 2) {
-							// cause 8 seconds of jarate regardless when above 50% charge
-							// 50% charge corresponds to 100 charge damage
+						else if (
+							(GetItemVariant(Wep_SydneySleeper) == 1 || GetItemVariant(Wep_SydneySleeper) == 2) &&
+							GetGameTime() - players[attacker].sleeper_time_since_scoping >= 1.0 && 
+							TF2_IsPlayerInCondition(attacker, TFCond_Slowed)
+						) {
+							// cause 8 seconds of jarate regardless when above 50% charge / 1 sec has passed since scoping in
 							// figure out how to apply jarate to invuln players for release version
-							if (charge >= 100.0)
-								players[attacker].sleeper_piss_duration = 8.0;
-							else if (charge < 100.0)
-								players[attacker].sleeper_piss_duration = 0.0;
+							//players[attacker].sleeper_piss_duration = 8.0; // why is this used again? because initial shot will crit if addcondition is used?
+							TF2_AddCondition(victim, TFCond_Jarated, 8.0);
 						}
 						players[attacker].sleeper_piss_explode = false;
 
