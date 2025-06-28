@@ -3951,6 +3951,7 @@ Action SDKHookCB_OnTakeDamageAlive(
 					// prevent jarate effect on invulnerable targets for pre-gun mettle sydney sleeper
 					// only apply jarate effect on invulnerable targets for release sydney sleeper for historical accuracy
 					TF2_AddCondition(victim, TFCond_Jarated, 8.0);
+					ParticleShowSimple("peejar_impact_small", damage_position);
 				}
 			}
 
