@@ -1425,15 +1425,6 @@ public void OnGameFrame() {
 						}
 					}
 				}
-
-				// pre-gun mettle sydney sleeper track time since scoped in
-				if(
-					(GetItemVariant(Wep_SydneySleeper) == 1 || GetItemVariant(Wep_SydneySleeper) == 2) &&
-					TF2_GetPlayerClass(idx) == TFClass_Sniper && TF2_IsPlayerInCondition(idx, TFCond_Slowed) &&
-					GetPlayerWeaponSlot(idx, TFWeaponSlot_Primary) == GetEntPropEnt(idx, Prop_Send, "m_hActiveWeapon")
-				) {
-					players[idx].sleeper_time_since_scoping = GetGameTime();
-				}
 			} else {
 				// reset if player is dead
 				players[idx].spy_is_feigning = false;
@@ -3571,21 +3562,29 @@ Action SDKHookCB_OnTakeDamage(
 							players[attacker].sleeper_piss_duration = ValveRemapVal(charge, 50.0, 150.0, 2.0, 8.0);
 						}
 						else if (GetItemVariant(Wep_SydneySleeper) == 1 || GetItemVariant(Wep_SydneySleeper) == 2)
-						{
-							// cause 8 seconds of jarate regardless when above 50% charge / 1 sec has passed since scoping in
-							// figure out how to apply jarate to invuln players for release version
-							if (
-								((GetGameTime() - players[attacker].sleeper_time_since_scoping) >= 1.0) && 
-								TF2_IsPlayerInCondition(attacker, TFCond_Slowed)
+						{		
+							// pre-gun mettle sydney sleeper track time since scoped in
+							if(
+								TF2_GetPlayerClass(attacker) == TFClass_Sniper && TF2_IsPlayerInCondition(attacker, TFCond_Slowed) &&
+								GetPlayerWeaponSlot(attacker, TFWeaponSlot_Primary) == GetEntPropEnt(attacker, Prop_Send, "m_hActiveWeapon")
 							) {
-								players[attacker].sleeper_piss_duration = 8.0;
-								TF2_AddCondition(victim, TFCond_Jarated, 8.0);
+								players[attacker].sleeper_time_since_scoping = GetGameTime();
+									PrintToChatAll("Begin scope: %f", GetGameTime());
+									PrintToChatAll("players[attacker].sleeper_time_since_scoping: %f", players[attacker].sleeper_time_since_scoping);
+								
+								// cause 8 seconds of jarate regardless when above 50% charge / 1 sec has passed since scoping in
+								// figure out how to apply jarate to invuln players for release version
+								if (
+									((GetGameTime() - players[attacker].sleeper_time_since_scoping) >= 1.0) && 
+									// gametime and sleeper_time_since_scoping is same for some reason that's why it doesn't work
+									TF2_IsPlayerInCondition(attacker, TFCond_Slowed)
+								) {
+									players[attacker].sleeper_piss_duration = 8.0;
+										PrintToChatAll("Shot at & over 1.0 sec: %f",(GetGameTime() - players[attacker].sleeper_time_since_scoping));
+									//TF2_AddCondition(victim, TFCond_Jarated, 8.0);
+								}
 							}
-							else if (
-								((GetGameTime() - players[attacker].sleeper_time_since_scoping) < 1.0) && 
-								TF2_IsPlayerInCondition(attacker, TFCond_Slowed)
-							)
-								players[attacker].sleeper_piss_duration = 0.0;
+						
 						}
 						players[attacker].sleeper_piss_explode = false;
 
