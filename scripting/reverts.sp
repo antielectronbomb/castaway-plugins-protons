@@ -2259,7 +2259,10 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		case 230: { if (ItemIsEnabled(Wep_SydneySleeper)) {
 			bool releaseVer = GetItemVariant(Wep_SydneySleeper) == 2;
 			TF2Items_SetNumAttributes(itemNew, releaseVer ? 5 : 2);
-			TF2Items_SetAttribute(itemNew, 0, 42, 0.0); // sniper no headshots
+			if (GetItemVariant(Wep_SydneySleeper) == 0)
+				TF2Items_SetAttribute(itemNew, 0, 42, 0.0); // sniper no headshots; needed for jarate splash on headshot
+			else if (GetItemVariant(Wep_SydneySleeper) == 1 || GetItemVariant(Wep_SydneySleeper) == 2)
+				TF2Items_SetAttribute(itemNew, 0, 42, 1.0); // sniper no headshots
 			TF2Items_SetAttribute(itemNew, 1, 175, 0.0); // jarate duration
 			if (releaseVer) {
 				TF2Items_SetAttribute(itemNew, 2, 28, 1.0); // crit mod disabled; doesn't work
