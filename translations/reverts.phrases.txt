@@ -709,15 +709,15 @@
 	}
 	"Pomson_PreGM"
 	{
-		"en"	"Increased hitbox size (same as Bison), passes through team, no uber & cloak drain fall-off at any range"
+		"en"	"Increased hitbox size (same as Bison), passes through team, no uber & cloak drain fall-off at any range, lights up friendly Huntsman arrows"
 	}
 	"Pomson_Release"
 	{
-		"en"	"Reverted to release, same dmg as Bison, bigger hitbox size, passes thru players, no uber & cloak drain fall-off at any range"
+		"en"	"Reverted to release, same dmg as Bison, bigger hitbox size, passes thru players, no uber & cloak drain fall-off at any range, lights up friendly Huntsman arrows"
 	}
 	"Pomson_PreGM_Historical"
 	{
-		"en"	"Reverted to pre-gunmettle, increased hitbox size (same as Bison), does not pass through team, no uber & cloak drain fall-off at any range"
+		"en"	"Reverted to pre-gunmettle, increased hitbox size (same as Bison), does not pass through team, no uber & cloak drain fall-off at any range, lights up friendly Huntsman arrows"
 	}	
 	"Powerjack_PreGM"
 	{
@@ -769,7 +769,7 @@
 	}
 	"Bison_PreMYM"
 	{
-		"en"	"Reverted to pre-matchmaking, increased hitbox size, can hit the same player more times"
+		"en"	"Reverted to pre-matchmaking, increased hitbox size, can hit the same player more times, lights up friendly Huntsman arrows"
 	}
 	"RocketJmp_Pre2013"
 	{
@@ -781,7 +781,11 @@
 	}
 	"Saharan_Release"
 	{
-		"en"	"Restored release item set bonus, quiet decloak, 0.5s longer cloak blink time. Equip the L'Etranger and YER to gain the bonus, the hat is not required"
+		"en"	"Restored release item set bonus, quiet decloak, 0.5s longer cloak blink time. Equip the L'Etranger (removes +40%% cloak) and YER to gain the bonus, the hat is not required."
+	}
+	"Saharan_ExtraCloak"
+	{
+		"en"	"Restored release item set bonus, quiet decloak, 0.5s longer cloak blink time. Equip the L'Etranger and YER (or Wanga Prick) to gain the bonus, the hat is not required"
 	}
 	"Sandman_PreJI"
 	{
