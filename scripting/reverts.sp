@@ -1528,7 +1528,8 @@ public void OnEntityCreated(int entity, const char[] class) {
 	if (
 		StrEqual(class, "tf_projectile_stun_ball") ||
 		StrEqual(class, "tf_projectile_energy_ring") ||
-		StrEqual(class, "tf_projectile_cleaver")
+		StrEqual(class, "tf_projectile_cleaver") ||
+		(StrEqual(class, "tf_projectile_pipe") && ItemIsEnabled(Wep_IronBomber))
 	) {
 		SDKHook(entity, SDKHook_Spawn, SDKHookCB_Spawn);
 		SDKHook(entity, SDKHook_SpawnPost, SDKHookCB_SpawnPost);
@@ -3065,7 +3066,6 @@ Action OnSoundNormal(
 Action SDKHookCB_Spawn(int entity) {
 	char class[64];
 
-	GetEntityClassname(entity, class, sizeof(class));
 
 	if (StrContains(class, "tf_projectile_") == 0) {
 		entities[entity].spawn_time = GetGameTime();
@@ -3085,20 +3085,30 @@ void SDKHookCB_SpawnPost(int entity) {
 	// for some reason this is called twice
 	// on the first call m_hLauncher is empty??
 
+	// These only work for some projectiles! 
+	// Does not work with flareguns, and rocket launchers, and mad milk and jarate unless specified to search for those models!
 	GetEntityClassname(entity, class, sizeof(class));
-
+		PrintToChatAll("GetEntityClassname: %s", class);
+	GetEntPropString(entity, Prop_Data, "m_ModelName", model, sizeof(model));
+		PrintToChatAll("GetEntPropString: %s", model);
+		// GetEntPropString returns this even if using Iron Bomber: models/weapons/w_models/w_grenade_grenadelauncher.mdl
+		// Find another way to determine Iron Bomber projectile
 	{
 		// bison/pomson hitboxes
 
-		if (StrEqual(class, "tf_projectile_energy_ring")) {
+		if (StrEqual(class, "tf_projectile_energy_ring") || StrEqual(class, "tf_projectile_pipe")) {
 			owner = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
 			weapon = GetEntPropEnt(entity, Prop_Send, "m_hLauncher");
+
+			PrintToChatAll("owner: %i", owner);
+			PrintToChatAll("weapon: %i", weapon);
 
 			if (
 				owner > 0 &&
 				weapon > 0
 			) {
 				GetEntityClassname(weapon, class, sizeof(class));
+				PrintToChatAll("GetEntityClassname inside if: %s", class);
 
 				if (
 					(ItemIsEnabled(Wep_Bison) && StrEqual(class, "tf_weapon_raygun")) ||
@@ -3118,30 +3128,15 @@ void SDKHookCB_SpawnPost(int entity) {
 					SetEntProp(entity, Prop_Send, "m_usSolidFlags", (GetEntProp(entity, Prop_Send, "m_usSolidFlags") | FSOLID_USE_TRIGGER_BOUNDS));
 					SetEntProp(entity, Prop_Send, "m_triggerBloat", 24);
 				}
-			}
-		}
-	}
 
-	GetEntPropString(entity, Prop_Data, "m_ModelName", model, sizeof(model));
-
-	{
-		// pre-2020 iron bomber hitbox
-
-		if (StrEqual(class, "tf_projectile_pipe")) {
-			owner = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
-			weapon = GetEntPropEnt(entity, Prop_Send, "m_hLauncher");
-
-			if (
-				owner > 0 &&
-				weapon > 0
-			) {
-				GetEntityClassname(weapon, class, sizeof(class));
-
+				// Why is the class string not tf_weapon_grenadelauncher and is instead tf_projectile_pipe??? wtf valve
 				if (
-					(ItemIsEnabled(Wep_IronBomber) && 
-					StrEqual(class, "tf_weapon_grenadelauncher")) &&
-					StrEqual(model, "w_quadball_grenade.mdl")
+					(ItemIsEnabled(Wep_IronBomber) && StrEqual(class, "tf_projectile_pipe")) //&&
+					//StrEqual(model, "models/workshop/weapons/c_models/c_quadball/w_quadball_grenade.mdl")
 				) {
+					PrintToChatAll("If statement for Iron Bomber Revert executed", 0);
+					PrintToChatAll("No model check!", 0);
+
 					maxs[0] = 8.7;
 					maxs[1] = 8.7;
 					maxs[2] = 8.7;
@@ -3155,10 +3150,32 @@ void SDKHookCB_SpawnPost(int entity) {
 
 					SetEntProp(entity, Prop_Send, "m_usSolidFlags", (GetEntProp(entity, Prop_Send, "m_usSolidFlags") | FSOLID_USE_TRIGGER_BOUNDS));
 					SetEntProp(entity, Prop_Send, "m_triggerBloat", 24);
-				}
+				}				
 			}
 		}
-	}	
+
+		// pre-2020 iron bomber hitbox
+/*
+		if (StrEqual(class, "tf_projectile_pipe")) {
+			owner = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
+			weapon = GetEntPropEnt(entity, Prop_Send, "m_hLauncher");
+
+			PrintToChatAll("StrEqual class: %s", class);
+			PrintToChatAll("IB owner: %i", owner);
+			PrintToChatAll("IB weapon: %i", weapon);
+
+			if (
+				owner > 0 &&
+				weapon > 0
+			) {
+				GetEntityClassname(weapon, class, sizeof(class));
+				PrintToChatAll("GetEntityClassname inside if: %s", class);
+
+
+			}
+		}
+*/
+	}
 }
 
 Action SDKHookCB_Touch(int entity, int other) {
