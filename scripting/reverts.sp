@@ -495,6 +495,7 @@ public void OnPluginStart() {
 	ItemDefine("rocketjmp", "RocketJmp_Pre2013", CLASSFLAG_SOLDIER, Wep_RocketJumper);
 	ItemVariant(Wep_RocketJumper, "RocketJmp_Pre2013_Intel");
 	ItemDefine("saharan", "Saharan_Release", CLASSFLAG_SPY, Set_Saharan);
+	ItemVariant(Set_Saharan, "Saharan_ExtraCloak");
 	ItemDefine("sandman", "Sandman_PreJI", CLASSFLAG_SCOUT, Wep_Sandman);
 	ItemDefine("scottish", "Scottish_Release", CLASSFLAG_DEMOMAN, Wep_Scottish);
 	ItemDefine("circuit", "Circuit_PreMYM", CLASSFLAG_ENGINEER, Wep_ShortCircuit);
@@ -2732,35 +2733,36 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 			{
 				case TFClass_Scout:
 				{
-					TF2Attrib_SetByDefIndex(client, 517, 0.0); // SET BONUS: max health additive bonus
+					TF2Attrib_RemoveByDefIndex(client, 517); // SET BONUS: max health additive bonus
 				}
 				case TFClass_Pyro:
 				{
-					TF2Attrib_SetByDefIndex(client, 489, 1.0); // SET BONUS: move speed set bonus
-					TF2Attrib_SetByDefIndex(client, 516, 1.0); // SET BONUS: dmg taken from bullets increased 
+					TF2Attrib_RemoveByDefIndex(client, 489); // SET BONUS: move speed set bonus
+					TF2Attrib_RemoveByDefIndex(client, 516); // SET BONUS: dmg taken from bullets increased 
 				}
 				case TFClass_DemoMan:
 				{
-					TF2Attrib_SetByDefIndex(client, 492, 1.0); // SET BONUS: dmg taken from fire reduced set bonus
+					TF2Attrib_RemoveByDefIndex(client, 492); // SET BONUS: dmg taken from fire reduced set bonus
 				}
 				case TFClass_Heavy:
 				{
-					TF2Attrib_SetByDefIndex(client, 491, 1.0); // SET BONUS: dmg taken from crit reduced set bonus
+					TF2Attrib_RemoveByDefIndex(client, 491); // SET BONUS: dmg taken from crit reduced set bonus
 				}
 				case TFClass_Sniper:
 				{
-					TF2Attrib_SetByDefIndex(client, 176, 0.0); // SET BONUS: no death from headshots
+					TF2Attrib_RemoveByDefIndex(client, 176); // SET BONUS: no death from headshots
 				}
 				case TFClass_Spy:
 				{
-					TF2Attrib_SetByDefIndex(client, 159, 0.0); // SET BONUS: cloak blink time penalty
-					TF2Attrib_SetByDefIndex(client, 160, 0.0); // SET BONUS: quiet unstealth
+					TF2Attrib_RemoveByDefIndex(client, 159); // SET BONUS: cloak blink time penalty
+					TF2Attrib_RemoveByDefIndex(client, 160); // SET BONUS: quiet unstealth
 				}
 			}
 
 			//handle item sets
 			int wep_count = 0;
 			int active_set = 0;
+			int first_wep = -1;
 
 			int length = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
 			for (int i;i < length; i++)
@@ -2774,7 +2776,7 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 
 					switch(item_index) {
 						// Special Delivery
-						case 220, 221, 222: {
+						case 220, 221, 222, 1121: {
 							if(ItemIsEnabled(Set_SpDelivery)) {
 								wep_count++;
 								if(wep_count == 3) active_set = Set_SpDelivery;
@@ -2810,7 +2812,17 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 						}
 						// Saharan Spy
 						case 224, 225, 574: {
-							if(ItemIsEnabled(Set_Saharan)) {
+							if (
+								GetItemVariant(Set_Saharan) == 0 &&
+								item_index != 574 // exclude Wanga Prick
+							) {
+								if (item_index == 224 && first_wep == -1) { // reset L'Etranger cloak duration
+									first_wep = weapon;
+									TF2Attrib_SetByDefIndex(first_wep, 83, 0.6); // +40% cloak duration
+								}
+								wep_count++;
+								if(wep_count == 2) active_set = Set_Saharan;
+							}else if(GetItemVariant(Set_Saharan) == 1) {
 								wep_count++;
 								if(wep_count == 2) active_set = Set_Saharan;
 							}
@@ -2878,6 +2890,10 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 							player_weapons[client][Set_Saharan] = true;
 							TF2Attrib_SetByDefIndex(client, 159, 0.5); // SET BONUS: cloak blink time penalty
 							TF2Attrib_SetByDefIndex(client, 160, 1.0); // SET BONUS: quiet unstealth
+							if (GetItemVariant(Set_Saharan) == 0 && first_wep != -1)
+							{
+								TF2Attrib_SetByDefIndex(first_wep, 83, 1.0); // +0% cloak duration
+							}
 						}
 					}
 				}
