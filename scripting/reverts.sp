@@ -312,6 +312,7 @@ enum
 	Wep_GRU,
 	Wep_Gunboats,
 	Wep_Zatoichi, // Half-Zatoichi
+	Wep_IronBomber,
 	Wep_Jag,
 	Wep_LibertyLauncher,
 	Wep_LochLoad,
@@ -461,6 +462,7 @@ public void OnPluginStart() {
 	ItemDefine("gunboats", "Gunboats_Release", CLASSFLAG_SOLDIER, Wep_Gunboats);
 	ItemDefine("zatoichi", "Zatoichi_PreTB", CLASSFLAG_SOLDIER | CLASSFLAG_DEMOMAN, Wep_Zatoichi);
 	ItemDefine("hibernate", "Hibernate_Release", CLASSFLAG_HEAVY, Set_Hibernate);
+	ItemDefine("ironbomber", "IronBomber_Pre2020", CLASSFLAG_DEMOMAN, Wep_IronBomber);
 	ItemDefine("jag", "Jag_PreTB", CLASSFLAG_ENGINEER, Wep_Jag);
 	ItemVariant(Wep_Jag, "Jag_PreGM");  
 	ItemDefine("liberty", "Liberty_Release", CLASSFLAG_SOLDIER, Wep_LibertyLauncher);
@@ -2661,6 +2663,7 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 						case 416: player_weapons[client][Wep_MarketGardener] = true;
 						case 239, 1084, 1100: player_weapons[client][Wep_GRU] = true;
 						case 812, 833: player_weapons[client][Wep_Cleaver] = true;
+						case 1151: player_weapons[client][Wep_IronBomber] = true;
 						case 329: player_weapons[client][Wep_Jag] = true;
 						case 414: player_weapons[client][Wep_LibertyLauncher] = true;
 						case 308: player_weapons[client][Wep_LochLoad] = true;
@@ -3077,6 +3080,7 @@ void SDKHookCB_SpawnPost(int entity) {
 	float mins[3];
 	int owner;
 	int weapon;
+	char model[64];
 
 	// for some reason this is called twice
 	// on the first call m_hLauncher is empty??
@@ -3117,6 +3121,44 @@ void SDKHookCB_SpawnPost(int entity) {
 			}
 		}
 	}
+
+	GetEntPropString(entity, Prop_Data, "m_ModelName", model, sizeof(model));
+
+	{
+		// pre-2020 iron bomber hitbox
+
+		if (StrEqual(class, "tf_projectile_pipe")) {
+			owner = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
+			weapon = GetEntPropEnt(entity, Prop_Send, "m_hLauncher");
+
+			if (
+				owner > 0 &&
+				weapon > 0
+			) {
+				GetEntityClassname(weapon, class, sizeof(class));
+
+				if (
+					(ItemIsEnabled(Wep_IronBomber) && 
+					StrEqual(class, "tf_weapon_grenadelauncher")) &&
+					StrEqual(model, "w_quadball_grenade.mdl")
+				) {
+					maxs[0] = 8.7;
+					maxs[1] = 8.7;
+					maxs[2] = 8.7;
+
+					mins[0] = (0.0 - maxs[0]);
+					mins[1] = (0.0 - maxs[1]);
+					mins[2] = (0.0 - maxs[2]);
+
+					SetEntPropVector(entity, Prop_Send, "m_vecMaxs", maxs);
+					SetEntPropVector(entity, Prop_Send, "m_vecMins", mins);
+
+					SetEntProp(entity, Prop_Send, "m_usSolidFlags", (GetEntProp(entity, Prop_Send, "m_usSolidFlags") | FSOLID_USE_TRIGGER_BOUNDS));
+					SetEntProp(entity, Prop_Send, "m_triggerBloat", 24);
+				}
+			}
+		}
+	}	
 }
 
 Action SDKHookCB_Touch(int entity, int other) {
