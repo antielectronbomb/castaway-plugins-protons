@@ -1269,6 +1269,7 @@ public void OnGameFrame() {
 						if (players[idx].spy_is_feigning == false) {
 							if (TF2_IsPlayerInCondition(idx, TFCond_DeadRingered)) {
 								players[idx].spy_is_feigning = true;
+								players[idx].damage_taken_during_feign = 0.0;
 							}
 						} else {
 							if (
@@ -3294,7 +3295,7 @@ Action SDKHookCB_OnTakeDamage(
 					}
 				}
 
-				// pre-gun mettle dead ringer track when feign begins
+				// pre-gun mettle dead ringer damage tracking
 				if (
 					ItemIsEnabled(Wep_DeadRinger) && GetItemVariant(Wep_DeadRinger) == 0
 				) {
@@ -3303,7 +3304,9 @@ Action SDKHookCB_OnTakeDamage(
 						players[victim].spy_is_feigning == false
 					) {
 						players[victim].ticks_since_feign_ready = GetGameTickCount();
-						players[victim].damage_taken_during_feign  = 0.0;
+					}
+					if (players[victim].spy_is_feigning) {
+						players[victim].damage_taken_during_feign += damage;
 					}
 				}
 			}
@@ -4001,6 +4004,7 @@ void SDKHookCB_OnTakeDamagePost(
 	int victim, int attacker, int inflictor, float damage, int damage_type,
 	int weapon, float damage_force[3], float damage_position[3], int damage_custom
 ) {
+	/*
 	if (
 		(GetItemVariant(Wep_DeadRinger) == 0) &&
 		victim >= 1 &&
@@ -4012,7 +4016,7 @@ void SDKHookCB_OnTakeDamagePost(
 			players[victim].damage_taken_during_feign += damage;
 		}
 	}
-
+	*/
 	if (
 		victim >= 1 && victim <= MaxClients &&
 		attacker >= 1 && attacker <= MaxClients
