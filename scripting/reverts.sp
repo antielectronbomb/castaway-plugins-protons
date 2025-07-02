@@ -159,7 +159,10 @@ enum struct Player {
 	int sleeper_piss_frame;
 	float sleeper_piss_duration;
 	bool sleeper_piss_explode;
-	float sleeper_time_since_scoping;	
+	float sleeper_time_since_scoping;
+	int sleeper_damage_frame;
+	float sleeper_damage_amount;
+	float sleeper_total_damage_amount;
 	int medic_medigun_defidx;
 	float medic_medigun_charge;
 	float parachute_cond_time;
@@ -3657,7 +3660,93 @@ Action SDKHookCB_OnTakeDamage(
 					}
 				}
 			}
+		
+			{
+				// workaround for enabling random crits on release sydney sleeper
+				// replicate random crit mechanic
+				// https://github.com/ValveSoftware/source-sdk-2013/blob/39f6dde8fbc238727c020d13b05ecadd31bda4c0/src/game/shared/tf/tf_player_shared.cpp#L9414
+				
+				if (
+					ItemIsEnabled(Wep_SydneySleeper) &&
+					GetItemVariant(Wep_SydneySleeper) == 2 &&
+					StrEqual(class, "tf_weapon_sniperrifle") &&
+					GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 230
+				) {
+					weapon = GetEntPropEnt(attacker, Prop_Send, "m_hActiveWeapon");
 
+					if (weapon > 0) {
+						GetEntityClassname(weapon, class, sizeof(class));
+
+						if (
+							StrEqual(class, "tf_weapon_sniperrifle") &&
+							GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 230
+						) {
+							
+							// Crit chance multiplier
+							// literally how? i don't see 800 damage in the last 20 seconds here.
+							// find a way to retrieve amount of total damage in last 20 seconds from crit bucket?
+							// FIND A WAY TO RETRIEVE m_iCritMult FROM CTFPlayerShared::UpdateCritMult
+
+							// Find a way to translate damage to crit multiplier
+							// Start at 0 damage, 1.0 multiplier. 800 damage, 4.0 multiplier.
+							// Let x = damage, y = crit multiplier
+							// y = mx + b
+							// y = 0.00375x + 1
+							
+							//float m_iCritMult = ValveRemapVal(1.0, 1.0, 4.0, 0.0, 255.0);
+							//	PrintToChatAll("m_iCritMult: %f", m_iCritMult);
+							//float flRemapCritMul = ValveRemapVal(m_iCritMult, 0.0, 255.0, 1.0, 4.0);
+							//	PrintToChatAll("flRemapCritMul: %f", flRemapCritMul);
+							/*
+							float crit_multiplier = 1.0;
+
+							if (damage > 0) {
+								players[attacker].sleeper_damage_frame = GetGameTickCount(); // 66 = 1 sec
+								
+								players[attacker].sleeper_damage_amount += damage;
+								float total_damage_amount = players[attacker].sleeper_damage_amount;
+									PrintToChatAll("players[attacker].sleeper_damage_amount: %f", players[attacker].sleeper_damage_amount);
+
+							//	// how to remove oldest damage?
+							//	if (GetGameTickCount() == players[attacker].sleeper_damage_frame + 66*20) {
+							//		total_damage_amount = total_damage_amount - players[attacker].sleeper_damage_amount;
+							//			PrintToChatAll("players[attacker].sleeper_damage_amount: %f", players[attacker].sleeper_damage_amount);
+							//	}
+									
+								// translate total damage to crit multiplier
+								if (crit_multiplier < 4.0 && total_damage_amount < 800.0) {
+									crit_multiplier = (0.00375*(total_damage_amount) + 1);
+										PrintToChatAll("crit_multiplier: %f", crit_multiplier);
+								}
+								else if (crit_multiplier >= 4.0 && total_damage_amount >= 800.0) {
+									crit_multiplier = 4.0;
+										PrintToChatAll("crit_multiplier: %f", crit_multiplier);
+								}
+							}
+							*/
+							// Random crit chance
+							//float crit_threshold = 0.02*(flRemapCritMul);
+							float crit_threshold = 0.02;
+								PrintToChatAll("crit_threshold: %f", crit_threshold);
+							float crit_roll = GetRandomFloat(0.0, 1.0);
+								PrintToChatAll("crit_roll: %f", crit_roll);
+
+							if (crit_roll <= crit_threshold) {
+								damage_type = (damage_type | DMG_CRIT);
+									PrintToChatAll("Random crit! crit_roll is less than crit_threshold", 0);
+								// critical hit lightning sound doesn't play. i'll do this later.
+								//EmitGameSoundToAll("Weapon_General.CritPower", attacker);
+								EmitGameSoundToAll("Weapon_SydneySleeper.SingleCrit", attacker);
+								
+								return Plugin_Changed;
+							}
+							
+						}
+					}
+					return Plugin_Continue;
+				}
+			}
+		
 			{
 				// zatoichi duels
 
