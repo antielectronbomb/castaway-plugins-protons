@@ -3663,7 +3663,7 @@ Action SDKHookCB_OnTakeDamage(
 		
 			{
 				// workaround for enabling random crits on release sydney sleeper
-				// replicate random crit mechanic
+				// todo: replicate random crit mechanic
 				// https://github.com/ValveSoftware/source-sdk-2013/blob/39f6dde8fbc238727c020d13b05ecadd31bda4c0/src/game/shared/tf/tf_player_shared.cpp#L9414
 				
 				if (
@@ -3727,14 +3727,14 @@ Action SDKHookCB_OnTakeDamage(
 							// Random crit chance
 							//float crit_threshold = 0.02*(flRemapCritMul);
 							float crit_threshold = 0.02;
-								PrintToChatAll("crit_threshold: %f", crit_threshold);
+								//PrintToChatAll("crit_threshold: %f", crit_threshold);
 							float crit_roll = GetRandomFloat(0.0, 1.0);
-								PrintToChatAll("crit_roll: %f", crit_roll);
+								//PrintToChatAll("crit_roll: %f", crit_roll);
 
 							if (crit_roll <= crit_threshold) {
 								damage_type = (damage_type | DMG_CRIT);
-									PrintToChatAll("Random crit! crit_roll is less than crit_threshold", 0);
-								// critical hit lightning sound doesn't play. i'll do this later.
+									//PrintToChatAll("Random crit! crit_roll is less than crit_threshold", 0);
+								// critical hit lightning sound doesn't play, so add it back.
 								//EmitGameSoundToAll("Weapon_General.CritPower", attacker);
 								EmitGameSoundToAll("Weapon_SydneySleeper.SingleCrit", attacker);
 								
@@ -4105,6 +4105,7 @@ Action SDKHookCB_OnTakeDamageAlive(
 					// prevent jarate effect on invulnerable targets for pre-gun mettle sydney sleeper
 					// only apply jarate effect on invulnerable targets for release sydney sleeper for historical accuracy
 					TF2_AddCondition(victim, TFCond_Jarated, 8.0);
+					// add back small jarate impact effect
 					ParticleShowSimple("peejar_impact_small", damage_position);
 				}
 			}
