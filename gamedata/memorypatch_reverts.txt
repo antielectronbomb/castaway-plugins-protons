@@ -102,6 +102,13 @@
 				// this is weird, blame makesig.idc for this
 				"windows" "\x57\x8B\xF9\x8B\x0D\x2A\x2A\x2A\x2A\xE8\x2A\x2A\x2A\x2A\x84\xC0\x0F\x85\x2A\x2A\x2A\x2A"
 			}
+			"CTFWeaponBase::ApplyOnHitAttributes"
+			// Used for release Mad Milk revert
+			{
+				"library"   "server"
+				"linux"     "@_ZN13CTFWeaponBase20ApplyOnHitAttributesEP11CBaseEntityP9CTFPlayerRK15CTakeDamageInfo"
+				"windows"   "\x55\x8B\xEC\x81\xEC\x10\x01\x00\x00\x53\x56\x57\x8B\x7D\x0C\x8B\xF1"
+			}			
 		}
 
 		"MemPatches"
@@ -125,7 +132,22 @@
 						"patch"   "\xEB\x1F\x90\x90\x90\x90\x90\x90" // Short jump to the nearest LEAVE
 					}
 				}
-
+				"CTFWeaponBase::ApplyOnHitAttributes_MilkHealAmount" // Patch done by Eric Zhang
+				{
+					"signature"     "CTFWeaponBase::ApplyOnHitAttributes"
+					"linux"
+					{
+						"offset"    "4233"
+						"verify"    "\xF3\x0F\x10\x05\x88\x38\x1A\x01" // movss xmm0, ds:dword_11A3888 (0.6 in dword_11A3888)
+						"patch"     "\xF3\x0F\x10\x05\x28\x39\x1A\x01" // movss xmm0, ds:dword_11A3928 (0.75 in dword_11A3928)
+					}
+					"windows"
+					{
+						"offset"    "935"
+						"verify"    "\xF3\x0F\x59\x05\x08\xA5\x77\x10" // mulss xmm0, ds:flt_1077A508 (0.6 in flt_1077A508)
+						"patch"     "\xF3\x0F\x59\x05\x48\x5E\x77\x10" // mulss xmm0, ds:dword_10775E48 (0.75 in dword_10775E48)
+					}
+				}
 				// ╔══════════════════════════════════════════════╗
 				// ║                   Soldier                    ║
 				// ╚══════════════════════════════════════════════╝

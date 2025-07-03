@@ -50,7 +50,7 @@
 
 #define PLUGIN_NAME "TF2 Weapon Reverts"
 #define PLUGIN_DESC "Reverts nerfed weapons back to their glory days"
-#define PLUGIN_AUTHOR "Bakugo, NotnHeavy, random, huutti, VerdiusArcana, MindfulProtons"
+#define PLUGIN_AUTHOR "Bakugo, NotnHeavy, random, huutti, VerdiusArcana, Eric Zhang, MindfulProtons"
 
 #define PLUGIN_VERSION_NUM "2.0.0"
 // Add a OS suffix if Memorypatch reverts are used
@@ -237,6 +237,8 @@ DHookSetup dHooks_CTFProjectile_Arrow_BuildingHealingArrow;
 
 Handle dhook_CTFAmmoPack_MakeHolidayPack;
 MemoryPatch Patch_DroppedWeapon;
+
+MemoryPatch patch_RevertMadMilk_HealAmount;
 #endif
 Handle sdkcall_JarExplode;
 Handle sdkcall_GetMaxHealth;
@@ -312,7 +314,6 @@ enum
 	Wep_Eviction,
 	Wep_FistsSteel,
 	Wep_Cleaver, // Flying Guillotine
-	Wep_MarketGardener,
 	Wep_GRU,
 	Wep_Gunboats,
 	Wep_Zatoichi, // Half-Zatoichi
@@ -321,6 +322,8 @@ enum
 	Wep_LibertyLauncher,
 	Wep_LochLoad,
 	Wep_LooseCannon,
+	Wep_MadMilk,
+	Wep_MarketGardener,
 	Wep_Natascha,
 	Wep_PanicAttack,
 	Wep_Persian,
@@ -476,6 +479,7 @@ public void OnPluginStart() {
 	ItemDefine("lochload", "LochLoad_PreGM", CLASSFLAG_DEMOMAN, Wep_LochLoad);
 	ItemVariant(Wep_LochLoad, "LochLoad_2013");
 	ItemDefine("cannon", "Cannon_PreTB", CLASSFLAG_DEMOMAN, Wep_LooseCannon);
+	ItemDefine("madmilk", "MadMilk_Release", CLASSFLAG_SCOUT, Wep_MadMilk);
 	ItemDefine("gardener", "Gardener_PreTB", CLASSFLAG_SOLDIER, Wep_MarketGardener);
 	ItemDefine("natascha", "Natascha_PreMYM", CLASSFLAG_HEAVY, Wep_Natascha);
 	ItemDefine("panic", "Panic_PreJI", CLASSFLAG_SOLDIER | CLASSFLAG_PYRO | CLASSFLAG_HEAVY | CLASSFLAG_ENGINEER, Wep_PanicAttack);
@@ -657,6 +661,9 @@ public void OnPluginStart() {
 		patch_RevertDalokohsBar_ChgTo400 =
 			MemoryPatch.CreateFromConf(conf,
 			"CTFLunchBox::ApplyBiteEffect_Dalokohs_MOV_400");
+		patch_RevertMadMilk_HealAmount =
+			MemoryPatch.CreateFromConf(conf,
+			"CTFWeaponBase::ApplyOnHitAttributes_MilkHealAmount");
 
 		Patch_DroppedWeapon = MemoryPatch.CreateFromConf(conf, "CTFPlayer::DropAmmoPack");
 		dhook_CTFAmmoPack_MakeHolidayPack = DHookCreateFromConf(conf, "CTFAmmoPack::MakeHolidayPack");
@@ -689,6 +696,7 @@ public void OnPluginStart() {
 		if (!ValidateAndNullCheck(patch_RevertDalokohsBar_ChgFloatAddr)) SetFailState("Failed to create patch_RevertDalokohsBar_ChgFloatAddr");
 		if (!ValidateAndNullCheck(patch_RevertDalokohsBar_ChgTo400)) SetFailState("Failed to create patch_RevertDalokohsBar_ChgTo400");
 		if (!ValidateAndNullCheck(Patch_DroppedWeapon)) SetFailState("Failed to create Patch_DroppedWeapon");
+		if (!ValidateAndNullCheck(patch_RevertMadMilk_HealAmount)) SetFailState("Failed to create patch_RevertMadMilk_HealAmount");
 		AddressOf_g_flDalokohsBarCanOverHealTo = GetAddressOfCell(g_flDalokohsBarCanOverHealTo);
 
 
@@ -846,6 +854,13 @@ void ToggleMemoryPatchReverts(bool enable, int wep_enum) {
 				patch_RevertDalokohsBar_ChgFloatAddr.Disable();
 				patch_RevertDalokohsBar_ChgTo400.Disable();
 			}
+		}
+		case Wep_MadMilk: {
+			if (enable) {
+				patch_RevertMadMilk_HealAmount.Enable();
+			} else {
+				patch_RevertMadMilk_HealAmount.Disable();
+			}			
 		}
 	}
 }
@@ -2111,6 +2126,10 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 				TF2Items_SetAttribute(itemNew, 5, 681, 0.00); // grenade no spin
 			}
 		}}
+		case 222: { if (ItemIsEnabled(Wep_MadMilk)) {
+			TF2Items_SetNumAttributes(itemNew, 1);
+			TF2Items_SetAttribute(itemNew, 0, 784, 1.0); // extinguish_reduces_cooldown
+		}}		
 		case 41: { if (ItemIsEnabled(Wep_Natascha)) {
 			TF2Items_SetNumAttributes(itemNew, 1);
 			TF2Items_SetAttribute(itemNew, 0, 738, 1.00); // spunup damage resistance
@@ -2712,6 +2731,7 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 						case 329: player_weapons[client][Wep_Jag] = true;
 						case 414: player_weapons[client][Wep_LibertyLauncher] = true;
 						case 308: player_weapons[client][Wep_LochLoad] = true;
+						case 222: player_weapons[client][Wep_MadMilk] = true;
 						case 41: player_weapons[client][Wep_Natascha] = true;
 						case 1153: player_weapons[client][Wep_PanicAttack] = true;
 						case 773: player_weapons[client][Wep_PocketPistol] = true;
