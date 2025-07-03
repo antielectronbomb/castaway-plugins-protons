@@ -3681,49 +3681,6 @@ Action SDKHookCB_OnTakeDamage(
 							StrEqual(class, "tf_weapon_sniperrifle") &&
 							GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 230
 						) {
-							
-							// Crit chance multiplier
-							// literally how? i don't see 800 damage in the last 20 seconds here.
-							// find a way to retrieve amount of total damage in last 20 seconds from crit bucket?
-							// FIND A WAY TO RETRIEVE m_iCritMult FROM CTFPlayerShared::UpdateCritMult
-
-							// Find a way to translate damage to crit multiplier
-							// Start at 0 damage, 1.0 multiplier. 800 damage, 4.0 multiplier.
-							// Let x = damage, y = crit multiplier
-							// y = mx + b
-							// y = 0.00375x + 1
-							
-							//float m_iCritMult = ValveRemapVal(1.0, 1.0, 4.0, 0.0, 255.0);
-							//	PrintToChatAll("m_iCritMult: %f", m_iCritMult);
-							//float flRemapCritMul = ValveRemapVal(m_iCritMult, 0.0, 255.0, 1.0, 4.0);
-							//	PrintToChatAll("flRemapCritMul: %f", flRemapCritMul);
-							/*
-							float crit_multiplier = 1.0;
-
-							if (damage > 0) {
-								players[attacker].sleeper_damage_frame = GetGameTickCount(); // 66 = 1 sec
-								
-								players[attacker].sleeper_damage_amount += damage;
-								float total_damage_amount = players[attacker].sleeper_damage_amount;
-									PrintToChatAll("players[attacker].sleeper_damage_amount: %f", players[attacker].sleeper_damage_amount);
-
-							//	// how to remove oldest damage?
-							//	if (GetGameTickCount() == players[attacker].sleeper_damage_frame + 66*20) {
-							//		total_damage_amount = total_damage_amount - players[attacker].sleeper_damage_amount;
-							//			PrintToChatAll("players[attacker].sleeper_damage_amount: %f", players[attacker].sleeper_damage_amount);
-							//	}
-									
-								// translate total damage to crit multiplier
-								if (crit_multiplier < 4.0 && total_damage_amount < 800.0) {
-									crit_multiplier = (0.00375*(total_damage_amount) + 1);
-										PrintToChatAll("crit_multiplier: %f", crit_multiplier);
-								}
-								else if (crit_multiplier >= 4.0 && total_damage_amount >= 800.0) {
-									crit_multiplier = 4.0;
-										PrintToChatAll("crit_multiplier: %f", crit_multiplier);
-								}
-							}
-							*/
 							// Random crit chance
 							//float crit_threshold = 0.02*(flRemapCritMul);
 							float crit_threshold = 0.02;
@@ -4061,7 +4018,6 @@ Action SDKHookCB_OnTakeDamageAlive(
 	int victim, int& attacker, int& inflictor, float& damage, int& damage_type,
 	int& weapon, float damage_force[3], float damage_position[3], int damage_custom
 ) {
-	char class[64];
 	Action returnValue = Plugin_Continue;
 	if (
 		victim >= 1 && victim <= MaxClients &&
@@ -4091,13 +4047,11 @@ Action SDKHookCB_OnTakeDamageAlive(
 		}
 		{
 			// sydney sleeper (pre-gun mettle & release) jarate effect
-			GetEntityClassname(weapon, class, sizeof(class));
 			if (
 				ItemIsEnabled(Wep_SydneySleeper) &&
 				(GetItemVariant(Wep_SydneySleeper) == 1 || GetItemVariant(Wep_SydneySleeper) == 2) &&
-				StrEqual(class, "tf_weapon_sniperrifle") &&
-				GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 230 &&
-				GetGameTime() - players[attacker].sleeper_time_since_scoping >= 1.0 && 
+				player_weapons[attacker][Wep_SydneySleeper] &&
+				GetGameTime() - players[attacker].sleeper_time_since_scoping >= 1.0 &&
 				TF2_IsPlayerInCondition(attacker, TFCond_Slowed)
 			) {
 				if ((GetItemVariant(Wep_SydneySleeper) == 1 && !PlayerIsInvulnerable(victim)) || GetItemVariant(Wep_SydneySleeper) == 2)
@@ -4109,7 +4063,6 @@ Action SDKHookCB_OnTakeDamageAlive(
 					ParticleShowSimple("peejar_impact_small", damage_position);
 				}
 			}
-
 		}
 		{
 			if (
