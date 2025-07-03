@@ -3682,8 +3682,11 @@ Action SDKHookCB_OnTakeDamage(
 							GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 230
 						) {
 							// Random crit chance
+							// how to get flRemapCritMul from the game?
 							//float crit_threshold = 0.02*(flRemapCritMul);
-							float crit_threshold = 0.02;
+
+							// Because I don't know yet how to get the random crit multiplier, instead we just choose a random threshold for the time being.
+							float crit_threshold = GetRandomFloat(0.02, 0.08);
 								//PrintToChatAll("crit_threshold: %f", crit_threshold);
 							float crit_roll = GetRandomFloat(0.0, 1.0);
 								//PrintToChatAll("crit_roll: %f", crit_roll);
@@ -3692,7 +3695,6 @@ Action SDKHookCB_OnTakeDamage(
 								damage_type = (damage_type | DMG_CRIT);
 									//PrintToChatAll("Random crit! crit_roll is less than crit_threshold", 0);
 								// critical hit lightning sound doesn't play, so add it back.
-								//EmitGameSoundToAll("Weapon_General.CritPower", attacker);
 								EmitGameSoundToAll("Weapon_SydneySleeper.SingleCrit", attacker);
 								
 								return Plugin_Changed;
