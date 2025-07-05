@@ -3902,13 +3902,18 @@ Action SDKHookCB_OnTakeDamage(
 							}
 
 							// Historically accurate Pre-MyM Righteous Bison damage numbers against players ported from NotnHeavy's pre-GM plugin
-							if (StrEqual(class, "tf_weapon_raygun") && GetItemVariant(Wep_Bison) == 1) {
+							if (
+								StrEqual(class, "tf_weapon_raygun") && GetItemVariant(Wep_Bison) == 1 &&
+								(damage_type & DMG_CRIT == 0)
+							) {
+								// Changing the damage type makes it not crit on hit with random & conditional crits. 
+								// So we check if the shot is a crit. If true, then ignore this if statement so the Bison actually crits.
+								// When the Bison crits, its still going to use the modern Bison damage falloff, but it shouldn't really matter since its a crit anyways.
+
 								damage_type ^= DMG_USEDISTANCEMOD; // Do not use internal rampup/falloff.
 								damage_type = DMG_PREVENT_PHYSICS_FORCE; // Ignore vaccinator resistance, use new 
 								
 								damage = 16.00 * ValveRemapVal(floatMin(0.35, GetGameTime() - entities[players[victim].projectile_touch_entity].spawn_timestamp), 0.35 / 2, 0.35, 1.25, 0.75); // Deal 16 base damage with 125% rampup, 75% falloff.
-
-								// This makes it not have random crits ffs
 
 								return Plugin_Changed;
 							}
