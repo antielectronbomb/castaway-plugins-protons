@@ -3901,24 +3901,13 @@ Action SDKHookCB_OnTakeDamage(
 								}
 							}
 
-							// Accurate Pre-MyM Righteous Bison damage numbers against players ported from NotnHeavy's pre-GM plugin
-							// This also ignores Vaccinator resistances.
-							if (
-								ItemIsEnabled(Wep_Bison) && GetItemVariant(Wep_Bison) == 1 &&
-								StrContains(class, "tf_weapon_raygun") == 0
-							) {
+							// Historically accurate Pre-MyM Righteous Bison damage numbers against players ported from NotnHeavy's pre-GM plugin
+							if (GetItemVariant(Wep_Bison) == 1) {
 								damage_type ^= DMG_USEDISTANCEMOD; // Do not use internal rampup/falloff.
-								//	PrintToChat(attacker, "damage_type bison: %i", damage_type);
-								// It doesn't ignore Vaccinator resistance?
-								damage_type = DMG_PREVENT_PHYSICS_FORCE;
-								//	PrintToChat(attacker, "damage_type bison: %i", damage_type);
+								damage_type = DMG_PREVENT_PHYSICS_FORCE; // Ignore vaccinator resistance, use new 
 								
 								damage = 16.00 * ValveRemapVal(floatMin(0.35, GetGameTime() - entities[players[victim].projectile_touch_entity].spawn_timestamp), 0.35 / 2, 0.35, 1.25, 0.75); // Deal 16 base damage with 125% rampup, 75% falloff.
-								//	PrintToChat(attacker, "floatMin: %f", floatMin(0.35, GetGameTime() - entities[players[victim].projectile_touch_entity].spawn_timestamp));
-								//	PrintToChat(attacker, "damage bison: %f", damage);
-								// Why does this do 100 damage in total when an enemy is hit thrice in a row? Is this supposed to happen?
-								// Also I do not get how that Remap function works.
-
+							
 								return Plugin_Changed;
 							}
 						}

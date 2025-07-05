@@ -769,7 +769,7 @@
 	}
 	"Bison_PreMYM_Historical"
 	{
-		"en"	"Reverted to pre-matchmaking, 20 dmg per hit, old dmg falloff, ignores Vaccinator resists, increased hitbox size, can hit the same player more times, lights up friendly Huntsman arrows"
+		"en"	"Reverted to pre-matchmaking, increased hitbox size, can hit the same player more times, lights up friendly Huntsman arrows, ignores Vaccinator resists, old dmg falloff"
 	}
 	"RocketJmp_Pre2013"
 	{
