@@ -3909,6 +3909,7 @@ Action SDKHookCB_OnTakeDamage(
 								// Changing the damage type makes it not crit on hit with random & conditional crits. 
 								// So we check if the shot is a crit. If true, then ignore this if statement so the Bison actually crits.
 								// When the Bison crits, its still going to use the modern Bison damage falloff, but it shouldn't really matter since its a crit anyways.
+								// This also means that if the Bison crits against a Vac Medic, it won't ignore damage resistance. Regardless this should be good enough
 
 								damage_type ^= DMG_USEDISTANCEMOD; // Do not use internal rampup/falloff.
 								damage_type = DMG_PREVENT_PHYSICS_FORCE; // Ignore vaccinator resistance, use new 
