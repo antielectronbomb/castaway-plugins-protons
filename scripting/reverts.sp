@@ -3902,12 +3902,14 @@ Action SDKHookCB_OnTakeDamage(
 							}
 
 							// Historically accurate Pre-MyM Righteous Bison damage numbers against players ported from NotnHeavy's pre-GM plugin
-							if (GetItemVariant(Wep_Bison) == 1) {
+							if (StrEqual(class, "tf_weapon_raygun") && GetItemVariant(Wep_Bison) == 1) {
 								damage_type ^= DMG_USEDISTANCEMOD; // Do not use internal rampup/falloff.
 								damage_type = DMG_PREVENT_PHYSICS_FORCE; // Ignore vaccinator resistance, use new 
 								
 								damage = 16.00 * ValveRemapVal(floatMin(0.35, GetGameTime() - entities[players[victim].projectile_touch_entity].spawn_timestamp), 0.35 / 2, 0.35, 1.25, 0.75); // Deal 16 base damage with 125% rampup, 75% falloff.
-							
+
+								// This makes it not have random crits ffs
+
 								return Plugin_Changed;
 							}
 						}
