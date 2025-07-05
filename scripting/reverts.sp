@@ -2109,9 +2109,12 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 				TF2Items_SetAttribute(itemNew, 0, 16, 7.0); // On Hit: Gain up to +7 health
 			}
 		}}
-		case 588: { if (ItemIsEnabled(Wep_Pomson) && GetItemVariant(Wep_Pomson) == 1) {
-			TF2Items_SetNumAttributes(itemNew, 1);
-			TF2Items_SetAttribute(itemNew, 0, 283, 1.0); // energy_weapon_penetration; NOTE: turns pomson projectile into bison projectile
+		case 588: { if (ItemIsEnabled(Wep_Pomson)) {
+			bool release = GetItemVariant(Wep_Pomson) == 1;
+			TF2Items_SetNumAttributes(itemNew, release ? 2 : 1);
+			TF2Items_SetAttribute(itemNew, 0, 797, 1.0); // mod_pierce_resists_absorbs; pierce resistances so it acts like untyped damage
+			if (release)
+				TF2Items_SetAttribute(itemNew, 1, 283, 1.0); // energy_weapon_penetration; NOTE: turns pomson projectile into bison projectile
 		}}		
 		case 214: { if (ItemIsEnabled(Wep_Powerjack)) {
 			// health bonus with overheal for all variants handled elsewhere
@@ -2183,6 +2186,10 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 			TF2Items_SetAttribute(itemNew, 1, 178, 0.85); // 15% faster weapon switch
 			TF2Items_SetAttribute(itemNew, 2, 547, 1.0); // This weapon deploys 0% faster
 		}}
+		case 442: { if (ItemIsEnabled(Wep_Bison)) {
+			TF2Items_SetNumAttributes(itemNew, 1);
+			TF2Items_SetAttribute(itemNew, 0, 797, 1.0); // mod_pierce_resists_absorbs; pierce resistances so it acts like untyped damage
+		}}			
 		case 59: { if (ItemIsEnabled(Wep_DeadRinger)) {
 			bool preGunMettle = (GetItemVariant(Wep_DeadRinger) == 0);
 			TF2Items_SetNumAttributes(itemNew, preGunMettle ? 5 : 3);
@@ -3852,18 +3859,23 @@ Action SDKHookCB_OnTakeDamage(
 								}
 							}
 
-							// Historically accurate Pre-MyM Righteous Bison damage numbers against players ported from NotnHeavy's pre-GM plugin
+							// Historically accurate Pre-MyM Bison damage numbers against players ported from NotnHeavy's pre-GM plugin
+							// Using this code does not work with the Pomson for some reason. I do not know why.
 							if (
-								StrEqual(class, "tf_weapon_raygun") && GetItemVariant(Wep_Bison) == 1
+								(StrEqual(class, "tf_weapon_raygun") && GetItemVariant(Wep_Bison) == 1)
 							) {
 								damage_type ^= DMG_USEDISTANCEMOD; // Do not use internal rampup/falloff.
 								
+								// Use piercing attribute instead which ignores damage resistances and does not ignore vulnerabilities just like untyped damage
+								// I am leaving this in just in case. If you want to test how "Untyped" damage type works, use the vanilla Flying Guillotine - the first hit and Bleed are "Untyped" damage types.
+								/*
 								// Ignore vaccinator resistance by changing damage types
 								if (damage_type & DMG_CRIT == 0)
 									damage_type = DMG_PREVENT_PHYSICS_FORCE; 
 								else if (damage_type & DMG_CRIT != 0)
 									damage_type = DMG_PREVENT_PHYSICS_FORCE + DMG_CRIT; // Add back crit damage if the shot is a crit
-								
+								*/
+
 								damage = 16.00 * ValveRemapVal(floatMin(0.35, GetGameTime() - entities[players[victim].projectile_touch_entity].spawn_timestamp), 0.35 / 2, 0.35, 1.25, 0.75); // Deal 16 base damage with 125% rampup, 75% falloff.
 
 								return Plugin_Changed;
