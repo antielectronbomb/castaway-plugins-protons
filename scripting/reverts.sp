@@ -495,6 +495,7 @@ public void OnPluginStart() {
 	ItemDefine("reserve", "Reserve_PreTB", CLASSFLAG_SOLDIER | CLASSFLAG_PYRO, Wep_ReserveShooter);
 	ItemVariant(Wep_ReserveShooter, "Reserve_PreJI");
 	ItemDefine("bison", "Bison_PreMYM", CLASSFLAG_SOLDIER, Wep_Bison);
+	ItemVariant(Wep_Bison, "Bison_PreMYM_Historical");
 	ItemDefine("rocketjmp", "RocketJmp_Pre2013", CLASSFLAG_SOLDIER, Wep_RocketJumper);
 	ItemVariant(Wep_RocketJumper, "RocketJmp_Pre2013_Intel");
 	ItemDefine("saharan", "Saharan_Release", CLASSFLAG_SPY, Set_Saharan);
@@ -3360,23 +3361,6 @@ Action SDKHookCB_OnTakeDamage(
 		if (weapon > MaxClients) {
 			GetEntityClassname(weapon, class, sizeof(class));
 
-			if (
-				ItemIsEnabled(Wep_Bison) &&
-				StrContains(class, "tf_weapon_raygun") == 0 //&&
-				//GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 442
-			) {
-				// Righteous Bison damage numbers to players mechanics ported from NotnHeavy's pre-GM plugin
-
-				damage_type ^= DMG_USEDISTANCEMOD; // Do not use internal rampup/falloff.
-				// It doesn't ignore Vaccinator resistance?
-					PrintToChatAll("damage_type bison: %i", damage_type);
-				
-				damage = 16.00 * ValveRemapVal(floatMin(0.35, GetGameTime() - entities[players[victim].projectile_touch_entity].spawn_timestamp), 0.35 / 2, 0.35, 1.25, 0.75); // Deal 16 base damage with 125% rampup, 75% falloff.
-					PrintToChatAll("damage bison: %f", damage);
-
-				return Plugin_Changed;
-			}
-
 			{
 				// caber damage
 
@@ -3915,6 +3899,27 @@ Action SDKHookCB_OnTakeDamage(
 										TF2_AddCondition(victim, TFCond_DeadRingered);
 									}								
 								}
+							}
+
+							// Accurate Pre-MyM Righteous Bison damage numbers against players ported from NotnHeavy's pre-GM plugin
+							// This also ignores Vaccinator resistances.
+							if (
+								ItemIsEnabled(Wep_Bison) && GetItemVariant(Wep_Bison) == 1 &&
+								StrContains(class, "tf_weapon_raygun") == 0
+							) {
+								damage_type ^= DMG_USEDISTANCEMOD; // Do not use internal rampup/falloff.
+								//	PrintToChat(attacker, "damage_type bison: %i", damage_type);
+								// It doesn't ignore Vaccinator resistance?
+								damage_type = DMG_PREVENT_PHYSICS_FORCE;
+								//	PrintToChat(attacker, "damage_type bison: %i", damage_type);
+								
+								damage = 16.00 * ValveRemapVal(floatMin(0.35, GetGameTime() - entities[players[victim].projectile_touch_entity].spawn_timestamp), 0.35 / 2, 0.35, 1.25, 0.75); // Deal 16 base damage with 125% rampup, 75% falloff.
+								//	PrintToChat(attacker, "floatMin: %f", floatMin(0.35, GetGameTime() - entities[players[victim].projectile_touch_entity].spawn_timestamp));
+								//	PrintToChat(attacker, "damage bison: %f", damage);
+								// Why does this do 100 damage in total when an enemy is hit thrice in a row? Is this supposed to happen?
+								// Also I do not get how that Remap function works.
+
+								return Plugin_Changed;
 							}
 						}
 
