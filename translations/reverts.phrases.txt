@@ -713,7 +713,7 @@
 	}
 	"Pomson_PreGM_Historical"
 	{
-		"en"	"Reverted to pre-gunmettle, increased hitbox size (same as Bison), does not pass through team, no uber & cloak drain fall-off at any range, lights up friendly Huntsman arrows, ignores Vaccinator resists, old dmg falloff, 60 dmg per hit"
+		"en"	"Reverted to pre-gunmettle, increased hitbox size, does not pass through team, no uber & cloak drain fall-off at any range, lights up friendly Huntsman arrows, ignores Vaccinator resists, old dmg falloff, 60 dmg per hit"
 	}	
 	"Powerjack_PreGM"
 	{
@@ -765,7 +765,7 @@
 	}
 	"Bison_PreMYM"
 	{
-		"en"	"Increased hitbox size, can hit the same player more times, lights up friendly Huntsman arrows, ignores Vaccinator resists, old dmg falloff"
+		"en"	"Increased hitbox size, can hit the same player more times, lights up friendly Huntsman arrows, ignores Vaccinator resists"
 	}
 	"Bison_PreMYM_Historical"
 	{
