@@ -182,6 +182,7 @@ enum struct Entity {
 	bool exists;
 	float spawn_time;
 	bool is_demo_shield;
+	float spawn_timestamp;
 }
 
 ConVar cvar_enable;
@@ -1516,6 +1517,8 @@ public void OnEntityCreated(int entity, const char[] class) {
 		// sourcemod calls this with entrefs for non-networked ents ??
 		return;
 	}
+
+	entities[entity].spawn_timestamp = GetGameTime(); // for bison/pomson damage numbers handling
 
 	entities[entity].exists = true;
 	entities[entity].spawn_time = 0.0;
@@ -3357,6 +3360,23 @@ Action SDKHookCB_OnTakeDamage(
 		if (weapon > MaxClients) {
 			GetEntityClassname(weapon, class, sizeof(class));
 
+			if (
+				ItemIsEnabled(Wep_Bison) &&
+				StrContains(class, "tf_weapon_raygun") == 0 //&&
+				//GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 442
+			) {
+				// Righteous Bison damage numbers to players mechanics ported from NotnHeavy's pre-GM plugin
+
+				damage_type ^= DMG_USEDISTANCEMOD; // Do not use internal rampup/falloff.
+				// It doesn't ignore Vaccinator resistance?
+					PrintToChatAll("damage_type bison: %i", damage_type);
+				
+				damage = 16.00 * ValveRemapVal(floatMin(0.35, GetGameTime() - entities[players[victim].projectile_touch_entity].spawn_timestamp), 0.35 / 2, 0.35, 1.25, 0.75); // Deal 16 base damage with 125% rampup, 75% falloff.
+					PrintToChatAll("damage bison: %f", damage);
+
+				return Plugin_Changed;
+			}
+
 			{
 				// caber damage
 
@@ -5153,6 +5173,18 @@ MRESReturn DHookCallback_CTFPlayer_AddToSpyKnife(int entity, DHookReturn returnV
  * @return		The smaller integer between x and y.
  */
 int intMin(int x, int y)
+{
+	return x > y ? y : x;
+}
+
+/**
+ * Get the smaller float between two floats.
+ * 
+ * @param x		Float x.
+ * @param y		Float y.
+ * @return		The smaller float between x and y.
+ */
+float floatMin(float x, float y)
 {
 	return x > y ? y : x;
 }
