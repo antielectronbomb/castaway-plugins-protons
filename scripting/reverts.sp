@@ -50,7 +50,7 @@
 
 #define PLUGIN_NAME "TF2 Weapon Reverts"
 #define PLUGIN_DESC "Reverts nerfed weapons back to their glory days"
-#define PLUGIN_AUTHOR "Bakugo, NotnHeavy, random, huutti, VerdiusArcana, MindfulProtons"
+#define PLUGIN_AUTHOR "Bakugo, NotnHeavy, random, huutti, VerdiusArcana, MindfulProtons, EricZhang456"
 
 #define PLUGIN_VERSION_NUM "2.0.0"
 // Add a OS suffix if Memorypatch reverts are used
@@ -190,6 +190,7 @@ ConVar cvar_extras;
 ConVar cvar_old_falldmg_sfx;
 ConVar cvar_no_reverts_info_by_default;
 ConVar cvar_dropped_weapon_enable;
+ConVar cvar_pre_toughbreak_switch;
 ConVar cvar_ref_tf_airblast_cray;
 ConVar cvar_ref_tf_bison_tick_time;
 ConVar cvar_ref_tf_dropped_weapon_lifetime;
@@ -389,6 +390,7 @@ public void OnPluginStart() {
 	cvar_old_falldmg_sfx = CreateConVar("sm_reverts__old_falldmg_sfx", "1", (PLUGIN_NAME ... " - Enable old (pre-inferno) fall damage sound (old bone crunch, no hurt voicelines)"), _, true, 0.0, true, 1.0);
 	cvar_dropped_weapon_enable = CreateConVar("sm_reverts__enable_dropped_weapon", "0", (PLUGIN_NAME ... " - Revert dropped weapon behaviour"), _, true, 0.0, true, 1.0);
 	cvar_no_reverts_info_by_default = CreateConVar("sm_reverts__no_reverts_info_on_spawn", "0", (PLUGIN_NAME ... " - Disable loadout change reverts info by default"), _, true, 0.0, true, 1.0);
+	cvar_pre_toughbreak_switch = CreateConVar("sm_reverts__pre_toughbreak_switch", "0", (PLUGIN_NAME ... " - Use pre-toughbreak weapon switch time (0.67 sec instead of 0.5 sec)"), _, true, 0.0, true, 1.0);
 
 	cvar_dropped_weapon_enable.AddChangeHook(OnDroppedWeaponCvarChange);
 
@@ -531,7 +533,7 @@ public void OnPluginStart() {
 
 	ItemFinalize();
 
-	AutoExecConfig(false, "reverts", "sourcemod");
+	AutoExecConfig(true, "reverts", "sourcemod");
 
 	g_hClientMessageCookie = RegClientCookie("reverts_messageinfo_cookie","Weapon Reverts Message Info Cookie",CookieAccess_Protected);
 
@@ -1001,24 +1003,6 @@ public void OnGameFrame() {
 
 						if (TF2_IsPlayerInCondition(idx, TFCond_Bonked)) {
 							players[idx].bonk_cond_frame = GetGameTickCount();
-						}
-					}
-
-					{
-						// shortstop shove removal
-
-						if (GetItemVariant(Wep_Shortstop) == 1 || GetItemVariant(Wep_Shortstop) == 3) {
-							weapon = GetEntPropEnt(idx, Prop_Send, "m_hActiveWeapon");
-
-							if (weapon > 0) {
-								GetEntityClassname(weapon, class, sizeof(class));
-
-								if (StrEqual(class, "tf_weapon_handgun_scout_primary")) {
-									// disable secondary attack
-									// this is somewhat broken, can still shove by holding m2 when reload ends
-									SetEntPropFloat(weapon, Prop_Send, "m_flNextSecondaryAttack", (GetGameTime() + 1.0));
-								}
-							}
 						}
 					}
 
@@ -2232,28 +2216,24 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 			switch (GetItemVariant(Wep_Shortstop)) {
 				case 0, 1: {
 					// Pre-Manniversary Shortstop
-					TF2Items_SetNumAttributes(itemNew, 5);
-					TF2Items_SetAttribute(itemNew, 0, 76, 1.125); // 12.5% max primary ammo on wearer, reverts max ammo back to 36, required for ammo sharing to work
-					TF2Items_SetAttribute(itemNew, 1, 241, 1.0); // reload time increased hidden
-					TF2Items_SetAttribute(itemNew, 2, 534, 1.00); // airblast vulnerability multiplier hidden
-					TF2Items_SetAttribute(itemNew, 3, 535, 1.00); // damage force increase hidden
-					TF2Items_SetAttribute(itemNew, 4, 536, 1.00); // damage force increase text
+					TF2Items_SetNumAttributes(itemNew, 3);
+					TF2Items_SetAttribute(itemNew, 0, 241, 1.0); // reload time increased hidden
+					TF2Items_SetAttribute(itemNew, 1, 534, 1.00); // airblast vulnerability multiplier hidden
+					TF2Items_SetAttribute(itemNew, 2, 535, 1.00); // damage force increase hidden
 				}
 				case 2, 3: {
 					// Pre-Gun Mettle Shortstop
-					TF2Items_SetNumAttributes(itemNew, 6);
-					TF2Items_SetAttribute(itemNew, 1, 526, 1.20); // 20% bonus healing from all sources
-					TF2Items_SetAttribute(itemNew, 2, 534, 1.40); // airblast vulnerability multiplier hidden
-					TF2Items_SetAttribute(itemNew, 3, 535, 1.40); // damage force increase hidden
-					TF2Items_SetAttribute(itemNew, 4, 536, 1.40); // damage force increase text
-					TF2Items_SetAttribute(itemNew, 5, 128, 0.0); // disable provide_on_active so push force penalty is active at all times
+					TF2Items_SetNumAttributes(itemNew, 4);
+					TF2Items_SetAttribute(itemNew, 0, 526, 1.20); // 20% bonus healing from all sources
+					TF2Items_SetAttribute(itemNew, 1, 534, 1.40); // airblast vulnerability multiplier hidden
+					TF2Items_SetAttribute(itemNew, 2, 535, 1.40); // damage force increase hidden
+					TF2Items_SetAttribute(itemNew, 3, 128, 0.0); // disable provide_on_active so push force penalty is active at all times
 				}
 			}	
 		}}
 		case 230: { if (ItemIsEnabled(Wep_SydneySleeper)) {
-			TF2Items_SetNumAttributes(itemNew, 2);
-			TF2Items_SetAttribute(itemNew, 0, 42, 0.0); // sniper no headshots
-			TF2Items_SetAttribute(itemNew, 1, 175, 0.0); // jarate duration
+			TF2Items_SetNumAttributes(itemNew, 1);
+			TF2Items_SetAttribute(itemNew, 0, 175, 0.0); // jarate duration
 		}}
 		case 448: { if (ItemIsEnabled(Wep_SodaPopper)) {
 			bool minicrits = GetItemVariant(Wep_SodaPopper) == 0;
@@ -2568,31 +2548,6 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 					}
 				}
 			}
-
-			{
-				// fix sydney sleeper headshot kill icon (unless crit-boosted)
-
-				if (
-					GetEventInt(event, "customkill") == TF_CUSTOM_HEADSHOT &&
-					players[attacker].headshot_frame == GetGameTickCount() &&
-					PlayerIsCritboosted(attacker) == false
-				) {
-					weapon = GetEntPropEnt(attacker, Prop_Send, "m_hActiveWeapon");
-
-					if (weapon > 0) {
-						GetEntityClassname(weapon, class, sizeof(class));
-
-						if (
-							ItemIsEnabled(Wep_SydneySleeper) &&
-							StrEqual(class, "tf_weapon_sniperrifle") &&
-							GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 230
-						) {
-							SetEventInt(event, "customkill", TF_DMG_CUSTOM_NONE);
-							return Plugin_Changed;
-						}
-					}
-				}
-			}
 		}
 	}
 
@@ -2601,6 +2556,12 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 
 		// keep track of resupply time
 		players[client].resupply_time = GetGameTime();
+
+		// apply pre-toughbreak weapon switch if cvar is enabled
+		if (cvar_pre_toughbreak_switch.BoolValue)
+			TF2Attrib_SetByDefIndex(client, 177, 1.34); // 34% longer weapon switch
+		else
+			TF2Attrib_RemoveByDefIndex(client, 177);
 
 		bool should_display_info_msg = false;
 
@@ -3611,16 +3572,6 @@ Action SDKHookCB_OnTakeDamage(
 							players[attacker].sleeper_piss_explode = true;
 						}
 					}
-
-					// disable headshot crits
-					// ...is this even needed?
-					if (
-						damage_type & DMG_CRIT != 0 &&
-						PlayerIsCritboosted(attacker) == false
-					) {
-						damage_type = (damage_type & ~DMG_CRIT);
-						return Plugin_Changed;
-					}
 				}
 			}
 
@@ -4062,41 +4013,63 @@ public Action OnPlayerRunCmd(
 	int client, int& buttons, int& impulse, float vel[3], float angles[3],
 	int& weapon, int& subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2]
 ) {
+	Action returnValue = Plugin_Continue;
+	int weapon1;
+	char class[64];
+
 	if (TF2_GetPlayerClass(client) == TFClass_Scout) {
 		if (
 			GetItemVariant(Wep_BabyFace) == 1 &&
 			player_weapons[client][Wep_BabyFace]
 		) {
 			// Release Baby Face's Blaster boost reset on jump
-			switch (buttons & IN_JUMP != 0)
+			if (buttons & IN_JUMP != 0)
 			{
-				case true:
+				if (!players[client].player_jumped)
 				{
-					if (!players[client].player_jumped)
-					{
-						if (
-							GetEntPropFloat(client, Prop_Send, "m_flHypeMeter") > 0.0 && 
-							GetEntProp(client, Prop_Data, "m_nWaterLevel") <= 1 && // don't reset if swimming 
-							buttons & IN_DUCK == 0 && // don't reset if crouching
-							(GetEntityFlags(client) & FL_ONGROUND) != 0 // don't reset if airborne
-							// the attrib for reducing boost will reset for air jumps
-						) {
-							SetEntPropFloat(client, Prop_Send, "m_flHypeMeter", 0.0);
-							// apply the following so movement gets reset immediately, maybe there's a better way
-							TF2Attrib_AddCustomPlayerAttribute(client, "move speed penalty", 0.99, 0.001);
-						}
-						players[client].player_jumped = true;
+					if (
+						GetEntPropFloat(client, Prop_Send, "m_flHypeMeter") > 0.0 && 
+						GetEntProp(client, Prop_Data, "m_nWaterLevel") <= 1 && // don't reset if swimming 
+						buttons & IN_DUCK == 0 && // don't reset if crouching
+						(GetEntityFlags(client) & FL_ONGROUND) != 0 // don't reset if airborne, the attribute will handle air jumps
+					) {
+						SetEntPropFloat(client, Prop_Send, "m_flHypeMeter", 0.0);
+						// apply the following so movement gets reset immediately, maybe there's a better way
+						TF2Attrib_AddCustomPlayerAttribute(client, "move speed penalty", 0.99, 0.001);
 					}
+					players[client].player_jumped = true;
 				}
-				case false:
-				{
-					players[client].player_jumped = false;
+			}
+			else
+			{
+				players[client].player_jumped = false;
+			}
+		}
+		
+		if (
+			(GetItemVariant(Wep_Shortstop) == 1 ||
+			GetItemVariant(Wep_Shortstop) == 3) &&
+			player_weapons[client][Wep_Shortstop]
+		) {
+			// shortstop shove removal
+			weapon1 = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+
+			if (weapon1 > 0) {
+				GetEntityClassname(weapon1, class, sizeof(class));
+
+				if (
+					StrEqual(class, "tf_weapon_handgun_scout_primary") &&
+					buttons & IN_ATTACK2 != 0
+				) {
+					// disable secondary attack
+					buttons ^= IN_ATTACK2;
+					returnValue = Plugin_Changed;
 				}
 			}
 		}
 	}
 	
-	return Plugin_Continue;
+	return returnValue;
 }
 
 Action Command_Menu(int client, int args) {
@@ -4202,6 +4175,7 @@ bool PlayerIsInvulnerable(int client) {
 	);
 }
 
+/*
 TFCond critboosts[] =
 {
 	TFCond_Kritzkrieged,
@@ -4225,6 +4199,7 @@ bool PlayerIsCritboosted(int client) {
 
 	return false;
 }
+*/
 
 float ValveRemapVal(float val, float a, float b, float c, float d) {
 	// https://github.com/ValveSoftware/source-sdk-2013/blob/master/sp/src/public/mathlib/mathlib.h#L648
@@ -4298,6 +4273,11 @@ void ItemDefine(char[] key, char[] desc, int flags, int wep_enum) {
  */
 void ItemVariant(int wep_enum, char[] desc) {
 	int variant_idx = ++items[wep_enum].num_variants;
+
+	if (items[wep_enum].num_variants > MAX_VARIANTS) {
+		SetFailState("Tried to define more than %d variants", MAX_VARIANTS);
+	}
+
 	strcopy(items_desc[wep_enum][variant_idx], sizeof(items_desc[][]), desc);
 }
 
@@ -4309,10 +4289,6 @@ void ItemFinalize() {
 	for (idx = 0; idx < NUM_ITEMS; idx++) {
 		if (items[idx].cvar != null) {
 			SetFailState("Tried to initialize items more than once");
-		}
-
-		if (items[idx].num_variants > MAX_VARIANTS) {
-			SetFailState("Tried to initialize an item with more than %d variants", MAX_VARIANTS);
 		}
 
 		Format(cvar_name, sizeof(cvar_name), "sm_reverts__item_%s", items[idx].key);
