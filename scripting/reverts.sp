@@ -3907,18 +3907,19 @@ Action SDKHookCB_OnTakeDamage(
 								(ItemIsEnabled(Wep_Bison) || ItemIsEnabled(Wep_Pomson)) &&
 								(StrContains(class, "tf_weapon_raygun") == 0 || StrContains(class, "tf_weapon_drg_pomson") == 0)
 							) {
-								if((GetItemVariant(Wep_Bison) == 1 || GetItemVariant(Wep_Pomson) == 1 || GetItemVariant(Wep_Pomson) == 2))
+								bool useOldFalloff = (GetItemVariant(Wep_Bison) == 1 || GetItemVariant(Wep_Pomson) == 1 || GetItemVariant(Wep_Pomson) == 2);
+								if(useOldFalloff)
 									damage_type ^= DMG_USEDISTANCEMOD; // Do not use internal rampup/falloff.
 								
 								damage_type = DMG_PREVENT_PHYSICS_FORCE; // Change from bullet damage type to another damage type to ignore Vaccinator resists
 								
 								// Historically accurate pre-MyM Bison and release Pomson falloff
-								if(GetItemVariant(Wep_Bison) == 1 || GetItemVariant(Wep_Pomson) == 1)
+								if(useOldFalloff && (GetItemVariant(Wep_Bison) == 1 || GetItemVariant(Wep_Pomson) == 1))
 									damage = 16.00 * ValveRemapVal(floatMin(0.35, GetGameTime() - entities[players[victim].projectile_touch_entity].spawn_timestamp), 0.35 / 2, 0.35, 1.25, 0.75); 
 									// Deal 16 base damage with 125% rampup, 75% falloff.
 								
 								// Historically accurate pre-GM Pomson falloff
-								if(GetItemVariant(Wep_Pomson) == 1 || GetItemVariant(Wep_Pomson) == 2)
+								if(useOldFalloff && GetItemVariant(Wep_Pomson) == 2)
 									damage = 48.00 * ValveRemapVal(floatMin(0.35, GetGameTime() - entities[players[victim].projectile_touch_entity].spawn_timestamp), 0.35 / 2, 0.35, 1.25, 0.75); 
 									// Deal 48 base damage with 125% rampup, 75% falloff.	
 
