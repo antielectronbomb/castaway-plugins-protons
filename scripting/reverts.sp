@@ -4083,7 +4083,24 @@ void SDKHookCB_OnTakeDamagePost(
 						charge = (charge - damage1);
 						charge = (charge < 0.0 ? 0.0 : charge);
 						
-						SetEntPropFloat(victim, Prop_Send, "m_flCloakMeter", charge);
+						// hacky bug fix to prevent reverted Dead Ringer from getting drained twice in a row by reverted Pomson at close to medium ranges
+						// this simply adds back 20% cloak whenever drained twice by the revert Pomson
+						// need to find a cleaner way to fix this issue
+						if (
+							ItemIsEnabled(Wep_DeadRinger) && 
+							GetItemVariant(Wep_DeadRinger) == 0 &&
+							damage1 < 20 && // damage1 value: 20 corresponds to 1536 hammer units, 1.0 corresponds to 512 hammer units
+							charge == 100 && 
+							GetEntProp(victim, Prop_Send, "m_bFeignDeathReady") &&
+							players[victim].spy_is_feigning == false &&
+							!TF2_IsPlayerInCondition(victim, TFCond_DeadRingered)
+						) {
+							SetEntPropFloat(victim, Prop_Send, "m_flCloakMeter", charge + 20);
+								PrintToChatAll("damage1 < 20; charge after hit (if): set to %f", charge);
+								PrintToChatAll("damage1 < 20; charge after hit and add (if): set to %f", charge + 20);
+						}
+						else
+							SetEntPropFloat(victim, Prop_Send, "m_flCloakMeter", charge);
 					}
 
 					players[attacker].drain_victim = victim;
