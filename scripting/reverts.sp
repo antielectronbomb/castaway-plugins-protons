@@ -176,7 +176,8 @@ enum struct Player {
 	int fall_dmg_tick;
 	int ticks_since_switch;
 	bool player_jumped;
-	int pomson_hit_tick;
+	int drain_victim;
+	float drain_time;
 }
 
 enum struct Entity {
@@ -1415,6 +1416,8 @@ public void OnGameFrame() {
 				players[idx].scout_airdash_count = 0;
 				players[idx].is_under_hype = false;
 				players[idx].player_jumped = false;
+				players[idx].drain_victim = 0;
+				players[idx].drain_time = 0.0;
 			}
 		}
 	}
@@ -1575,7 +1578,7 @@ public void OnEntityDestroyed(int entity) {
 }
 
 public void TF2_OnConditionAdded(int client, TFCond condition) {
-	//float cloak;
+	float cloak;
 
 	// this function is called on a per-frame basis
 	// if two conds are added within the same game frame,
@@ -1614,21 +1617,14 @@ public void TF2_OnConditionAdded(int client, TFCond condition) {
 			TF2_GetPlayerClass(client) == TFClass_Spy
 		) {
 			if (condition == TFCond_DeadRingered) {
-				//cloak = GetEntPropFloat(client, Prop_Send, "m_flCloakMeter");
+				cloak = GetEntPropFloat(client, Prop_Send, "m_flCloakMeter");
 
 				if (
 					abs(GetGameTickCount() - players[client].feign_ready_tick) <= 2 &&
 					players[client].feign_ready_tick > 0
 				) {
 					// undo 50% drain on activated
-					float meter = 100.0;
-					if (
-						abs(GetGameTickCount() - players[client].pomson_hit_tick) <= 2 &&
-						players[client].pomson_hit_tick > 0
-					) {
-						meter = 80.0;
-					}
-					SetEntPropFloat(client, Prop_Send, "m_flCloakMeter", meter);
+					SetEntPropFloat(client, Prop_Send, "m_flCloakMeter", cloak + 50.0);
 				}
 			}
 
@@ -3762,10 +3758,6 @@ Action SDKHookCB_OnTakeDamage(
 					if (StrEqual(class, "tf_projectile_energy_ring")) {
 						GetEntityClassname(weapon, class, sizeof(class));
 
-						if (StrEqual(class, "tf_weapon_drg_pomson")) {
-							players[victim].pomson_hit_tick = GetGameTickCount();
-						}
-
 						if (
 							(ItemIsEnabled(Wep_Bison) && StrEqual(class, "tf_weapon_raygun")) ||
 							(ItemIsEnabled(Wep_Pomson) && StrEqual(class, "tf_weapon_drg_pomson"))
@@ -3825,6 +3817,7 @@ Action SDKHookCB_OnTakeDamage(
 							// Remove bullet damage flags so it's untyped damage
 							if (damage_type & DMG_BULLET != 0) damage_type ^= DMG_BULLET;
 							if (damage_type & DMG_BUCKSHOT != 0) damage_type ^= DMG_BUCKSHOT;
+
 							return Plugin_Changed;
 						}
 
@@ -4042,7 +4035,9 @@ void SDKHookCB_OnTakeDamagePost(
 				if (
 					ItemIsEnabled(Wep_Pomson) &&
 					StrEqual(class, "tf_weapon_drg_pomson") &&
-					PlayerIsInvulnerable(victim) == false
+					PlayerIsInvulnerable(victim) == false &&
+					(players[attacker].drain_victim != victim ||
+					GetGameTime() - players[attacker].drain_time > 0.3)
 				) {
 					GetEntPropVector(attacker, Prop_Send, "m_vecOrigin", pos1);
 					GetEntPropVector(victim, Prop_Send, "m_vecOrigin", pos2);
@@ -4090,6 +4085,9 @@ void SDKHookCB_OnTakeDamagePost(
 						
 						SetEntPropFloat(victim, Prop_Send, "m_flCloakMeter", charge);
 					}
+
+					players[attacker].drain_victim = victim;
+					players[attacker].drain_time = GetGameTime();
 				}
 			}
 		}
