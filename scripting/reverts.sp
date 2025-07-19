@@ -180,6 +180,7 @@ enum struct Player {
 	bool player_jumped;
 	int drain_victim;
 	float drain_time;
+	float medic_current_uber;
 }
 
 enum struct Entity {
@@ -302,6 +303,7 @@ enum
 	Wep_Claidheamh,
 	Wep_CleanerCarbine,
 	Wep_CritCola,
+	Wep_CrusadersCrossbow,
 	Wep_Dalokoh,
 	Wep_Darwin,
 	Wep_DeadRinger,	
@@ -434,6 +436,7 @@ public void OnPluginStart() {
 	ItemVariant(Wep_CritCola, "CritCola_PreJuly2013");
 	ItemVariant(Wep_CritCola, "CritCola_Release");
 	ItemDefine("crocostyle", "CrocoStyle_Release", CLASSFLAG_SNIPER, Set_CrocoStyle);
+	ItemDefine("crossbow", "CrusadersCrossbow_PreJI", CLASSFLAG_MEDIC, Wep_CrusadersCrossbow);
 #if defined MEMORY_PATCHES
 	ItemDefine("dalokohsbar", "DalokohsBar_PreMYM", CLASSFLAG_HEAVY, Wep_Dalokoh);
 #endif
@@ -2673,6 +2676,7 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 						case 751: player_weapons[client][Wep_CleanerCarbine] = true;
 						case 327: player_weapons[client][Wep_Claidheamh] = true;
 						case 163: player_weapons[client][Wep_CritCola] = true;
+						case 305, 1079: player_weapons[client][Wep_CrusadersCrossbow] = true;
 						case 215: player_weapons[client][Wep_Degreaser] = true;
 						case 460: player_weapons[client][Wep_Enforcer] = true;
 						case 128, 775: player_weapons[client][Wep_Pickaxe] = true;
@@ -5339,4 +5343,12 @@ int GetEntityFromAddress(Address pEntity) // From nosoop's stocksoup framework.
 	// offset seems right, cache it for the next call
 	offs_RefEHandle = offs_angRotation + 0x0C;
 	return GetEntityFromAddress(pEntity);
+}
+
+MRESReturn HealPlayerWithCrossbow(int entity, DHookParam parameters)
+{
+	int client = parameters.Get(1);
+	if (ItemIsEnabled(Wep_CrusadersCrossbow) && client > 0 && client <= MaxClients && player_weapons[client][Wep_CrusadersCrossbow]) // Do not grant Uber with the crossbow.
+        SetEntPropFloat(DoesPlayerHaveItemByClass(client, "tf_weapon_medigun"), Prop_Send, "m_flChargeLevel", players[client].medic_current_uber);
+    return MRES_Supercede;
 }

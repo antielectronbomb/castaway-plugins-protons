@@ -197,6 +197,10 @@
 	{
 		"en"	"Croc-o-Style Kit"
 	}
+	"crossbow"
+	{
+		"en"	"Crusader's Crossbow"
+	}
 	"dalokohsbar"
 	{
 		"en"	"Dalokohs Bar"
@@ -550,6 +554,10 @@
 	"CrocoStyle_Release"
 	{
 		"en"	"Restored release item set bonus, no death from headshots when above 1 HP. Equip the Sydney Sleeper, DDS and Bushwacka to gain the bonus, the hat is not required"
+	}
+	"CrusadersCrossbow_PreJI"
+	{
+		"en"	"Reverted to pre-inferno, always fill 6.3%% Uber per 100 HP healed"
 	}
 	"DalokohsBar_PreMYM"
 	{
