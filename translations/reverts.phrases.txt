@@ -297,6 +297,10 @@
 	{
 		"en"	"Persian Persuader"
 	}
+	"phlogistinator"
+	{
+		"en"	"Phlogistinator"
+	}
 	"pomson"
 	{
 		"en"	"Pomson 6000"
@@ -702,6 +706,10 @@
 	"Persuader_PreTB"
 	{
 		"en"	"Reverted to pre-toughbreak, picks up ammo as health, +100%% charge recharge rate, no max ammo penalty"
+	}
+	"Phlogistinator_TB"
+	{
+		"en"	"Reverted to toughbreak, activating Mmmph refills to full health, only 225 points of fire damage required to fill up Mmmph meter (compared to 300 for vanilla)"
 	}
 	"Pomson_PreGM"
 	{

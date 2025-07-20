@@ -322,6 +322,7 @@ enum
 	Wep_Natascha,
 	Wep_PanicAttack,
 	Wep_Persian,
+	Wep_Phlogistinator,
 	Wep_PocketPistol,
 	Wep_Pomson,
 	Wep_Powerjack,
@@ -477,6 +478,7 @@ public void OnPluginStart() {
 	ItemDefine("natascha", "Natascha_PreMYM", CLASSFLAG_HEAVY, Wep_Natascha);
 	ItemDefine("panic", "Panic_PreJI", CLASSFLAG_SOLDIER | CLASSFLAG_PYRO | CLASSFLAG_HEAVY | CLASSFLAG_ENGINEER, Wep_PanicAttack);
 	ItemDefine("persuader", "Persuader_PreTB", CLASSFLAG_DEMOMAN, Wep_Persian);
+	ItemDefine("phlogistinator", "Phlogistinator_TB", CLASSFLAG_PYRO, Wep_Phlogistinator);
 	ItemDefine("pomson", "Pomson_PreGM", CLASSFLAG_ENGINEER, Wep_Pomson);
 	ItemVariant(Wep_Pomson, "Pomson_Release");
 	ItemVariant(Wep_Pomson, "Pomson_PreGM_Historical");
@@ -1561,6 +1563,8 @@ public void OnEntityDestroyed(int entity) {
 
 public void TF2_OnConditionAdded(int client, TFCond condition) {
 	float cloak;
+	int health_cur;
+	int health_max;
 
 	// this function is called on a per-frame basis
 	// if two conds are added within the same game frame,
@@ -1667,6 +1671,26 @@ public void TF2_OnConditionAdded(int client, TFCond condition) {
 			player_weapons[client][Wep_CritCola] == true
 		) {
 			TF2_AddCondition(client, TFCond_MarkedForDeathSilent, 8.0, 0);
+		}
+	}
+
+	{
+		// phlogistinator restore to max health on mmmph activation
+		if (
+			ItemIsEnabled(Wep_Phlogistinator) &&
+			TF2_GetPlayerClass(client) == TFClass_Pyro &&
+			condition == TFCond_Taunting &&
+			TF2_IsPlayerInCondition(client, TFCond_CritMmmph) &&
+			TF2_IsPlayerInCondition(client, TFCond_UberchargedCanteen) &&
+			TF2_IsPlayerInCondition(client, TFCond_MegaHeal)
+		) {
+			health_cur = GetClientHealth(client);
+			health_max = SDKCall(sdkcall_GetMaxHealth, client);
+
+			if (health_cur < health_max) {
+				SetEntProp(client, Prop_Send, "m_iHealth", health_max);
+					//PrintToChat(client, "Detected Mmmph taunt", 0);
+			}
 		}
 	}
 }
@@ -2673,6 +2697,7 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 						case 308: player_weapons[client][Wep_LochLoad] = true;
 						case 41: player_weapons[client][Wep_Natascha] = true;
 						case 1153: player_weapons[client][Wep_PanicAttack] = true;
+						case 594: player_weapons[client][Wep_Phlogistinator] = true;
 						case 773: player_weapons[client][Wep_PocketPistol] = true;
 						case 588: player_weapons[client][Wep_Pomson] = true;
 						case 214: player_weapons[client][Wep_Powerjack] = true;
