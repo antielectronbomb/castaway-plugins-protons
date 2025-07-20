@@ -283,6 +283,7 @@ enum
 	//Specific weapons
 	Wep_Airstrike,
 	Wep_Ambassador,
+	Wep_Amputator,
 	Wep_Atomizer,
 	Wep_Axtinguisher,
 	Wep_BabyFace,
@@ -403,6 +404,7 @@ public void OnPluginStart() {
 	ItemDefine("swords", "Swords_PreTB", CLASSFLAG_DEMOMAN, Feat_Sword);
 	ItemDefine("ambassador", "Ambassador_PreJI", CLASSFLAG_SPY, Wep_Ambassador);
 	ItemDefine("atomizer", "Atomizer_PreJI", CLASSFLAG_SCOUT, Wep_Atomizer);
+	ItemDefine("amputator", "Amputator_PreTB", CLASSFLAG_MEDIC, Wep_Amputator);
 	ItemDefine("axtinguish", "Axtinguisher_PreLW", CLASSFLAG_PYRO, Wep_Axtinguisher);
 	ItemVariant(Wep_Axtinguisher, "Axtinguisher_PreTB");
 	ItemDefine("backburner", "Backburner_PreHat", CLASSFLAG_PYRO, Wep_Backburner);
@@ -1791,6 +1793,12 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 			TF2Items_SetAttribute(itemNew, 2, 250, 0.0); // air dash count
 			TF2Items_SetAttribute(itemNew, 3, 773, 1.0); // single wep deploy time increased
 		}}
+		case 304: { if (ItemIsEnabled(Wep_Amputator)) {
+			TF2Items_SetNumAttributes(itemNew, 2);
+			// TO DO: FIND OUT WHAT ATTRIBUTE THE AMPUTATOR REALLY USES (there are multiple add_health_regen attributes!)
+			TF2Items_SetAttribute(itemNew, 0, 57, 0.0); // remove default add_health_regen
+			//TF2Items_SetAttribute(itemNew, 1, 57, 3.0); // constant add_health_regen
+		}}
 		case 38, 457, 1000: { if (ItemIsEnabled(Wep_Axtinguisher)) {
 			TF2Items_SetNumAttributes(itemNew, 5);
 			TF2Items_SetAttribute(itemNew, 0, 1, 1.00); // damage penalty
@@ -2639,6 +2647,7 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 						case 61: player_weapons[client][Wep_Ambassador] = true;
 						case 1006: player_weapons[client][Wep_Ambassador] = true;
 						case 450: player_weapons[client][Wep_Atomizer] = true;
+						case 304: player_weapons[client][Wep_Amputator] = true;
 						case 38, 47, 1000: player_weapons[client][Wep_Axtinguisher] = true;
 						case 772: player_weapons[client][Wep_BabyFace] = true;
 						case 40, 1146: player_weapons[client][Wep_Backburner] = true;

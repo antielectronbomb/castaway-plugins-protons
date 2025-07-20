@@ -125,6 +125,10 @@
 	{
 		"en"	"Ambassador"
 	}
+	"amputator"
+	{
+		"en"	"Amputator"
+	}
 	"atomizer"
 	{
 		"en"	"Atomizer"
@@ -438,6 +442,10 @@
 	"Ambassador_PreJI"
 	{
 		"en"	"Reverted to pre-inferno, deals full headshot damage (102) at all ranges"
+	}
+	"Amputator_PreTB"
+	{
+		"en"	"Reverted to pre-Tough Break, always regenerate 3 HP/s when active"
 	}
 	"Atomizer_PreJI"
 	{
