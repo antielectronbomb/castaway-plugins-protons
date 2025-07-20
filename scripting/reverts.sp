@@ -1796,8 +1796,19 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		case 304: { if (ItemIsEnabled(Wep_Amputator)) {
 			TF2Items_SetNumAttributes(itemNew, 2);
 			// TO DO: FIND OUT WHAT ATTRIBUTE THE AMPUTATOR REALLY USES (there are multiple add_health_regen attributes!)
-			TF2Items_SetAttribute(itemNew, 0, 57, 0.0); // remove default add_health_regen
-			//TF2Items_SetAttribute(itemNew, 1, 57, 3.0); // constant add_health_regen
+			TF2Items_SetAttribute(itemNew, 0, 57, 0.0); // remove default add_health_regen; seems to be the default attribute
+			//TF2Items_SetAttribute(itemNew, 0, 490, 0.0); // old set bonus; remove default add_health_regen; doesn't remove orig attribute
+			//TF2Items_SetAttribute(itemNew, 0, 1003, 0.0); // card: health regen; remove default add_health_regen; doesn't remove orig attribute
+
+			//TF2Items_SetAttribute(itemNew, 0, 129, 0.0); // remove default add_health_regen; this won't time with medic health regen mechanics
+			//TF2Items_SetAttribute(itemNew, 0, 881, 0.0); // remove default add_health_regen; this won't time with medic health regen mechanics
+
+			// constant add_health_regen?
+			//TF2Items_SetAttribute(itemNew, 1, 57, 3.0); // remove default add_health_regen; obviously doesn't work, not constant
+			//TF2Items_SetAttribute(itemNew, 1, 490, 3.0); // old set bonus; is not constant
+			//TF2Items_SetAttribute(itemNew, 1, 1003, 3.0); // card: health regen; is not constant
+
+			// it is likely its hard-coded into the add_health_regen attribute
 		}}
 		case 38, 457, 1000: { if (ItemIsEnabled(Wep_Axtinguisher)) {
 			TF2Items_SetNumAttributes(itemNew, 5);
