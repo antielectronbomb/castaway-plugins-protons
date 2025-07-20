@@ -38,6 +38,13 @@
 				"windows" "\x55\x8B\xEC\x6A\x07"
 				"linux"   "@_ZN9CTFPlayer13AddToSpyKnifeEfb"
 			}
+
+			"CTFPlayerShared::ModifyRage" // Imported from NotnHeavy's plugin; aRageOnHit "rage_on_hit", go to subroutine (2nd line down previously) that is just a one-liner func call
+			{
+				"library" "server"
+				"windows" "\x55\x8B\xEC\xF3\x0F\x10\x81\x88\x02\x00\x00"
+				"linux"	  "@_ZN15CTFPlayerShared10ModifyRageEf"
+			}			
 		}
 
 		"Offsets"
@@ -71,6 +78,12 @@
 				"windows" "234"
 				"linux"   "237"
 			}
+
+			"CTFPlayerShared::m_pOuter" // added +1 to 396, i'm assuming the offsets got updated by +1
+			{
+				"windows" "397"
+				"linux"	  "397"
+			}			
 		}
 
 		"Functions"
@@ -167,6 +180,21 @@
 					"force"
 					{
 						"type" "bool"
+					}
+				}
+			}
+
+			"CTFPlayerShared::ModifyRage"
+			{
+				"signature" "CTFPlayerShared::ModifyRage"
+				"callconv"  "thiscall"
+				"this"      "address"
+				"return"    "void"
+				"arguments"
+				{
+					"fDelta"
+					{
+						"type" "float"
 					}
 				}
 			}

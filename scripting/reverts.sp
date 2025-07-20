@@ -251,6 +251,10 @@ Handle dhook_CTFAmmoPack_PackTouch;
 // Spycicle ammo pickup fix imported from NotnHeavy's plugin
 DHookSetup dhook_CTFPlayer_AddToSpyKnife;
 
+// Used for Phlogistinator MMMPH damage points requirement imported from NotnHeavy's plugin
+Address CTFPlayerShared_m_pOuter;
+DHookSetup dhook_CTFPlayerShared_SetRageMeter;
+
 Player players[MAXPLAYERS+1];
 Entity entities[2048];
 int frame;
@@ -605,6 +609,9 @@ public void OnPluginStart() {
 		dhook_CTFPlayer_AddToSpyKnife = DHookCreateFromConf(conf, "CTFPlayer::AddToSpyKnife");
 		dhook_CAmmoPack_MyTouch = DHookCreateFromConf(conf, "CAmmoPack::MyTouch");
 		dhook_CTFAmmoPack_PackTouch =  DHookCreateFromConf(conf, "CTFAmmoPack::PackTouch");
+		dhook_CTFPlayerShared_SetRageMeter = DHookCreateFromConf(conf, "CTFPlayerShared::ModifyRage");
+
+		CTFPlayerShared_m_pOuter = view_as<Address>(GameConfGetOffset(conf, "CTFPlayerShared::m_pOuter"));
 
 		delete conf;
 	}
@@ -722,6 +729,7 @@ public void OnPluginStart() {
 	DHookEnableDetour(dhook_CTFPlayer_CalculateMaxSpeed, true, DHookCallback_CTFPlayer_CalculateMaxSpeed);
   	DHookEnableDetour(dhook_CTFPlayer_AddToSpyKnife, false, DHookCallback_CTFPlayer_AddToSpyKnife);
 	DHookEnableDetour(dhook_CTFAmmoPack_PackTouch, false, DHookCallback_CTFAmmoPack_PackTouch);
+	DHookEnableDetour(dhook_CTFPlayerShared_SetRageMeter, false, DHookCallback_CTFPlayerShared_SetRageMeter);
 
 	for (idx = 1; idx <= MaxClients; idx++) {
 		if (IsClientConnected(idx)) OnClientConnected(idx);
@@ -5336,4 +5344,25 @@ int GetEntityFromAddress(Address pEntity) // From nosoop's stocksoup framework.
 	// offset seems right, cache it for the next call
 	offs_RefEHandle = offs_angRotation + 0x0C;
 	return GetEntityFromAddress(pEntity);
+}
+
+any Dereference(Address address, NumberType bitdepth = NumberType_Int32)
+{
+	return LoadFromAddress(address, bitdepth);
+}
+
+MRESReturn DHookCallback_CTFPlayerShared_SetRageMeter(Address thisPointer, DHookParam parameters)
+{
+	// Imported from NotnHeavy's pre-GM plugin
+    int client = GetEntityFromAddress(Dereference(thisPointer + CTFPlayerShared_m_pOuter));
+    if (
+		TF2_GetPlayerClass(client) == TFClass_Pyro && 
+		ItemIsEnabled(Wep_Phlogistinator)
+    ) {
+        float delta = view_as<float>(parameters.Get(1));
+        delta *= (300.00 / 225.00); // Take only 225 damage to build up the Phlog rage meter. This is hacky but it's simple, at least.
+        parameters.Set(1, delta);
+        return MRES_ChangedHandled;
+    }
+    return MRES_Ignored;
 }
