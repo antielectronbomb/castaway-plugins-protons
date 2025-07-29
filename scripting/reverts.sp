@@ -2990,15 +2990,40 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 							) {
 								if (item_index == 214 && third_wep == -1) { // reset to stats to Vanilla/Pre-GM Powerjack
 									third_wep = weapon;
-									if(GetItemVariant(Wep_Powerjack) == -1) // If Vanilla Powerjack
-										TF2Attrib_SetByDefIndex(third_wep, 180, 25.0); // add back +25 hp on kill attribute
-									else if(GetItemVariant(Wep_Powerjack) >= 0) // If reverted Powerjack variants
-										TF2Attrib_SetByDefIndex(third_wep, 180, 0.0); // remove +25 hp on kill attribute
-									TF2Attrib_SetByDefIndex(third_wep, 107, 1.15); // add back faster move speed on wearer while active
-									TF2Attrib_SetByDefIndex(third_wep, 412, 1.20); // add back damage vulnerability on wearer while active 
-									TF2Attrib_SetByDefIndex(third_wep, 206, 1.00); // remove +20% damage from melee sources while active 
-									TF2Attrib_SetByDefIndex(third_wep, 2, 1.00); // remove damage bonus
-									TF2Attrib_SetByDefIndex(third_wep, 15, 1.0); // enable back random crits
+									switch(GetItemVariant(Wep_Powerjack)) {
+										case -1: {
+											TF2Attrib_SetByDefIndex(third_wep, 180, 25.0); // add back +25 hp on kill attribute
+											TF2Attrib_SetByDefIndex(third_wep, 107, 1.15); // add back faster move speed on wearer while active
+											TF2Attrib_SetByDefIndex(third_wep, 412, 1.20); // add back damage vulnerability on wearer while active 
+											TF2Attrib_SetByDefIndex(third_wep, 206, 1.00); // remove +20% damage from melee sources while active 
+											TF2Attrib_SetByDefIndex(third_wep, 2, 1.00); // remove damage bonus
+											TF2Attrib_SetByDefIndex(third_wep, 15, 1.0); // enable back random crits
+										}
+										case 0: {
+											TF2Attrib_SetByDefIndex(third_wep, 180, 0.0); // remove +25 hp on kill attribute
+											TF2Attrib_SetByDefIndex(third_wep, 107, 1.15); // add back faster move speed on wearer while active
+											TF2Attrib_SetByDefIndex(third_wep, 412, 1.20); // add back damage vulnerability on wearer while active 
+											TF2Attrib_SetByDefIndex(third_wep, 206, 1.00); // remove +20% damage from melee sources while active 
+											TF2Attrib_SetByDefIndex(third_wep, 2, 1.00); // remove damage bonus
+											TF2Attrib_SetByDefIndex(third_wep, 15, 1.0); // enable back random crits
+										}
+										case 1: {
+											TF2Attrib_SetByDefIndex(third_wep, 180, 0.0); // remove +25 hp on kill attribute
+											TF2Attrib_SetByDefIndex(third_wep, 107, 1.00); // remove faster move speed on wearer while active
+											TF2Attrib_SetByDefIndex(third_wep, 412, 1.00); // remove damage vulnerability on wearer while active 
+											TF2Attrib_SetByDefIndex(third_wep, 206, 1.00); // remove +20% damage from melee sources while active 
+											TF2Attrib_SetByDefIndex(third_wep, 2, 1.25); // add back +25% damage bonus
+											TF2Attrib_SetByDefIndex(third_wep, 15, 0.0); // disble back random crits
+										}
+										case 2: {
+											TF2Attrib_SetByDefIndex(third_wep, 180, 0.0); // remove +25 hp on kill attribute
+											TF2Attrib_SetByDefIndex(third_wep, 107, 1.00); // remove faster move speed on wearer while active
+											TF2Attrib_SetByDefIndex(third_wep, 412, 1.00); // remove damage vulnerability on wearer while active 
+											TF2Attrib_SetByDefIndex(third_wep, 206, 1.20); // add back +20% damage from melee sources while active 
+											TF2Attrib_SetByDefIndex(third_wep, 2, 1.00); // remove +25% damage bonus
+											TF2Attrib_SetByDefIndex(third_wep, 15, 1.0); // enable random crits
+										}																				
+									}
 								}
 								wep_count++;
 								if(wep_count == 2) active_set = Set_GasJockey;
