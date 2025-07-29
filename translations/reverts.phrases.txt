@@ -678,8 +678,16 @@
 	}
 	"GasJockey_Release"
 	{
-		"en"	"Restored release item set bonus, +10%% movespeed and bullet vuln. Equip the Degreaser and Powerjack to gain the bonus, the hat is not required"
+		"en"	"Restored release item set bonus, +10%% movespeed and bullet vuln. Equip the Degreaser and Powerjack to gain the bonus, the hat is not required, Powerjack reverted to release while set is used"
 	}
+	"GasJockey_Hatless"
+	{
+		"en"	"Restored release item set bonus, +10%% movespeed and bullet vuln. Equip the Degreaser and Powerjack to gain the bonus, the hat is not required, Powerjack reverted to Hatless Update while set is used"
+	}
+	"GasJockey_SetBonus"
+	{
+		"en"	"Restored release item set bonus, +10%% movespeed and bullet vuln. Equip the Degreaser and Powerjack to gain the bonus, the hat is not required"
+	}	
 	"GlovesRU_PreTB"
 	{
 		"en"	"Reverted to pre-toughbreak, no health drain or holster penalty, marks for death, -25%% damage"

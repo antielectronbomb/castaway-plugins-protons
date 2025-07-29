@@ -489,6 +489,8 @@ public void OnPluginStart() {
 	ItemVariant(Wep_FistsSteel, "FistSteel_Release");
 	ItemDefine("guillotine", "Guillotine_PreJI", CLASSFLAG_SCOUT, Wep_Cleaver);
 	ItemDefine("gasjockey", "GasJockey_Release", CLASSFLAG_PYRO, Set_GasJockey);
+	ItemVariant(Set_GasJockey, "GasJockey_Hatless");
+	ItemVariant(Set_GasJockey, "GasJockey_SetBonus");
 	ItemDefine("glovesru", "GlovesRU_PreTB", CLASSFLAG_HEAVY, Wep_GRU);
 	ItemVariant(Wep_GRU, "GlovesRU_PrePyro");
 	ItemDefine("gunboats", "Gunboats_Release", CLASSFLAG_SOLDIER, Wep_Gunboats);
@@ -2961,6 +2963,7 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 			int wep_count = 0;
 			int active_set = 0;
 			int first_wep = -1;
+			int third_wep = -1;
 
 			int length = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
 			for (int i;i < length; i++)
@@ -2982,7 +2985,24 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 						}
 						// Gas Jockey's Gear
 						case 214, 215: {
-							if(ItemIsEnabled(Set_GasJockey)) {
+							if (
+								GetItemVariant(Set_GasJockey) == 0 || GetItemVariant(Set_GasJockey) == 1
+							) {
+								if (item_index == 214 && third_wep == -1) { // reset to stats to Vanilla/Pre-GM Powerjack
+									third_wep = weapon;
+									if(GetItemVariant(Wep_Powerjack) == -1) // If Vanilla Powerjack
+										TF2Attrib_SetByDefIndex(third_wep, 180, 25.0); // add back +25 hp on kill attribute
+									else if(GetItemVariant(Wep_Powerjack) >= 0) // If reverted Powerjack variants
+										TF2Attrib_SetByDefIndex(third_wep, 180, 0.0); // remove +25 hp on kill attribute
+									TF2Attrib_SetByDefIndex(third_wep, 107, 1.15); // add back faster move speed on wearer while active
+									TF2Attrib_SetByDefIndex(third_wep, 412, 1.20); // add back damage vulnerability on wearer while active 
+									TF2Attrib_SetByDefIndex(third_wep, 206, 1.00); // remove +20% damage from melee sources while active 
+									TF2Attrib_SetByDefIndex(third_wep, 2, 1.00); // remove damage bonus
+									TF2Attrib_SetByDefIndex(third_wep, 15, 1.0); // enable back random crits
+								}
+								wep_count++;
+								if(wep_count == 2) active_set = Set_GasJockey;
+							} else if(GetItemVariant(Set_GasJockey) == 2) {
 								wep_count++;
 								if(wep_count == 2) active_set = Set_GasJockey;
 							}
@@ -3067,6 +3087,23 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 							player_weapons[client][Set_GasJockey] = true;
 							TF2Attrib_SetByDefIndex(client, 489, 1.10); // SET BONUS: move speed set bonus
 							TF2Attrib_SetByDefIndex(client, 516, 1.10); // SET BONUS: dmg taken from bullets increased
+							if (GetItemVariant(Set_GasJockey) == 0 && third_wep != -1)
+							{
+								// Release Powerjack
+								TF2Attrib_SetByDefIndex(third_wep, 180, 0.0); // remove +25 hp on kill attribute
+								TF2Attrib_SetByDefIndex(third_wep, 107, 1.0); // remove faster move speed on wearer while active
+								TF2Attrib_SetByDefIndex(third_wep, 412, 1.0); // remove damage vulnerability on wearer while active 
+								TF2Attrib_SetByDefIndex(third_wep, 2, 1.25); // add +25% damage bonus
+								TF2Attrib_SetByDefIndex(third_wep, 15, 0.0); // no random crits mod								
+							}
+							else if (GetItemVariant(Set_GasJockey) == 1 && third_wep != -1)
+							{
+								// Hatless Update Powerjack (2011 to 2013)
+								TF2Attrib_SetByDefIndex(third_wep, 180, 0.0); // remove +25 hp on kill attribute
+								TF2Attrib_SetByDefIndex(third_wep, 107, 1.0); // remove faster move speed on wearer while active
+								TF2Attrib_SetByDefIndex(third_wep, 412, 1.0); // remove damage vulnerability on wearer while active 
+								TF2Attrib_SetByDefIndex(third_wep, 206, 1.20); // add +20% damage from melee sources while active 
+							}							
 						}
 						case Set_Expert:
 						{
