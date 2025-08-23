@@ -16,19 +16,19 @@
 	}
 	"- No cheating"
 	{
-		"en"			"- 1. Usage of third-party software that is intended to gain an unfair advantage against other players on the servers is strictly forbidden. Examples of such third-party software include but are not limited to: programs and applications that modify via memory editing, code injection, and network traffic manipulation."
+		"en"			"Usage of third-party software that is intended to gain an unfair advantage against other players on the servers is strictly forbidden.\nExamples of such third-party software include but are not limited to:\n programs and applications that modify via memory editing, code injection, and network traffic manipulation."
 	}
 	"- Disrupting server activity with malicious intent is strictly forbidden"
 	{
-		"en"			"- 2. Disrupting server activity with malicious intent is strictly forbidden. This is including but not limited to Castaway.tf servers, the Castaway.tf steam group, and any other Castaway.tf affiliate controlled space. Examples of such behavior include cheating, creating false panic, encouraging players to leave, mass kick votes, raiding, and other gameplay disruptive behavior."
+		"en"			"Disrupting server activity with malicious intent is strictly forbidden.\n This is including but not limited to Castaway.tf servers, the Castaway.tf steam group, and any other Castaway.tf affiliate controlled space.\n Examples of such behavior include cheating, creating false panic, encouraging players to leave, mass kick votes, raiding, and other gameplay disruptive behavior."
 	}
 	"- Don't abuse votekicks. No illegal activities."
 	{
-		"en"			"- 3. Malicious use of kick votes is strictly forbidden. The intent of kick votes are to remove bad elements from the servers, examples include individuals using cheating software, or performing illegal/disruptive activities. Failure to use kick votes for their intended purpose will result in the removal of voting privileges from the offending party."
+		"en"			"Malicious use of kick votes is strictly forbidden. The intent of kick votes are to remove bad elements from the servers,\n examples include individuals using cheating software, or performing illegal/disruptive activities. Failure to use kick votes for their \nintended purpose will result in the removal of voting privileges from the offending party."
 	}
 	"- Addendum"
 	{
-		"en"			"- By proceeding to play on the Castaway.tf Team Fortress 2 game servers, you unconditionally and hereby agree to the written rules of the Castaway.tf Team Fortress 2 game servers. Failure to follow these rules will result in expulsion of your account from the game servers and/or related Castaway.tf affiliate controlled space(s)."
+		"en"			"By proceeding to play on the Castaway.tf Team Fortress 2 game servers, you unconditionally and hereby agree\n to the written rules of the Castaway.tf Team Fortress 2 game servers. Failure to follow these rules will result in\n expulsion of your account from the game servers and/or related Castaway.tf affiliate controlled space(s)."
 	}
 	"Welcome to Official Instructions"
 	{
@@ -131,7 +131,7 @@
 	}
 	"say !help"
 	{
-		"en"			"!help - Shows help menu"
+		"en"			"!help - Open help menu"
 	}
 	"say !weapons"
 	{
@@ -154,5 +154,12 @@
 		"zho"			"- 合作玩法: 倖存下來抵達終點，團結一致、互相合作才能通關"
 		"chi"			"- 合作玩法: 幸存下来抵达终点，团结一致、互相合作才能通关"
 		"ru"			"- Команда: Выживите вместе и спасайтесь, держась вместе и всегда помогая своим товарищам по команде"
+	}
+	"List Online Admins"
+	{
+		"en"			"List Online Admins"
+		"zho"			"在線管理員"
+		"chi"			"在线管理员"	
+		"ru"			"Список админов в игре"
 	}
 }
