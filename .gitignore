@@ -45,6 +45,7 @@ gamedata/*
 translations/*
 !translations/reverts.phrases.txt
 !translations/votescramble.phrases.txt
+!translations/helpmenu.phrases.txt
 !translations/chi/
 translations/chi/*
 !translations/chi/reverts.phrases.txt
