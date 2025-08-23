@@ -21,7 +21,7 @@ scripting/*
 !scripting/forcestalemate.sp
 !scripting/arena-autoscramble.sp
 !scripting/webshortcuts.sp
-!scripting/helps.sp
+!scripting/helpmenu.sp
 
 #includes
 !scripting/include/
