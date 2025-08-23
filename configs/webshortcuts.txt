@@ -3,14 +3,16 @@
 
 "!group" "Castaway.tf Group" https://steamcommunity.com/groups/castawaytf
 "!website" "Castaway.tf Website" https://castaway.tf/
-"!rules" "Castaway.tf Rules" https://castaway.tf/rules.html
+"!ruleshtml" "Castaway.tf Rules" https://castaway.tf/rules.html
 "!forums" "Castaway.tf Steam Group Forums" https://steamcommunity.com/groups/castawaytf/discussions/
 "!github" "GitHub" https://github.com/rsedxcftvgyhbujnkiqwe/castaway-plugins
 
 "!revertslist" "HTML Reverts List" https://castaway.tf/reverts.html
 "!revertlist" "HTML Reverts List" https://castaway.tf/reverts.html
 "!weapons" "HTML Reverts List" https://castaway.tf/reverts.html
-"!help" "Type cl_disablehtmlmotd 0 in console" https://castaway.tf/reverts.html
+"!showall" "HTML Reverts List" https://castaway.tf/reverts.html
+"!showallreverts" "HTML Reverts List" https://castaway.tf/reverts.html
+"!allreverts" "HTML Reverts List" https://castaway.tf/reverts.html
 
 "!revertschangelog" "Reverts Changelog" https://github.com/rsedxcftvgyhbujnkiqwe/castaway-plugins/wiki/Weapon-Reverts-Changelog
 "!revertchangelog" "Reverts Changelog" https://github.com/rsedxcftvgyhbujnkiqwe/castaway-plugins/wiki/Weapon-Reverts-Changelog

@@ -56,6 +56,7 @@ public Plugin myinfo = {
 	description = "Display a help menu to users",
 	version = PLUGIN_VERSION,
 	url = "https://forums.alliedmods.net/showthread.php?p=637467"
+	// https://github.com/fbef0102/Sourcemod-Plugins/tree/main/helpmenu // updated helpmenu plugin link
 };
 
 Handle g_hCookieMenu;
@@ -79,13 +80,14 @@ public void OnPluginStart()
 			
 	CreateConVar("sm_helpmenu_version", PLUGIN_VERSION, "Help menu version", FCVAR_SPONLY|FCVAR_DONTRECORD|FCVAR_NOTIFY).SetString(PLUGIN_VERSION);
 	g_cvarWelcome = CreateConVar("sm_helpmenu_welcome", "1", "Show welcome message and help menu to newly connected users.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
-	g_cvarAdmins = CreateConVar("sm_helpmenu_admins", "1", "Show a list of online admins in the menu.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
+	g_cvarAdmins = CreateConVar("sm_helpmenu_admins", "0", "Show a list of online admins in the menu.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	g_cvarReload = CreateConVar("sm_helpmenu_autoreload", "1", "Automatically reload the configuration file when changing the map.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	g_cvarConfigPath = CreateConVar("sm_helpmenu_config_path", "configs/helpmenu.cfg", "Path to configuration file.");
 	g_cvarSteamGroup = CreateConVar("sm_helpmenu_steam_group", "1", "Show 'Join our steam group' item in the menu.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	g_cvarDoNotDisplay = CreateConVar("sm_helpmenu_do_not_display", "1", "Show 'Don't display again' and 'Display again next time' item in the menu.", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 
 	RegConsoleCmd("sm_help", Command_HelpMenu, "Display the help menu.");
+	RegConsoleCmd("sm_rules", Command_HelpMenu, "Display the help menu.");
 	RegConsoleCmd("sm_helpmenu", Command_HelpMenu, "Display the help menu.");
 	RegConsoleCmd("sm_helpcommands", Command_HelpMenu, "Display the help menu.");
 	RegConsoleCmd("sm_helpcomands", Command_HelpMenu, "Display the help menu.");
@@ -403,7 +405,7 @@ int Help_MainMenuHandler(Menu menu, MenuAction action, int param1, int param2) {
 			}
 			else if (strcmp(szItem, "steam_group") == 0)
 			{
-				ShowMOTDPanel(param1, "", "", MOTDPANEL_TYPE_URL);
+				ShowMOTDPanel(param1, "Castaway.tf Steam Group", "https://steamcommunity.com/groups/castawaytf", MOTDPANEL_TYPE_URL);
 				return 0;
 			}
 			else if (strcmp(szItem, "admins") == 0)
