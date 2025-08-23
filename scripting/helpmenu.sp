@@ -11,7 +11,7 @@
 
 #include <sourcemod>
 #include <clientprefs>
-#include <multicolors>
+#include <morecolors>
 #undef REQUIRE_PLUGIN
 #tryinclude <readyup>
 
