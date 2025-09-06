@@ -656,6 +656,10 @@
 	{
 		"en"	"Reverted to post-release, 90%% dmg resist for 6.5s, no speedboost, full drain on early decloak, no afterburn immunity after feign"
 	}
+	"Ringer_Release"
+	{
+		"en"	"Reverted to release, 90%% dmg resist for 6.5s, no speedboost, no cloak drain on early decloak, no afterburn immunity after feign"
+	}
 	"Degreaser_PreTB"
 	{
 		"en"	"Reverted to pre-toughbreak, 65%% faster weapon switch, -10%% dmg & -25%% afterburn dmg penalties, no airblast cost penalty"
