@@ -844,10 +844,8 @@ public void OnPluginStart() {
 	dhook_CTFProjectile_Arrow_BuildingHealingArrow.Enable(Hook_Post, PostHealingBoltImpact);
 	dhook_CTFPlayer_RegenThink.Enable(Hook_Pre, DHookCallback_CTFPlayer_RegenThink_Pre);
 	dhook_CTFPlayer_RegenThink.Enable(Hook_Post, DHookCallback_CTFPlayer_RegenThink_Post);
-	dhook_CTFPlayerShared_SetRageMeter.Enable(Hook_Pre, ModifyRageMeter);
-	dhook_CTFPlayerShared_SetRageMeter.Enable(Hook_Post, ModifyRageMeter);
-	dhook_CTFPlayerShared_AddToSpyCloakMeter.Enable(Hook_Pre, AddToCloak);
-	dhook_CTFPlayerShared_AddToSpyCloakMeter.Enable(Hook_Post, AddToCloak);
+	dhook_CTFPlayerShared_SetRageMeter.Enable(Hook_Pre, DHookCallback_CTFPlayerShared_SetRageMeter);
+	dhook_CTFPlayerShared_AddToSpyCloakMeter.Enable(Hook_Pre, DHookCallback_CTFPlayerShared_AddToSpyCloakMeter);
 
 	for (idx = 1; idx <= MaxClients; idx++) {
 		if (IsClientConnected(idx)) OnClientConnected(idx);
@@ -1460,8 +1458,8 @@ public void OnGameFrame() {
 						cloak = GetEntPropFloat(idx, Prop_Send, "m_flCloakMeter");
 
 						// Bakugo's method for capping Dead Ringer cloak regen on ammo pickup
-						// TO DO: Use this as a fallback method if DHooks method does not work for any reason
-						/* if (GetItemVariant(Wep_DeadRinger) == 0) {
+						// Two methods for capping cloak regen up to 35% max are used in this plugin: this and DHooks.
+						if (GetItemVariant(Wep_DeadRinger) == 0) {
 							if (
 								(cloak - players[idx].spy_cloak_meter) > 35.0 &&
 								(players[idx].ammo_grab_frame + 1) == GetGameTickCount()
@@ -1481,7 +1479,7 @@ public void OnGameFrame() {
 									}
 								}
 							}
-						} */
+						}
 
 						// attenuate Dead Ringer player/recharged.wav ping sound when refilling from dispensers & ammo packs
 						// this does not work 100% especially on higher pings, but it helps quiet down the noise if you're standing next to a dispenser while cloaked
@@ -1854,8 +1852,7 @@ public void TF2_OnConditionAdded(int client, TFCond condition) {
 					// undo 50% drain on activated
 					// also prevent cloak meter from going over 100% when using DHook method for capping cloak gain up to 35%
 					// this seems to be necessary after importing the up to 35% cloak cap from notnheavy's plugin? why does cloak get set to 150.0??
-					if(cloak > 100.0)
-						SetEntPropFloat(client, Prop_Send, "m_flCloakMeter", 100.0);
+					SetEntPropFloat(client, Prop_Send, "m_flCloakMeter", floatMin(cloak + 50.0, 100.0));
 				}
 			}
 
@@ -6369,7 +6366,7 @@ MRESReturn DHookCallback_CTFPlayer_RegenThink_Post(int client)
     return MRES_Ignored;
 }
 
-MRESReturn ModifyRageMeter(Address thisPointer, DHookParam parameters)
+MRESReturn DHookCallback_CTFPlayerShared_SetRageMeter(Address thisPointer, DHookParam parameters)
 {
 	// Imported from NotnHeavy's plugin
     int client = GetEntityFromAddress(Dereference(thisPointer + CTFPlayerShared_m_pOuter));
@@ -6391,7 +6388,7 @@ MRESReturn ModifyRageMeter(Address thisPointer, DHookParam parameters)
     return MRES_Ignored;
 }
 
-MRESReturn AddToCloak(Address thisPointer, DHookReturn returnValue, DHookParam parameters)
+MRESReturn DHookCallback_CTFPlayerShared_AddToSpyCloakMeter(Address thisPointer, DHookReturn returnValue, DHookParam parameters)
 {
 	// Imported from NotnHeavy's plugin; cap cloak gain up to 35% and prevent false full cloak sound cues especially on higher pings
     int client = GetEntityFromAddress(Dereference(thisPointer + CTFPlayerShared_m_pOuter));
