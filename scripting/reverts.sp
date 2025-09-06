@@ -1483,6 +1483,24 @@ public void OnGameFrame() {
 							}
 						} */
 
+						// attenuate Dead Ringer player/recharged.wav ping sound when refilling from dispensers & ammo packs
+						// this does not work 100% especially on higher pings, but it helps quiet down the noise if you're standing next to a dispenser while cloaked
+						if (GetItemVariant(Wep_DeadRinger) == 0) {
+							weapon = GetPlayerWeaponSlot(idx, TFWeaponSlot_Building);
+							if (weapon > 0) {
+								GetEntityClassname(weapon, class, sizeof(class));
+
+								if (
+									StrEqual(class, "tf_weapon_invis") &&
+									GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 59
+								) {
+									if(cloak >= 100.0 && TF2_IsPlayerInCondition(idx, TFCond_Cloaked)) {
+										StopSound(idx, 6, "player/recharged.wav");
+									}
+								}
+							}
+						}
+
 						players[idx].spy_cloak_meter = cloak;
 					}
 
@@ -1837,7 +1855,7 @@ public void TF2_OnConditionAdded(int client, TFCond condition) {
 					if(GetItemVariant(Wep_DeadRinger) == 3)
 						SetEntPropFloat(client, Prop_Send, "m_flCloakMeter", cloak + 50.0);
 					// prevent cloak meter from going over 100% when using DHook method for capping cloak gain up to 35%
-					else if(GetItemVariant(Wep_DeadRinger) == 0)
+					else if(GetItemVariant(Wep_DeadRinger) == 0 && cloak > 100)
 						SetEntPropFloat(client, Prop_Send, "m_flCloakMeter", 100.0);
 				}
 			}
