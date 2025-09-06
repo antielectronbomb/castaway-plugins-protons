@@ -5164,6 +5164,7 @@ bool TraceFilter_CustomShortCircuit(int entity, int contentsmask, any data) {
 int GetFeignBuffsEnd(int client)
 {
 	int reduction_by_dmg_taken = GetItemVariant(Wep_DeadRinger) == 0 ? RoundFloat(players[client].damage_taken_during_feign * 1.1) : 0;
+		PrintToChat(client, "reduction_by_dmg_taken = %i", reduction_by_dmg_taken);
 	return players[client].feign_ready_tick + RoundFloat(66 * 6.5) - reduction_by_dmg_taken;
 }
 
