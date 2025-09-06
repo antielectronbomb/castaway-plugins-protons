@@ -1852,10 +1852,9 @@ public void TF2_OnConditionAdded(int client, TFCond condition) {
 					players[client].feign_ready_tick > 0
 				) {
 					// undo 50% drain on activated
-					if(GetItemVariant(Wep_DeadRinger) == 3)
-						SetEntPropFloat(client, Prop_Send, "m_flCloakMeter", cloak + 50.0);
-					// prevent cloak meter from going over 100% when using DHook method for capping cloak gain up to 35%
-					else if(GetItemVariant(Wep_DeadRinger) == 0 && cloak > 100)
+					// also prevent cloak meter from going over 100% when using DHook method for capping cloak gain up to 35%
+					// this seems to be necessary after importing the up to 35% cloak cap from notnheavy's plugin? why does cloak get set to 150.0??
+					if(cloak > 100.0)
 						SetEntPropFloat(client, Prop_Send, "m_flCloakMeter", 100.0);
 				}
 			}
