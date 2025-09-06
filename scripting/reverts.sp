@@ -295,6 +295,7 @@ DynamicDetour dhook_CTFPlayer_AddToSpyKnife;
 DynamicDetour dhook_CTFProjectile_Arrow_BuildingHealingArrow;
 DynamicDetour dhook_CTFPlayer_RegenThink;
 DynamicDetour dhook_CTFPlayerShared_SetRageMeter;
+DynamicDetour dhook_CTFPlayerShared_AddToSpyCloakMeter;
 
 Address CTFPlayerShared_m_pOuter;
 
@@ -719,6 +720,7 @@ public void OnPluginStart() {
 		dhook_CTFProjectile_Arrow_BuildingHealingArrow = DynamicDetour.FromConf(conf, "CTFProjectile_Arrow::BuildingHealingArrow");
 		dhook_CTFPlayer_RegenThink = DynamicDetour.FromConf(conf, "CTFPlayer::RegenThink");
 		dhook_CTFPlayerShared_SetRageMeter = DynamicDetour.FromConf(conf, "CTFPlayerShared::SetRageMeter");
+		dhook_CTFPlayerShared_AddToSpyCloakMeter = DynamicDetour.FromConf(conf, "CTFPlayerShared::AddToSpyCloakMeter");
 
 		CTFPlayerShared_m_pOuter = view_as<Address>(GameConfGetOffset(conf, "CTFPlayerShared::m_pOuter"));
 
@@ -832,6 +834,7 @@ public void OnPluginStart() {
 	if (dhook_CTFProjectile_Arrow_BuildingHealingArrow == null) SetFailState("Failed to create dhook_CTFProjectile_Arrow_BuildingHealingArrow");
 	if (dhook_CTFPlayer_RegenThink == null) SetFailState("Failed to create dhook_CTFPlayer_RegenThink");
 	if (dhook_CTFPlayerShared_SetRageMeter == null) SetFailState("Failed to create dhook_CTFPlayerShared_SetRageMeter");
+	if (dhook_CTFPlayerShared_AddToSpyCloakMeter == null) SetFailState("Failed to create dhook_CTFPlayerShared_AddToSpyCloakMeter");
 
 	dhook_CTFPlayer_CanDisguise.Enable(Hook_Post, DHookCallback_CTFPlayer_CanDisguise);
 	dhook_CTFPlayer_CalculateMaxSpeed.Enable(Hook_Post, DHookCallback_CTFPlayer_CalculateMaxSpeed);
@@ -843,6 +846,8 @@ public void OnPluginStart() {
 	dhook_CTFPlayer_RegenThink.Enable(Hook_Post, DHookCallback_CTFPlayer_RegenThink_Post);
 	dhook_CTFPlayerShared_SetRageMeter.Enable(Hook_Pre, ModifyRageMeter);
 	dhook_CTFPlayerShared_SetRageMeter.Enable(Hook_Post, ModifyRageMeter);
+	dhook_CTFPlayerShared_AddToSpyCloakMeter.Enable(Hook_Pre, AddToCloak);
+	dhook_CTFPlayerShared_AddToSpyCloakMeter.Enable(Hook_Post, AddToCloak);
 
 	for (idx = 1; idx <= MaxClients; idx++) {
 		if (IsClientConnected(idx)) OnClientConnected(idx);
@@ -1454,7 +1459,9 @@ public void OnGameFrame() {
 
 						cloak = GetEntPropFloat(idx, Prop_Send, "m_flCloakMeter");
 
-						if (GetItemVariant(Wep_DeadRinger) == 0) {
+						// Bakugo's method for capping Dead Ringer cloak regen on ammo pickup
+						// TO DO: Use this as a fallback method if DHooks method does not work for any reason
+						/* if (GetItemVariant(Wep_DeadRinger) == 0) {
 							if (
 								(cloak - players[idx].spy_cloak_meter) > 35.0 &&
 								(players[idx].ammo_grab_frame + 1) == GetGameTickCount()
@@ -1474,7 +1481,7 @@ public void OnGameFrame() {
 									}
 								}
 							}
-						}
+						} */
 
 						players[idx].spy_cloak_meter = cloak;
 					}
@@ -1827,7 +1834,11 @@ public void TF2_OnConditionAdded(int client, TFCond condition) {
 					players[client].feign_ready_tick > 0
 				) {
 					// undo 50% drain on activated
-					SetEntPropFloat(client, Prop_Send, "m_flCloakMeter", cloak + 50.0);
+					if(GetItemVariant(Wep_DeadRinger) == 3)
+						SetEntPropFloat(client, Prop_Send, "m_flCloakMeter", cloak + 50.0);
+					// prevent cloak meter from going over 100% when using DHook method for capping cloak gain up to 35%
+					else if(GetItemVariant(Wep_DeadRinger) == 0)
+						SetEntPropFloat(client, Prop_Send, "m_flCloakMeter", 100.0);
 				}
 			}
 
@@ -6358,6 +6369,27 @@ MRESReturn ModifyRageMeter(Address thisPointer, DHookParam parameters)
      			delta *= (300.00 / 225.00); // Take only 225 damage to build up the Phlog rage meter. This is hacky but it's simple, at least.
      			parameters.Set(1, delta);
      			return MRES_ChangedHandled;
+			}
+		}
+    return MRES_Ignored;
+}
+
+MRESReturn AddToCloak(Address thisPointer, DHookReturn returnValue, DHookParam parameters)
+{
+	// Imported from NotnHeavy's plugin; cap cloak gain up to 35% and prevent false full cloak sound cues especially on higher pings
+    int client = GetEntityFromAddress(Dereference(thisPointer + CTFPlayerShared_m_pOuter));
+	int weapon;
+		// Grab primary weapon
+		weapon = GetPlayerWeaponSlot(client, TFWeaponSlot_Building);
+		if (
+			TF2_GetPlayerClass(client) == TFClass_Spy &&
+			ItemIsEnabled(Wep_DeadRinger) &&
+			GetItemVariant(Wep_DeadRinger) == 0 &&
+			weapon > 0
+		) { // Only gain up to 35% cloak with the Dead Ringer.
+			if (GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 59) {
+				parameters.Set(1, floatMin(view_as<float>(parameters.Get(1)), 35.00)); // Force "val" to be no larger than 35.
+				return MRES_ChangedHandled;
 			}
 		}
     return MRES_Ignored;
