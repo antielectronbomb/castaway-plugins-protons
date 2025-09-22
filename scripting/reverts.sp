@@ -243,6 +243,8 @@ ConVar cvar_ref_tf_parachute_aircontrol;
 ConVar cvar_ref_tf_parachute_maxspeed_onfire_z;
 ConVar cvar_ref_tf_scout_hype_mod;
 ConVar cvar_ref_tf_gamemode_mvm;
+ConVar cvar_ref_tf_sticky_airdet_radius;
+ConVar cvar_ref_tf_sticky_radius_ramp_time;
 #if defined MEMORY_PATCHES
 MemoryPatch patch_RevertDisciplinaryAction;
 // If Windows, prepare additional vars for Disciplinary Action.
@@ -331,7 +333,8 @@ enum
 	Feat_Minigun, // All Miniguns
 	Feat_SniperRifle, // All Sniper Rifles
 #endif
-	Feat_Sword, // All Swords	
+	Feat_Sword, // All Swords
+	Feat_Stickybomb, // All Stickybomb Launchers
 
 	//Item sets
 	Set_SpDelivery,
@@ -485,6 +488,7 @@ public void OnPluginStart() {
 	ItemDefine("sniperrifles", "SniperRifle_PreLW", CLASSFLAG_SNIPER, Feat_SniperRifle, true);
 #endif
 	ItemDefine("swords", "Swords_PreTB", CLASSFLAG_DEMOMAN, Feat_Sword);
+	ItemDefine("stickybomb", "Stickybomb_PreLW", CLASSFLAG_DEMOMAN, Feat_Stickybomb);
 	ItemDefine("ambassador", "Ambassador_PreJI", CLASSFLAG_SPY, Wep_Ambassador);
 	ItemDefine("amputator", "Amputator_PreTB", CLASSFLAG_MEDIC, Wep_Amputator);
 	ItemDefine("atomizer", "Atomizer_PreJI", CLASSFLAG_SCOUT, Wep_Atomizer);
@@ -665,6 +669,8 @@ public void OnPluginStart() {
 	cvar_ref_tf_parachute_maxspeed_onfire_z = FindConVar("tf_parachute_maxspeed_onfire_z");
 	cvar_ref_tf_scout_hype_mod = FindConVar("tf_scout_hype_mod");
 	cvar_ref_tf_gamemode_mvm = FindConVar("tf_gamemode_mvm");
+	cvar_ref_tf_sticky_airdet_radius = FindConVar("tf_sticky_airdet_radius");
+	cvar_ref_tf_sticky_radius_ramp_time = FindConVar("tf_sticky_radius_ramp_time");
 
 #if !defined MEMORY_PATCHES
 	cvar_ref_tf_dropped_weapon_lifetime.AddChangeHook(OnDroppedWeaponLifetimeCvarChange);
@@ -1713,6 +1719,8 @@ public void OnGameFrame() {
 			cvar_ref_tf_feign_death_speed_duration.RestoreDefault();
 			cvar_ref_tf_feign_death_activate_damage_scale.RestoreDefault();
 			cvar_ref_tf_feign_death_damage_scale.RestoreDefault();
+			cvar_ref_tf_sticky_airdet_radius.RestoreDefault();
+			cvar_ref_tf_sticky_radius_ramp_time.RestoreDefault();
 
 			// these cvars are global, set them to the desired value
 			SetConVarMaybe(cvar_ref_tf_bison_tick_time, "0.001", ItemIsEnabled(Wep_Bison));
@@ -2938,6 +2946,16 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		TF2Items_SetAttribute(itemNew, 1, 264, (index == 357) ? 1.50 : 1.0); // melee range multiplier
 	}
 
+	if (
+		ItemIsEnabled(Feat_Stickybomb) &&
+		!sword_reverted && //must be set to true on every weapon that implements Feat_Stickybomb check! 
+		StrEqual(class, "tf_weapon_pipebomblauncher")
+	) {
+		TF2Items_SetNumAttributes(itemNew, 1);
+		TF2Items_SetAttribute(itemNew, 0, 99, 1.089); // mult_explosion_radius; +%s1% explosion radius
+		// Old radius: 159 Hu, Modern radius: 146 Hu. 159/146 = 1.089
+	}	
+
 	if (TF2Items_GetNumAttributes(itemNew)) {
 		itemTarget = itemNew;
 		return Plugin_Changed;
@@ -3220,6 +3238,12 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 						(!ItemIsEnabled(Wep_Zatoichi) && StrEqual(class, "tf_weapon_katana"))
 					) {
 						player_weapons[client][Feat_Sword] = true;
+					}
+
+					else if (
+						StrEqual(class, "tf_weapon_pipebomblauncher")
+					) {
+						player_weapons[client][Feat_Stickybomb] = true;
 					}
 
 					switch (index) {
@@ -5837,6 +5861,17 @@ MRESReturn DHookCallback_CTFWeaponBase_SecondaryAttack(int entity) {
 
 			return MRES_Ignored;
 		}
+
+		if (
+			StrEqual(class, "tf_weapon_pipebomblauncher")
+		) {
+			// stickybomb launcher air det stickies set type cvar
+
+			SetConVarMaybe(cvar_ref_tf_sticky_airdet_radius, "1", ItemIsEnabled(Feat_Stickybomb));
+			SetConVarMaybe(cvar_ref_tf_sticky_radius_ramp_time, "0", ItemIsEnabled(Feat_Stickybomb));
+
+			return MRES_Ignored;
+		}		
 
 		if (
 			GetItemVariant(Wep_ShortCircuit) == 0 &&

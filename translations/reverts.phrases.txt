@@ -142,6 +142,10 @@
 	{
 		"en"	"All Sniper Rifles"
 	}
+	"stickybomb"
+	{
+		"en"	"All Stickybomb Launchers"
+	}
 	"swords"
 	{
 		"en"	"All Swords"
@@ -491,6 +495,10 @@
 	"SniperRifle_PreLW"
 	{
 		"en"	"Reverted to pre-August 27, 2014; can jump immediately after firing a scoped shot (scope jumping)"
+	}
+	"Stickybomb_PreLW"
+	{
+		"en"	"Reverted to pre-love&war, air-detonated stickies have full blast radius, increased base blast radius"
 	}
 	"Swords_PreTB"
 	{
