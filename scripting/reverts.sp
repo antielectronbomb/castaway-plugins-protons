@@ -289,6 +289,9 @@ MemoryPatch patch_RevertSniperRifles_ScopeJump;
 #if !defined WIN32
 MemoryPatch patch_RevertSniperRifles_ScopeJump_linuxextra;
 #endif
+
+MemoryPatch patch_RevertStickybomb_DetonateWhileTaunting;
+
 #endif
 
 Handle sdkcall_JarExplode;
@@ -485,7 +488,11 @@ public void OnPluginStart() {
 	ItemDefine("miniramp", "Minigun_ramp_PreLW", CLASSFLAG_HEAVY, Feat_Minigun, true);
 	ItemDefine("sniperrifles", "SniperRifle_PreLW", CLASSFLAG_SNIPER, Feat_SniperRifle, true);
 #endif
+#if defined MEMORY_PATCHES
 	ItemDefine("stickybomb", "Stickybomb_PreLW", CLASSFLAG_DEMOMAN, Feat_Stickybomb);
+#else
+	ItemDefine("stickybomb", "Stickybomb_PreLW_Patchless", CLASSFLAG_DEMOMAN, Feat_Stickybomb);
+#endif
 	ItemDefine("swords", "Swords_PreTB", CLASSFLAG_DEMOMAN, Feat_Sword);
 	ItemDefine("ambassador", "Ambassador_PreJI", CLASSFLAG_SPY, Wep_Ambassador);
 	ItemDefine("amputator", "Amputator_PreTB", CLASSFLAG_MEDIC, Wep_Amputator);
@@ -672,7 +679,7 @@ public void OnPluginStart() {
 	cvar_ref_tf_scout_hype_mod = FindConVar("tf_scout_hype_mod");
 	cvar_ref_tf_gamemode_mvm = FindConVar("tf_gamemode_mvm");
 	cvar_ref_tf_weapon_criticals = FindConVar("tf_weapon_criticals");
-  cvar_ref_tf_sticky_airdet_radius = FindConVar("tf_sticky_airdet_radius");
+	cvar_ref_tf_sticky_airdet_radius = FindConVar("tf_sticky_airdet_radius");
 	cvar_ref_tf_sticky_radius_ramp_time = FindConVar("tf_sticky_radius_ramp_time");
 
 #if !defined MEMORY_PATCHES
@@ -797,6 +804,9 @@ public void OnPluginStart() {
 		patch_RevertSniperRifles_ScopeJump =
 			MemoryPatch.CreateFromConf(conf,
 			"CTFSniperRifle::SetInternalUnzoomTime_SniperScopeJump");
+		patch_RevertStickybomb_DetonateWhileTaunting =
+			MemoryPatch.CreateFromConf(conf,
+			"CTFGrenadeLauncher::SecondaryAttack_DetonateWhileTaunting");			
 #if !defined WIN32
 		patch_RevertSniperRifles_ScopeJump_linuxextra =
 			MemoryPatch.CreateFromConf(conf,
@@ -824,6 +834,7 @@ public void OnPluginStart() {
 		if (!ValidateAndNullCheck(patch_RevertDalokohsBar_ChgTo400)) SetFailState("Failed to create patch_RevertDalokohsBar_ChgTo400");
 		if (!ValidateAndNullCheck(patch_DroppedWeapon)) SetFailState("Failed to create patch_DroppedWeapon");
 		if (!ValidateAndNullCheck(patch_RevertSniperRifles_ScopeJump)) SetFailState("Failed to create patch_RevertSniperRifles_ScopeJump");
+		if (!ValidateAndNullCheck(patch_RevertStickybomb_DetonateWhileTaunting)) SetFailState("Failed to create patch_RevertStickybomb_DetonateWhileTaunting");
 #if !defined WIN32
 		if (!ValidateAndNullCheck(patch_RevertSniperRifles_ScopeJump_linuxextra)) SetFailState("Failed to create patch_RevertSniperRifles_ScopeJump_linuxextra");
 		PrintToServer("Nullchecked and validates sniperscope jump linux extra!");
@@ -920,6 +931,7 @@ public void OnConfigsExecuted() {
 	ToggleMemoryPatchReverts(ItemIsEnabled(Wep_Disciplinary),Wep_Disciplinary);
 	ToggleMemoryPatchReverts(ItemIsEnabled(Wep_DragonFury),Wep_DragonFury);
 	ToggleMemoryPatchReverts(ItemIsEnabled(Feat_Minigun),Feat_Minigun);
+	ToggleMemoryPatchReverts(ItemIsEnabled(Feat_Stickybomb),Feat_Stickybomb);
 	ToggleMemoryPatchReverts(ItemIsEnabled(Feat_SniperRifle),Feat_SniperRifle);
 	ToggleMemoryPatchReverts(ItemIsEnabled(Wep_Wrangler),Wep_Wrangler);
 	ToggleMemoryPatchReverts(ItemIsEnabled(Wep_CozyCamper),Wep_CozyCamper);
@@ -986,6 +998,13 @@ void ToggleMemoryPatchReverts(bool enable, int wep_enum) {
 				patch_RevertMiniguns_RampupNerf_Spread.Disable();
 			}
 		}
+		case Feat_Stickybomb: {
+			if (enable) {
+				patch_RevertStickybomb_DetonateWhileTaunting.Enable();
+			} else {
+				patch_RevertStickybomb_DetonateWhileTaunting.Disable();
+			}
+		}
 		case Feat_SniperRifle: {
 			if (enable) {
 				patch_RevertSniperRifles_ScopeJump.Enable();
@@ -999,7 +1018,7 @@ void ToggleMemoryPatchReverts(bool enable, int wep_enum) {
 				patch_RevertSniperRifles_ScopeJump_linuxextra.Disable();
 #endif
 			}
-		}		
+		}	
 		case Wep_Wrangler: {
 			if (enable) {
 				patch_RevertWrangler_WrenchRepairNerf.Enable();

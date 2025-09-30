@@ -107,6 +107,12 @@
 				"library" "server"
 				"linux" "@_ZN14CTFSniperRifle4FireEP9CTFPlayer"
 			}
+			"CTFGrenadeLauncher::SecondaryAttack"
+			{
+				"library" "server"
+				"linux"	"@__ZN18CTFGrenadeLauncher15SecondaryAttackEv"
+				"windows" "\x53\x8B\xDC\x83\xEC\x08\x83\xE4\xF0\x83\xC4\x04\x55\x8B\x6B\x2A\x89\x6C\x24\x2A\x8B\xEC\x81\xEC\x78\x01\x00\x00"
+			}
 		}
 
 		"MemPatches"
@@ -204,6 +210,26 @@
 				// ╚══════════════════════════════════════════════╝
 
 				//  Demoman related MemoryPatches go here.
+
+				// ================================================
+				//  Detonate stickybombs while taunting revert
+				
+				"CTFGrenadeLauncher::SecondaryAttack_DetonateWhileTaunting" // temporary name for now
+				{
+					"signature" "CTFGrenadeLauncher::SecondaryAttack"
+					"linux"
+					{
+						"offset"	"24"
+						"verify"	"\x75\x2A" // JNZ, wildcard
+						"patch"		"\x90\x90" // NOP 2x, prevent if !CanAttack() statement
+					}
+					"windows"
+					{
+						"offset"	"15"
+						"verify"	"\x74\x2A" // JNZ, wildcard
+						"patch"		"\x90\x90" // NOP 2x
+					}
+				}
 
 				// ╔══════════════════════════════════════════════╗
 				// ║                    Heavy                     ║
