@@ -208,6 +208,8 @@ enum struct Player {
 	int projectile_touch_entity;
 	float stunball_fix_time_bonk;
 	float stunball_fix_time_wear;
+	float stunball_duration;
+	bool sandman_ball_hit;
 	float spy_cloak_meter;
 	bool spy_is_feigning;
 	int ammo_grab_frame;
@@ -683,6 +685,7 @@ public void OnPluginStart() {
 	ItemVariant(Set_Saharan, "Saharan_ExtraCloak");
 	ItemDefine("sandman", "Sandman_PreJI", CLASSFLAG_SCOUT, Wep_Sandman);
 	ItemVariant(Wep_Sandman, "Sandman_PreWAR");
+	ItemVariant(Wep_Sandman, "Sandman_PreClassless");
 	ItemDefine("scottish", "Scottish_Release", CLASSFLAG_DEMOMAN | ITEMFLAG_DISABLED, Wep_Scottish);
 	ItemDefine("circuit", "Circuit_PreMYM", CLASSFLAG_ENGINEER, Wep_ShortCircuit);
 	ItemVariant(Wep_ShortCircuit, "Circuit_PreGM");
@@ -2514,7 +2517,7 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		case 36: { if (ItemIsEnabled(Wep_Blutsauger)) {
 			TF2Items_SetNumAttributes(itemNew, 2);
 			TF2Items_SetAttribute(itemNew, 0, 881, 0.0); // health drain medic; add_health_regen
-			TF2Items_SetAttribute(itemNew, 0, 15, 0.0); // crit mod disabled; mult_crit_chance
+			TF2Items_SetAttribute(itemNew, 1, 15, 0.0); // crit mod disabled; mult_crit_chance
 			// heal per hit handled elsewhere
 		}}
 		case 405, 608: { if (ItemIsEnabled(Wep_Booties)) {
@@ -2998,6 +3001,12 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 					TF2Items_SetNumAttributes(itemNew, 2);
 					TF2Items_SetAttribute(itemNew, 0, 125, -30.0); // -30 max health on wearer
 					TF2Items_SetAttribute(itemNew, 1, 278, 1.50); // increase ball recharge time to 15s
+				}
+				case 2: {
+					TF2Items_SetNumAttributes(itemNew, 3);
+					TF2Items_SetAttribute(itemNew, 0, 125, 0.0); // no max health penalty on wearer
+					TF2Items_SetAttribute(itemNew, 1, 49, 1.0); // no double jump; set_scout_doublejump_disabled
+					TF2Items_SetAttribute(itemNew, 2, 278, 1.50); // increase ball recharge time to 15s
 				}
 				default: {
 					TF2Items_SetNumAttributes(itemNew, 1);
@@ -4191,7 +4200,7 @@ Action SDKHookCB_TraceAttack(
 		} else if ((GetItemVariant(Wep_Ambassador) == 1 || GetItemVariant(Wep_Ambassador) == 2)) {
 			players[attacker].is_rapid_headshot_ambassador = false;
 				// PrintToChat(attacker, "is_rapid_headshot_ambassador = false");
-		}
+		}	
 	}
 
 	return Plugin_Continue;
@@ -4635,6 +4644,13 @@ Action SDKHookCB_OnTakeDamage(
 								}
 
 								TF2_StunPlayer(victim, stun_dur, 0.5, stun_fls, attacker);
+
+								if (GetItemVariant(Wep_Sandman) == 2) {
+								// 	SDKHooks_TakeDamage(victim, inflictor, attacker, 1.0, 0, -1, NULL_VECTOR, NULL_VECTOR, false);
+								// 	// SDKHooks_TakeDamage(idx, entity, owner, damage, DMG_SHOCK, entity, NULL_VECTOR, target_pos, false);
+								// 	TF2_StunPlayer(victim, stun_dur, 0.5, stun_fls, attacker);
+									players[victim].sandman_ball_hit = true;
+								}
 
 								players[victim].stunball_fix_time_bonk = GetGameTime();
 								players[victim].stunball_fix_time_wear = 0.0;
@@ -5125,6 +5141,23 @@ Action SDKHookCB_OnTakeDamageAlive(
 					returnValue = Plugin_Changed;
 				}
 			}
+
+			// pre-Classless Update sandman victims take 50% of damage dealt
+
+			if (
+				GetItemVariant(Wep_Sandman) == 2 &&
+				TF2_IsPlayerInCondition(victim, TFCond_Dazed) &&
+				resist_damage
+			) {
+				int stun_fls = GetEntProp(victim, Prop_Send, "m_iStunFlags");
+				if (
+					stun_fls & TF_STUNFLAG_BONKSTUCK != 0 &&
+					stun_fls & TF_STUNFLAG_NOSOUNDOREFFECT == 0
+				) {
+					damage *= 0.50;
+					returnValue = Plugin_Changed;
+				}
+			}			
 		}
 		{
 			// spunup resistance regardless of health
@@ -5197,6 +5230,18 @@ Action SDKHookCB_OnTakeDamageAlive(
 					ParticleShowSimple("peejar_impact_small", damage_position);
 				}
 			}
+		}
+		{
+			if (
+				GetItemVariant(Wep_Sandman) == 2 &&
+				players[victim].projectile_touch_frame == GetGameTickCount() &&
+				players[victim].sandman_ball_hit
+			) {
+				// SDKHooks_TakeDamage(victim, inflictor, attacker, 1.0, 0, -1, NULL_VECTOR, NULL_VECTOR, false);
+			 	// SDKHooks_TakeDamage(idx, entity, owner, damage, DMG_SHOCK, entity, NULL_VECTOR, target_pos, false);
+				// players[victim].projectile_touch_frame = 0;
+				TF2_StunPlayer(victim, players[victim].stunball_duration, 0.5, TF_STUNFLAGS_NORMALBONK, attacker);
+			}			
 		}
 		{
 			// pre-2014 grenade random damage spread

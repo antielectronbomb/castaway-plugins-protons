@@ -1012,6 +1012,10 @@
 	{
 		"en"	"Reverted to pre-WAR! Update, full stuns, stun victims receive 75%% damage, -30 max health, 15 sec ball recharge time"
 	}
+	"Sandman_PreClassless"
+	{
+		"en"	"Reverted to pre-Classless Update, full stuns, stun victims receive 50%% damage, stun UberCharged players, no double jumps, 15 sec ball recharge time"
+	}
 	"Scottish_Release"
 	{
 		"en"	"Reverted to release, 0.4 arm time penalty (from 0.8), no fire rate bonus"
