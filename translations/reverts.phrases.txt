@@ -730,12 +730,20 @@
 	}
 	"DalokohsBar_PreMYM"
 	{
-		"en"	"Reverted to Gun Mettle update, can now overheal to 400 HP again"
+		"en"	"Reverted to pre-October 23, 2017: can now overheal to 400 HP again"
+	}
+	"DalokohsBar_GM"
+	{
+		"en"	"Reverted to Gun Mettle update, can now overheal to 400 HP again, can be thrown as medium health packs"
 	}
 	"DalokohsBar_PreMYM_Patchless"
 	{
 		"en"	"Memory patches turned off! Gun Mettle Dalokohs Bar is not reverted!"
 	}
+	"DalokohsBar_GM_Patchless"
+	{
+		"en"	"Partially reverted to Gun Mettle update, can be thrown as medium health packs"
+	}	
 	"DalokohsBar_PreGM"
 	{
 		"en"	"Reverted to pre-gunmettle, instantly recharge after eating, cannot be dropped for health pick-ups via alt-fire"

@@ -624,8 +624,10 @@ public void OnPluginStart() {
 	ItemDefine("dalokohsbar", "DalokohsBar_PreGM", CLASSFLAG_HEAVY, Wep_Dalokohs, true);
 #if defined MEMORY_PATCHES
 	ItemVariant(Wep_Dalokohs, "DalokohsBar_PreMYM");
+	ItemVariant(Wep_Dalokohs, "DalokohsBar_GM");
 #else
 	ItemVariant(Wep_Dalokohs, "DalokohsBar_PreMYM_Patchless"); // Variant does nothing with disabled mempatches
+	ItemVariant(Wep_Dalokohs, "DalokohsBar_GM_Patchless"); // Variant does not have overheal with disabled mempatches
 #endif
 	ItemDefine("darwin", "Darwin_Pre2013", CLASSFLAG_SNIPER, Wep_Darwin);
 	ItemVariant(Wep_Darwin, "Darwin_PreJI");
@@ -1209,7 +1211,7 @@ void ToggleMemoryPatchReverts(bool enable, int wep_enum) {
 			}
 		}
 		case Wep_Dalokohs: {
-			if (enable && (GetItemVariant(Wep_Dalokohs) == 1)) {
+			if (enable && (GetItemVariant(Wep_Dalokohs) == 1 || GetItemVariant(Wep_Dalokohs) == 2)) {
 				patch_RevertDalokohsBar_ChgFloatAddr.Enable();
 				patch_RevertDalokohsBar_ChgTo400.Enable();
 
