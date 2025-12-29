@@ -705,6 +705,7 @@ public void OnPluginStart() {
 	ItemVariant(Wep_Natascha, "Natascha_PreGM");
 	ItemDefine("panic", "Panic_PreJI", CLASSFLAG_SOLDIER | CLASSFLAG_PYRO | CLASSFLAG_HEAVY | CLASSFLAG_ENGINEER, Wep_PanicAttack);
 	ItemDefine("persuader", "Persuader_PreTB", CLASSFLAG_DEMOMAN, Wep_Persian);
+	ItemVariant(Wep_Persian, "Persuader_PreManniversary");
 	ItemDefine("phlog", "Phlog_Pyro", CLASSFLAG_PYRO, Wep_Phlogistinator);
 	ItemVariant(Wep_Phlogistinator, "Phlog_TB");
 	ItemVariant(Wep_Phlogistinator, "Phlog_Release");
@@ -7102,35 +7103,39 @@ MRESReturn DHookCallback_CTFPlayer_GiveAmmo(int client, DHookReturn returnValue,
 
 		if (
 			ItemIsEnabled(Wep_Persian) &&
-			TF2Attrib_HookValueInt(0, "ammo_becomes_health", client) == 1 &&
-			ammo_idx != TF_AMMO_METAL
+			TF2Attrib_HookValueInt(0, "ammo_becomes_health", client) == 1
 		) {
 			// Ammo from ground pickups is converted to health.
-			if (ammo_source == kAmmoSource_Pickup) {
-				int iTakenHealth = TF2Util_TakeHealth(client, float(amount));
-				if (iTakenHealth > 0)
-				{
-					if (!suppress_sound)
+			if (
+				(GetItemVariant(Wep_Persian) == 0 && ammo_idx != TF_AMMO_METAL) ||
+				(GetItemVariant(Wep_Persian) == 1)
+			) {
+				if (ammo_source == kAmmoSource_Pickup) {
+					int iTakenHealth = TF2Util_TakeHealth(client, float(amount));
+					if (iTakenHealth > 0)
 					{
-						EmitGameSoundToAll("BaseCombatCharacter.AmmoPickup", client);
+						if (!suppress_sound)
+						{
+							EmitGameSoundToAll("BaseCombatCharacter.AmmoPickup", client);
+						}
+
+						// Fire heal event
+						Event event = CreateEvent("player_healonhit", true);
+						event.SetInt("amount", iTakenHealth);
+						event.SetInt("entindex", client);
+						event.Fire();
+
+						// remove afterburn and bleed debuffs on heal
+						TF2_RemoveCondition(client, TFCond_OnFire);
+						TF2_RemoveCondition(client, TFCond_Bleeding);
 					}
-
-					// Fire heal event
-					Event event = CreateEvent("player_healonhit", true);
-					event.SetInt("amount", iTakenHealth);
-					event.SetInt("entindex", client);
-					event.Fire();
-
-					// remove afterburn and bleed debuffs on heal
-					TF2_RemoveCondition(client, TFCond_OnFire);
-					TF2_RemoveCondition(client, TFCond_Bleeding);
+					returnValue.Value = iTakenHealth;
+					return MRES_Supercede;
 				}
-				returnValue.Value = iTakenHealth;
-				return MRES_Supercede;
 			}
 
 			// Ammo from the cart or engineer dispensers is flatly ignored.
-			if (ammo_source == kAmmoSource_DispenserOrCart) {
+			if (ammo_source == kAmmoSource_DispenserOrCart && GetItemVariant(Wep_Persian) == 0) {
 				returnValue.Value = 0;
 				return MRES_Supercede;
 			}
