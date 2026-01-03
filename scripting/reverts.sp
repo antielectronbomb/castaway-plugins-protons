@@ -260,6 +260,19 @@ enum struct Player {
 	int thrown_sandvich_ent_ref; // This is a entity reference and not your normal entity index, see https://wiki.alliedmods.net/Entity_References_(SourceMod)
 	bool has_thrown_sandvich;
 	bool deny_metal_collection;
+<<<<<<< Updated upstream
+=======
+
+	// Vaccinator.
+	bool vaccinator_healers[MAXPLAYERS + 1];
+	bool UsingVaccinatorUber;
+	float VaccinatorCharge;
+	float EndVaccinatorChargeFalloff;
+	int TicksSinceApplyingDamageRules;
+	Address DamageInfo;
+	int ActualDamageType;
+	ECritType ActualCritType;	
+>>>>>>> Stashed changes
 }
 
 enum struct Entity {
@@ -5526,6 +5539,85 @@ Action SDKHookCB_OnTakeDamageAlive(
 				returnValue = Plugin_Changed;
 			}
 		}
+<<<<<<< Updated upstream
+=======
+		{
+			// vaccinator heal medic when patient takes damage under resist revert
+			if (ItemIsEnabled(Wep_Vaccinator)) {
+				int count = 0;
+				for (int i = 0; i < GetEntProp(victim, Prop_Send, "m_nNumHealers"); i++) {
+					if (GetItemVariant(Wep_Vaccinator) == 1) {
+						++count; // used for resistances stacking
+					}
+					int iHealerIndex = TF2Util_GetPlayerHealer(victim, i);
+					bool bIsClient = (iHealerIndex <= MaxClients);
+
+					if (bIsClient) {
+						weapon2 = GetPlayerWeaponSlot(iHealerIndex, TFWeaponSlot_Secondary);
+						if (weapon2 > 0) {
+							GetEntityClassname(weapon2, class, sizeof(class));
+							if (StrEqual(class, "tf_weapon_medigun") && GetEntProp(weapon2, Prop_Send, "m_iItemDefinitionIndex") == 998) {
+									// PrintToChatAll("\"%N\" <- healed by player \"%N\" [%i]", victim, iHealerIndex, iHealerIndex);
+								if (
+									attacker != victim && // note: this check seems to not include non-player damage sources
+									damage_type & resistanceMapping[GetResistType(weapon2)]
+								) { // Check that the damage type matches the Medic's current resistance.
+									if (damage_type != DMG_BURN)
+									{
+										if (victim != iHealerIndex)
+										{
+											health_cur = GetClientHealth(iHealerIndex);
+											health_max = SDKCall(sdkcall_GetMaxHealth, iHealerIndex);
+											float resist_heal = ((GetItemVariant(Wep_Vaccinator) == 0) ? 0.10 : 0.25);
+
+											// Show that the healer got healed.
+											Handle event = CreateEvent("player_healonhit", true);
+											SetEventInt(event, "amount", RoundFloat(damage * resist_heal));
+											SetEventInt(event, "entindex", iHealerIndex);
+											FireEvent(event);
+
+											// Set health.
+											TF2Util_TakeHealth(iHealerIndex, (damage * resist_heal));
+												// PrintToChatAll("(iHealerIndex: %i) Added %i health on resist, health_cur = %i, new health = %i", iHealerIndex, RoundFloat(damage * resist_heal), health_cur, health_cur + RoundFloat(damage * resist_heal));
+										}
+
+										if (players[victim].ActualCritType != CRIT_NONE && GetItemVariant(Wep_Vaccinator) == 1)
+										{
+											if (players[iHealerIndex].UsingVaccinatorUber)
+											{
+												if (damagetype & DMG_BULLET)
+													players[iHealerIndex].VaccinatorCharge -= 0.03;
+												else if (damagetype & DMG_BLAST)
+													players[iHealerIndex].VaccinatorCharge -= 0.75;
+												else if (damagetype & DMG_IGNITE)
+													players[iHealerIndex].VaccinatorCharge -= 0.01;
+												SetEntPropFloat(vaccinator, Prop_Send, "m_flChargeLevel", max(0.00, players[iHealerIndex].VaccinatorCharge));
+												WriteToValue(info + CTakeDamageInfo_m_eCritType, CRIT_NONE);
+												WriteToValue(info + CTakeDamageInfo_m_bitsDamageType, damagetype & ~DMG_CRIT);
+												if (crit == CRIT_MINI)
+													WriteToValue(info + CTakeDamageInfo_m_flDamage, damage / 1.35);
+												else if (crit == CRIT_FULL)
+													WriteToValue(info + CTakeDamageInfo_m_flDamage, damage / 3.00);
+												//WriteToValue(info + CTakeDamageInfo_m_flDamage, damage - damagebonus);
+											}
+										}
+									}
+									// Stack up resistances.
+									if (count > 1)
+									{
+										if (players[iHealerIndex].UsingVaccinatorUber)
+											WriteToValue(info + CTakeDamageInfo_m_flDamage, damage * 0.25);
+										else
+											WriteToValue(info + CTakeDamageInfo_m_flDamage, damage * 0.90);
+									}									
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+>>>>>>> Stashed changes
 	}
 
 	return returnValue;
