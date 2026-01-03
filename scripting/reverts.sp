@@ -260,8 +260,6 @@ enum struct Player {
 	int thrown_sandvich_ent_ref; // This is a entity reference and not your normal entity index, see https://wiki.alliedmods.net/Entity_References_(SourceMod)
 	bool has_thrown_sandvich;
 	bool deny_metal_collection;
-<<<<<<< Updated upstream
-=======
 
 	// Vaccinator.
 	bool vaccinator_healers[MAXPLAYERS + 1];
@@ -272,7 +270,6 @@ enum struct Player {
 	Address DamageInfo;
 	int ActualDamageType;
 	ECritType ActualCritType;	
->>>>>>> Stashed changes
 }
 
 enum struct Entity {
@@ -5539,8 +5536,6 @@ Action SDKHookCB_OnTakeDamageAlive(
 				returnValue = Plugin_Changed;
 			}
 		}
-<<<<<<< Updated upstream
-=======
 		{
 			// vaccinator heal medic when patient takes damage under resist revert
 			if (ItemIsEnabled(Wep_Vaccinator)) {
@@ -5617,7 +5612,6 @@ Action SDKHookCB_OnTakeDamageAlive(
 				}
 			}
 		}
->>>>>>> Stashed changes
 	}
 
 	return returnValue;
