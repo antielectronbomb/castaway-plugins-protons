@@ -204,6 +204,13 @@ enum BazaarBargainShotManager
     BazaarBargain_Gain
 }
 
+enum ECritType
+{
+    CRIT_NONE = 0,
+    CRIT_MINI,
+    CRIT_FULL,
+}
+
 enum struct Item {
 	char key[64];
 	int flags;
@@ -274,13 +281,13 @@ enum struct Player {
 
 	// Vaccinator.
 	bool vaccinator_healers[MAXPLAYERS + 1];
-	// bool UsingVaccinatorUber;
-	// float VaccinatorCharge;
-	// float EndVaccinatorChargeFalloff;
-	// int TicksSinceApplyingDamageRules;
-	// Address DamageInfo;
-	// int ActualDamageType;
-	// ECritType ActualCritType;	
+	bool UsingVaccinatorUber;
+	float VaccinatorCharge;
+	float EndVaccinatorChargeFalloff;
+	int TicksSinceApplyingDamageRules;
+	Address DamageInfo;
+	int ActualDamageType;
+	ECritType ActualCritType;
 }
 
 enum struct Entity {
@@ -5647,9 +5654,12 @@ Action SDKHookCB_OnTakeDamageAlive(
 		{
 			// vaccinator heal medic when patient takes damage under resist revert
 			if (ItemIsEnabled(Wep_Vaccinator)) {
+				int count = 0;
 				for (int i = 0; i < GetEntProp(victim, Prop_Send, "m_nNumHealers"); i++) {
 					int iHealerIndex = TF2Util_GetPlayerHealer(victim, i);
 					bool bIsClient = (iHealerIndex <= MaxClients);
+
+					if (GetItemVariant(Wep_Vaccinator) == 1) ++count; // for resistance stacking
 
 					if (bIsClient) {
 						weapon2 = GetPlayerWeaponSlot(iHealerIndex, TFWeaponSlot_Secondary);
@@ -5661,10 +5671,8 @@ Action SDKHookCB_OnTakeDamageAlive(
 									attacker != victim && 
 									damage_type & resistanceMapping[GetResistType(weapon2)]
 								) { // Check that the damage type matches the Medic's current resistance.
-									if (damage_type != DMG_BURN)
-									{
-										if (victim != i)
-										{
+									if (damage_type != DMG_BURN) {
+										if (victim != iHealerIndex) {
 											health_cur = GetClientHealth(iHealerIndex);
 											health_max = SDKCall(sdkcall_GetMaxHealth, iHealerIndex);
 											float resist_heal = ((GetItemVariant(Wep_Vaccinator) == 0) ? 0.10 : 0.25);
@@ -5679,6 +5687,38 @@ Action SDKHookCB_OnTakeDamageAlive(
 											TF2Util_TakeHealth(iHealerIndex, (damage * resist_heal));
 												// PrintToChatAll("(iHealerIndex: %i) Added %i health on resist, health_cur = %i, new health = %i", iHealerIndex, RoundFloat(damage * resist_heal), health_cur, health_cur + RoundFloat(damage * resist_heal));
 										}
+
+										// Remove uber on hit for each resistance type
+										if (players[victim].ActualCritType != CRIT_NONE && GetItemVariant(Wep_Vaccinator) == 1) {
+											if (players[iHealerIndex].UsingVaccinatorUber) {
+												if (damage_type & DMG_BULLET)
+													players[iHealerIndex].VaccinatorCharge -= 0.03;
+												else if (damage_type & DMG_BLAST)
+													players[iHealerIndex].VaccinatorCharge -= 0.75;
+												else if (damage_type & DMG_IGNITE)
+													players[iHealerIndex].VaccinatorCharge -= 0.01;
+												SetEntPropFloat(weapon2, Prop_Send, "m_flChargeLevel", floatMax(0.00, players[iHealerIndex].VaccinatorCharge));
+
+												// these are needed elsewhere
+												// TODO: understand what these are used for. these seem to be used for tracking crit/minicrit damage?
+												WriteToValue(info + CTakeDamageInfo_m_eCritType, CRIT_NONE);
+												WriteToValue(info + CTakeDamageInfo_m_bitsDamageType, damagetype & ~DMG_CRIT);
+												if (crit == CRIT_MINI)
+													WriteToValue(info + CTakeDamageInfo_m_flDamage, damage / 1.35);
+												else if (crit == CRIT_FULL)
+													WriteToValue(info + CTakeDamageInfo_m_flDamage, damage / 3.00);
+												//WriteToValue(info + CTakeDamageInfo_m_flDamage, damage - damagebonus);
+											}
+										}
+									}
+
+									// Stack up resistances.
+									if (count > 1)
+									{
+										if (players[iHealerIndex].UsingVaccinatorUber)
+											WriteToValue(info + CTakeDamageInfo_m_flDamage, damage * 0.25);
+										else
+											WriteToValue(info + CTakeDamageInfo_m_flDamage, damage * 0.90);
 									}
 								}
 							}
