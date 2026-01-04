@@ -139,6 +139,7 @@ public Plugin myinfo = {
 #define LUNCHBOX_FISHCAKE_DROP_MODEL	"models/workshop/weapons/c_models/c_fishcake/plate_fishcake.mdl"
 #define MAX_HEAD_BONUS 6
 #define TF_WEAPON_SNIPERRIFLE_CHARGE_PER_SEC 50
+#define TF_COND_RESIST_OFFSET 58
 
 enum
 {
@@ -281,12 +282,12 @@ enum struct Player {
 
 	// Vaccinator.
 	bool vaccinator_healers[MAXPLAYERS + 1];
-	bool UsingVaccinatorUber;
-	float VaccinatorCharge;
-	float EndVaccinatorChargeFalloff;
-	int TicksSinceApplyingDamageRules;
+	bool using_vaccinator_uber;
+	float vaccinator_charge;
+	float end_vaccinator_charge_falloff;
+	int ticks_since_applying_damage_rules;
 	Address DamageInfo;
-	int ActualDamageType;
+	int actual_damage_type;
 	ECritType ActualCritType;
 }
 
@@ -296,10 +297,11 @@ enum struct Entity {
 	int old_shield;
 	float minisentry_health;
 	int owner;
+	int current_healer;
 }
 
 // Vaccinator stuff
-int resistanceMapping[] =
+int resistance_mapping[] =
 {
     DMG_BULLET | DMG_BUCKSHOT,
     DMG_BLAST,
@@ -427,6 +429,10 @@ DynamicDetour dhook_CTFLunchBox_DrainAmmo;
 DynamicDetour dhook_CTFPlayer_Taunt;
 DynamicDetour dhook_CTFPlayer_OnTauntSucceeded;
 DynamicDetour dhook_CTFRevolver_CanFireCriticalShot;
+
+// For Pre-Gun Mettle Vaccinator import
+Address CTakeDamageInfo_m_eCritType;
+Address CTakeDamageInfo_m_bitsDamageType;
 
 Player players[MAXPLAYERS+1];
 Entity entities[2048];
@@ -948,6 +954,10 @@ public void OnPluginStart() {
 		m_flTauntNextStartTime = -1;
 		m_flTauntNextStartTime = GameConfGetOffset(conf, "m_flTauntNextStartTime");
 		if (m_flTauntNextStartTime == -1) SetFailState("Failed to load m_flTauntNextStartTime offset!");
+
+		// Offsets
+		CTakeDamageInfo_m_eCritType = view_as<Address>(100); //view_as<Address>(GameConfGetOffset(config, "CTakeDamageInfo::m_eCritType"));
+		CTakeDamageInfo_m_bitsDamageType = view_as<Address>(60); //view_as<Address>(GameConfGetOffset(config, "CTakeDamageInfo::m_bitsDamageType"));
 
 		delete conf;
 	}
@@ -1999,6 +2009,51 @@ public void OnGameFrame() {
 								players[idx].medic_medigun_defidx = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
 								players[idx].medic_medigun_charge = GetEntPropFloat(weapon, Prop_Send, "m_flChargeLevel");
 							}
+
+							// Set the healer for the Vaccinator and if being Ubered, remove their resistance. Also drain charge while Ubering.
+							if (
+								StrEqual(class, "tf_weapon_medigun") &&
+								GetItemVariant(Wep_Vaccinator) == 1 &&
+								player_weapons[idx][Wep_Vaccinator] &&
+								GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 998
+							) {
+								int patient = GetEntPropEnt(weapon, Prop_Send, "m_hHealingTarget");
+								int current_healer = entities[weapon].current_healer;
+								TFCond resistance = view_as<TFCond>(GetResistType(weapon) + TF_COND_RESIST_OFFSET);
+								if (players[idx].using_vaccinator_uber)
+								{
+									players[idx].vaccinator_charge -= 0.25 * (GetTickInterval() / 2);
+									if (players[idx].vaccinator_charge <= players[idx].end_vaccinator_charge_falloff)
+									{
+										players[idx].using_vaccinator_uber = false;
+										players[idx].vaccinator_healers[idx] = false;
+										if (patient != -1)
+											TF2_RemoveCondition(patient, resistance);
+										TF2_RemoveCondition(idx, resistance);
+									}
+									else
+										SetEntPropFloat(weapon, Prop_Send, "m_flChargeLevel", players[idx].vaccinator_charge);
+								}
+								if (
+									current_healer != patient || 
+									weapon != GetEntPropEnt(idx, Prop_Send, "m_hActiveWeapon")
+								) {
+									if (patient > 0)
+									{
+										if (players[idx].using_vaccinator_uber)
+											TF2_AddCondition(patient, resistance);
+										players[patient].vaccinator_healers[idx] = true;
+									}
+									if (weapon != GetEntPropEnt(idx, Prop_Send, "m_hActiveWeapon"))
+										players[idx].vaccinator_healers[idx] = false;
+									if (current_healer > 0)
+									{
+										TF2_RemoveCondition(current_healer, resistance);
+										players[current_healer].vaccinator_healers[idx] = false;
+									}
+									entities[weapon].current_healer = patient;
+								}
+							}							
 						}
 					}
 				}
@@ -5654,6 +5709,9 @@ Action SDKHookCB_OnTakeDamageAlive(
 		{
 			// vaccinator heal medic when patient takes damage under resist revert
 			if (ItemIsEnabled(Wep_Vaccinator)) {
+				Address info = view_as<Address>(victim);
+				ECritType crit = Dereference(info + CTakeDamageInfo_m_eCritType);
+
 				int count = 0;
 				for (int i = 0; i < GetEntProp(victim, Prop_Send, "m_nNumHealers"); i++) {
 					int iHealerIndex = TF2Util_GetPlayerHealer(victim, i);
@@ -5669,7 +5727,7 @@ Action SDKHookCB_OnTakeDamageAlive(
 									// PrintToChatAll("\"%N\" <- healed by player \"%N\" [%i]", victim, iHealerIndex, iHealerIndex);
 								if (
 									attacker != victim && 
-									damage_type & resistanceMapping[GetResistType(weapon2)]
+									damage_type & resistance_mapping[GetResistType(weapon2)]
 								) { // Check that the damage type matches the Medic's current resistance.
 									if (damage_type != DMG_BURN) {
 										if (victim != iHealerIndex) {
@@ -5690,24 +5748,22 @@ Action SDKHookCB_OnTakeDamageAlive(
 
 										// Remove uber on hit for each resistance type
 										if (players[victim].ActualCritType != CRIT_NONE && GetItemVariant(Wep_Vaccinator) == 1) {
-											if (players[iHealerIndex].UsingVaccinatorUber) {
+											if (players[iHealerIndex].using_vaccinator_uber) {
 												if (damage_type & DMG_BULLET)
-													players[iHealerIndex].VaccinatorCharge -= 0.03;
+													players[iHealerIndex].vaccinator_charge -= 0.03;
 												else if (damage_type & DMG_BLAST)
-													players[iHealerIndex].VaccinatorCharge -= 0.75;
+													players[iHealerIndex].vaccinator_charge -= 0.75;
 												else if (damage_type & DMG_IGNITE)
-													players[iHealerIndex].VaccinatorCharge -= 0.01;
-												SetEntPropFloat(weapon2, Prop_Send, "m_flChargeLevel", floatMax(0.00, players[iHealerIndex].VaccinatorCharge));
-
-												// these are needed elsewhere
-												// TODO: understand what these are used for. these seem to be used for tracking crit/minicrit damage?
+													players[iHealerIndex].vaccinator_charge -= 0.01;
+												SetEntPropFloat(weapon2, Prop_Send, "m_flChargeLevel", floatMax(0.00, players[iHealerIndex].vaccinator_charge));
+												
 												WriteToValue(info + CTakeDamageInfo_m_eCritType, CRIT_NONE);
 												WriteToValue(info + CTakeDamageInfo_m_bitsDamageType, damagetype & ~DMG_CRIT);
 												if (crit == CRIT_MINI)
 													WriteToValue(info + CTakeDamageInfo_m_flDamage, damage / 1.35);
 												else if (crit == CRIT_FULL)
 													WriteToValue(info + CTakeDamageInfo_m_flDamage, damage / 3.00);
-												//WriteToValue(info + CTakeDamageInfo_m_flDamage, damage - damagebonus);
+												WriteToValue(info + CTakeDamageInfo_m_flDamage, damage - damagebonus);
 											}
 										}
 									}
@@ -5715,7 +5771,7 @@ Action SDKHookCB_OnTakeDamageAlive(
 									// Stack up resistances.
 									if (count > 1)
 									{
-										if (players[iHealerIndex].UsingVaccinatorUber)
+										if (players[iHealerIndex].using_vaccinator_uber)
 											WriteToValue(info + CTakeDamageInfo_m_flDamage, damage * 0.25);
 										else
 											WriteToValue(info + CTakeDamageInfo_m_flDamage, damage * 0.90);
@@ -7620,6 +7676,42 @@ MRESReturn DHookCallback_CTFSniperRifleDecap_SniperRifleChargeRateMod(int entity
 	return MRES_Ignored;
 }
 
+MRESReturn ApplyDamageRules(Address thisPointer, DHookReturn returnValue, DHookParam parameters)
+{
+	int victim = parameters.Get(2);
+	if (victim > 0 && victim <= MaxClients)
+	{
+		Address info = parameters.Get(1);
+		int bitsDamageType = Dereference(info + CTakeDamageInfo_m_bitsDamageType);
+		for (int i = 1; i <= MaxClients; ++i)
+		{
+			if (players[victim].vaccinator_healers[i] && bitsDamageType & resistanceMapping[GetResistType(DoesPlayerHaveItem(i, 998))])
+			{
+				players[victim].ticks_since_applying_damage_rules = GetGameTickCount();
+				tf_weapon_minicrits_distance_falloff.BoolValue = true;
+				tf_weapon_criticals_distance_falloff.BoolValue = true;
+				break;
+			}
+		}
+	}
+	return MRES_Ignored;
+}
+
+
+MRESReturn ApplyDamageRules_Post(Address thisPointer, DHookReturn returnValue, DHookParam parameters)
+{
+	int victim = parameters.Get(2);
+	if (victim > 0 && victim <= MaxClients && players[victim].ticks_since_applying_damage_rules == GetGameTickCount())
+	{
+		Address info = parameters.Get(1);
+		players[victim].ActualDamageType = Dereference(info + CTakeDamageInfo_m_bitsDamageType);
+		players[victim].ActualCritType = Dereference(info + CTakeDamageInfo_m_eCritType);
+		tf_weapon_minicrits_distance_falloff.BoolValue = tf_weapon_minicrits_distance_falloff_original;
+		tf_weapon_criticals_distance_falloff.BoolValue = tf_weapon_criticals_distance_falloff_original;
+	}
+	return MRES_Ignored;
+}
+
 stock float CalcViewsOffset(float angle1[3], float angle2[3]) {
 	float v1;
 	float v2;
@@ -7989,4 +8081,14 @@ int GetResistType(int entity)
 {
     // the original code is weird and this does what i want but it's here for the sake of it.
     return GetChargeType(entity);
+}
+
+any Dereference(Address address, NumberType bitdepth = NumberType_Int32)
+{
+	return LoadFromAddress(address, bitdepth);
+}
+
+void WriteToValue(Address address, any value, NumberType bitdepth = NumberType_Int32)
+{
+    StoreToAddress(address, value, bitdepth);
 }
