@@ -330,6 +330,10 @@
 	{
 		"en"	"Gloves of Running Urgently"
 	}
+	"grenadestock"
+	{
+		"en"	"Grenade Launcher (Stock)"
+	}
 	"gunboats"
 	{
 		"en"	"Gunboats"
@@ -438,6 +442,10 @@
 	{
 		"en"	"Righteous Bison"
 	}
+	"rocketstock"
+	{
+		"en"	"Rocket Launcher (Stock)"
+	}
 	"rocketjmp"
 	{
 		"en"	"Rocket Jumper"
@@ -489,6 +497,10 @@
 	"spycicle"
 	{
 		"en"	"Spy-cicle"
+	}
+	"stickystock"
+	{
+		"en"	"Stickybomb Launcher (Stock)"
 	}
 	"stkjumper"
 	{
@@ -908,6 +920,14 @@
 	{
 		"en"	"Reverted to pre-pyromania, no health drain or holster penalty, -6 HP/s while active (jump a bit higher on dmg tick), -50%% damage"
 	}
+	"GrenadeStock_Pre2008"
+	{
+		"en"	"Reverted to pre-February 28, 2008; increased reserve max ammo from 16 to 30"
+	}
+	"GrenadeStock_PreRelease"
+	{
+		"en"	"Reverted to pre-release beta; increased reserve max ammo from 16 to 30, increased clip size from 4 to 6, grenades explode on contact after first bounce"
+	}
 	"Gunboats_Release"
 	{
 		"en"	"Reverted to release, -75%% blast damage from rocket jumps, grenade kamikaze taunt deals only 64 self-damage"
@@ -1100,6 +1120,10 @@
 	{
 		"en"	"Reverted to pre-toughbreak, increased hitbox size (can hit same target many times), pierces bullet resists, ignites friendly Huntsman arrows, old damage formula"
 	}
+	"RocketStock_Pre2008"
+	{
+		"en"	"Reverted to pre-February 28, 2008; increased reserve max ammo from 16 to 36"
+	}
 	"RocketJmp_Pre2013"
 	{
 		"en"	"Reverted to pre-2013, grants immunity to self-damage from Equalizer/Escape Plan taunt"
@@ -1219,6 +1243,10 @@
 	"SpyCicle_Pre2011"
 	{
 		"en"	"Reverted to release, fire immunity for 2s, silent killer, cannot regenerate from ammo sources, uses the Fencing taunt attack"
+	}
+	"StickyStock_Pre2008"
+	{
+		"en"	"Reverted to pre-February 28, 2008; increased reserve max ammo from 24 to 40, stickybombs cannot be destroyed by bullets"
 	}
 	"StkJumper_Pre2013"
 	{

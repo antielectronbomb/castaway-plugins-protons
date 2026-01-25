@@ -500,6 +500,7 @@ enum
 	Wep_FistsSteel,
 	Wep_Cleaver, // Flying Guillotine
 	Wep_GRU, // Gloves of Running Urgently
+	Wep_GrenadeStock, // Grenade Launcher (Stock only)
 	Wep_Gunboats,
 	Wep_Gunslinger,
 	Wep_Zatoichi, // Half-Zatoichi
@@ -530,6 +531,7 @@ enum
 	Wep_ReserveShooter,
 	Wep_Bison, // Righteous Bison
 	Wep_RocketJumper,
+	Wep_RocketStock, // Rocket Launcher (Stock only)
 	Wep_Sandman,
 	Wep_Sandvich,
 	Wep_ScorchShot,
@@ -540,6 +542,7 @@ enum
 	Wep_Solemn,
 	Wep_SplendidScreen,
 	Wep_Spycicle,
+	Wep_StickybombStock, // Stickybomb Launcher (Stock only)
 	Wep_StickyJumper,
 	Wep_SydneySleeper,
 	Wep_ThermalThruster,
@@ -719,6 +722,8 @@ public void OnPluginStart() {
 	ItemDefine("glovesru", "GlovesRU_PreTB", CLASSFLAG_HEAVY, Wep_GRU);
 	ItemVariant(Wep_GRU, "GlovesRU_PreJI");
 	ItemVariant(Wep_GRU, "GlovesRU_PrePyro");
+	ItemDefine("grenadestock", "GrenadeStock_Pre2008", CLASSFLAG_DEMOMAN | ITEMFLAG_DISABLED, Wep_GrenadeStock);
+	ItemVariant(Wep_GrenadeStock, "GrenadeStock_PreRelease");
 	ItemDefine("gunboats", "Gunboats_Release", CLASSFLAG_SOLDIER | ITEMFLAG_DISABLED, Wep_Gunboats);
 	ItemDefine("gunslinger", "Gunslinger_PreGM", CLASSFLAG_ENGINEER, Wep_Gunslinger);
 	ItemVariant(Wep_Gunslinger, "Gunslinger_Release");
@@ -772,6 +777,7 @@ public void OnPluginStart() {
 	ItemVariant(Wep_ReserveShooter, "Reserve_Release");
 	ItemDefine("bison", "Bison_PreMYM", CLASSFLAG_SOLDIER, Wep_Bison);
 	ItemVariant(Wep_Bison, "Bison_PreTB");
+	ItemDefine("rocketstock", "RocketStock_Pre2008", CLASSFLAG_SOLDIER | ITEMFLAG_DISABLED, Wep_RocketStock);
 	ItemDefine("rocketjmp", "RocketJmp_Pre2013", CLASSFLAG_SOLDIER, Wep_RocketJumper);
 	ItemVariant(Wep_RocketJumper, "RocketJmp_Release");
 	ItemVariant(Wep_RocketJumper, "RocketJmp_Pre2011");
@@ -796,6 +802,7 @@ public void OnPluginStart() {
 	ItemVariant(Wep_SplendidScreen, "Splendid_Release");
 	ItemDefine("spycicle", "SpyCicle_PreGM", CLASSFLAG_SPY, Wep_Spycicle);
 	ItemVariant(Wep_Spycicle, "SpyCicle_Pre2011");
+	ItemDefine("stickystock", "StickyStock_Pre2008", CLASSFLAG_DEMOMAN | ITEMFLAG_DISABLED, Wep_StickybombStock);
 	ItemDefine("stkjumper", "StkJumper_Pre2013", CLASSFLAG_DEMOMAN, Wep_StickyJumper);
 	ItemVariant(Wep_StickyJumper, "StkJumper_Pre2013_Intel");
 	ItemVariant(Wep_StickyJumper, "StkJumper_Pre2011");
@@ -2762,6 +2769,12 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 			TF2Items_SetNumAttributes(itemNew, 1);
 			TF2Items_SetAttribute(itemNew, 0, 268, 1.20); // Base charge rate decreased by 20%
 		}}
+		case 18, 205, 658, 800, 809, 889, 898, 907, 916, 965, 974, 
+			15006, 15014, 15028, 15043, 15052, 15057, 15081, 15104, 15105, 
+			15129, 15130, 15150: { if (ItemIsEnabled(Wep_RocketStock)) {
+			TF2Items_SetNumAttributes(itemNew, 1);
+			TF2Items_SetAttribute(itemNew, 0, 76, 2.25); // maxammo primary increased; +125% (from 16 to 36)
+		}}		
 		case 237: { if (ItemIsEnabled(Wep_RocketJumper)) {
 			switch (GetItemVariant(Wep_RocketJumper)) {				
 				case 1: { // RocketJmp_Release
@@ -3018,6 +3031,21 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		case 416: { if (ItemIsEnabled(Wep_MarketGardener)) {
 			TF2Items_SetNumAttributes(itemNew, 1);
 			TF2Items_SetAttribute(itemNew, 0, 5, 1.0); // fire rate penalty
+		}}
+		case 19, 206, 1007, 15077, 15079, 15091, 15092, 15116, 15117, 15142, 15158: { if (ItemIsEnabled(Wep_GrenadeStock)) {
+			switch (GetItemVariant(Wep_GrenadeStock)) {
+				case 0: {
+					// Pre-February 28, 2008
+					TF2Items_SetNumAttributes(itemNew, 1);
+					TF2Items_SetAttribute(itemNew, 0, 76, 1.875); // maxammo primary increased; +87.5% (from 16 to 30)
+				}
+				case 1: {
+					// Pre-Release Beta
+					TF2Items_SetNumAttributes(itemNew, 2);
+					TF2Items_SetAttribute(itemNew, 0, 76, 1.875); // maxammo primary increased; +87.5% (from 16 to 30)
+					TF2Items_SetAttribute(itemNew, 1, 4, 1.5); // clip size bonus; +50% (from 4 to 6)
+				}
+			}
 		}}
 		case 239, 1084, 1100: { if (ItemIsEnabled(Wep_GRU)) {
 			switch (GetItemVariant(Wep_GRU)) {
@@ -3403,6 +3431,12 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 		case 649: { if (ItemIsEnabled(Wep_Spycicle)) {
 			TF2Items_SetNumAttributes(itemNew, 1);
 			TF2Items_SetAttribute(itemNew, 0, 156, 1.0); // silent killer
+		}}
+		case 20, 207, 661, 797, 806, 886, 895, 904, 913, 962, 971,
+			15009, 15012, 15024, 15038, 15045, 15048, 15082, 15083, 
+			15084, 15113, 15137, 15138, 15155: { if (ItemIsEnabled(Wep_StickybombStock)) {
+			TF2Items_SetNumAttributes(itemNew, 1);
+			TF2Items_SetAttribute(itemNew, 0, 78, 1.67); // maxammo secondary increased; +67% (increased from 24 to 40)
 		}}
 		case 265: { if (ItemIsEnabled(Wep_StickyJumper)) {
 			switch (GetItemVariant(Wep_StickyJumper)) {
@@ -3859,6 +3893,9 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 						case 40, 1146: player_weapons[client][Wep_Backburner] = true;
 						case 1101: player_weapons[client][Wep_BaseJumper] = true;
 						case 402: player_weapons[client][Wep_BazaarBargain] = true;
+						case 18, 205, 658, 800, 809, 889, 898, 907, 916, 965, 974, 
+							15006, 15014, 15028, 15043, 15052, 15057, 15081, 15104, 15105, 
+							15129, 15130, 15150: player_weapons[client][Wep_RocketStock] = true;
 						case 237: player_weapons[client][Wep_RocketJumper] = true;
 						case 730: player_weapons[client][Wep_Beggars] = true;
 						case 442: player_weapons[client][Wep_Bison] = true;
@@ -3893,6 +3930,8 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 						case 426: player_weapons[client][Wep_Eviction] = true;
 						case 331: player_weapons[client][Wep_FistsSteel] = true;
 						case 416: player_weapons[client][Wep_MarketGardener] = true;
+						case 19, 206, 1007, 15077, 15079, 15091, 15092, 15116, 
+							15117, 15142, 15158: player_weapons[client][Wep_GrenadeStock] = true;
 						case 239, 1084, 1100: player_weapons[client][Wep_GRU] = true;
 						case 812, 833: player_weapons[client][Wep_Cleaver] = true;
 						case 56, 1005, 1092: player_weapons[client][Wep_Huntsman] = true;
@@ -3936,6 +3975,9 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 							}
 						}
 						case 649: player_weapons[client][Wep_Spycicle] = true;
+						case 20, 207, 661, 797, 806, 886, 895, 904, 913, 962, 971, 15009, 
+							15012, 15024, 15038, 15045, 15048, 15082, 15083, 15084, 15113, 
+							15137, 15138, 15155: player_weapons[client][Wep_StickybombStock] = true;
 						case 265: player_weapons[client][Wep_StickyJumper] = true;
 						case 424: player_weapons[client][Wep_Tomislav] = true;
 						case 171: player_weapons[client][Wep_TribalmansShiv] = true;
