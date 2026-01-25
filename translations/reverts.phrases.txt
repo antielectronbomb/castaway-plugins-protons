@@ -1122,7 +1122,7 @@
 	}
 	"RocketStock_Pre2008"
 	{
-		"en"	"Reverted to pre-February 28, 2008; increased reserve max ammo from 16 to 36"
+		"en"	"Reverted to pre-February 28, 2008; increased reserve max ammo from 20 to 36"
 	}
 	"RocketJmp_Pre2013"
 	{

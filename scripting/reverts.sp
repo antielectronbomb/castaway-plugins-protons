@@ -2773,7 +2773,7 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 			15006, 15014, 15028, 15043, 15052, 15057, 15081, 15104, 15105, 
 			15129, 15130, 15150: { if (ItemIsEnabled(Wep_RocketStock)) {
 			TF2Items_SetNumAttributes(itemNew, 1);
-			TF2Items_SetAttribute(itemNew, 0, 76, 2.25); // maxammo primary increased; +125% (from 16 to 36)
+			TF2Items_SetAttribute(itemNew, 0, 76, 1.80); // maxammo primary increased; +80% (from 20 to 36)
 		}}		
 		case 237: { if (ItemIsEnabled(Wep_RocketJumper)) {
 			switch (GetItemVariant(Wep_RocketJumper)) {				
