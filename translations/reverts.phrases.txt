@@ -684,6 +684,10 @@
 	{
 		"en"	"Reverted to pre-matchmaking, 20%% damage resistance when spun up regardless of health (6.7%% against crits)"
 	}
+	"BrassBeast_PreGM"
+	{
+		"en"	"Reverted to pre-gunmettle, no damage resistance when spun up"
+	}	
 	"Bushwacka_PreLW"
 	{
 		"en"	"Reverted to pre-love&war, 20%% fire vuln at all times, random crits enabled"
@@ -1299,6 +1303,10 @@
 	"Warrior_PreTB"
 	{
 		"en"	"Reverted to pre-toughbreak, heals 10 on hit, no damage vuln, -20 max health"
+	}
+	"Warrior_PreGM"
+	{
+		"en"	"Reverted to pre-gunmettle, no damage vuln, -20 max health"
 	}
 	"Wrangler_PreGM"
 	{
