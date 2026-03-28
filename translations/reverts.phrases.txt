@@ -158,6 +158,10 @@
 	{
 		"en"	"All Teleporters"
 	}
+	"medigun"
+	{
+		"en"	"All Mediguns"
+	}
 	"sniperquickscope"
 	{
 		"en"	"All Sniper Quickscopes"
@@ -667,6 +671,14 @@
 	"SniperQuickscope_Pre2008"
 	{
 		"en"	"Reverted to pre-February 14, 2008; can instantly headshot after zooming in (0.2 sec headshot prevention delay when zooming removed)"
+	}
+	"Medigun_PreMYM"
+	{
+		"en"	"Reverted to pre-matchmaking, does not mirror the speed of heal targets except for the Quick-Fix"
+	}
+	"Medigun_PreTB"
+	{
+		"en"	"Reverted to pre-toughbreak, does not mirror the speed of heal targets except for the Quick-Fix, no higher health regeneration while healing a hurt patient, no 3x build rate during setup"
 	}
 	"SniperRifle_PreLW"
 	{

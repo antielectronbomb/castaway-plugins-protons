@@ -321,6 +321,7 @@ enum struct Player {
 	bool has_built_object;
 	bool is_using_pda;
 	bool can_build_teleporter;
+	bool regen_think;
 }
 
 enum struct Entity {
@@ -449,6 +450,8 @@ DynamicDetour dhook_CTFPlayerShared_AddToSpyCloakMeter;
 DynamicDetour dhook_CWeaponMedigun_FindAndHealTargets;
 DynamicDetour dhook_CTFLunchBox_ApplyBiteEffects;
 DynamicDetour dhook_InternalCalculateObjectCost;
+DynamicDetour dhook_CTeamplayRoundBasedRules_GetActiveRoundTimer;
+DynamicDetour dhook_CTFPlayer_MedicGetHealTarget;
 
 Address CBaseObject_m_flHealth; // *((float *)a1 + 652)
 Address CObjectSentrygun_m_flShieldFadeTime; // *((float *)this + 712)
@@ -465,6 +468,8 @@ DynamicDetour dhook_GetPlayerClassData;
 // It's recommended that you name the int the same as the member.
 // We later load these with GameConfGetOffset(Handle gc, const char[] key)
 int m_flTauntNextStartTime;
+
+bool BypassRoundTimerChecks = false;
 
 Player players[MAXPLAYERS+1];
 Entity entities[2048];
@@ -496,6 +501,7 @@ enum
 	Feat_Minigun_Sentry, // Minigun Sentry Dmg Penalty
 	Feat_Sentry, // All Sentry Guns
 	Feat_Teleporter, // All Teleporters
+	Feat_Medigun, // All Mediguns
 #if defined MEMORY_PATCHES
 	Feat_SniperQuickscope, // Sniper 200ms Quickscope Delay Revert
 	Feat_SniperRifle, // All Sniper Rifles
@@ -685,6 +691,8 @@ public void OnPluginStart() {
 	ItemDefine("minigunsentry", "Minigun_Sentry_PreGM", CLASSFLAG_HEAVY | ITEMFLAG_DISABLED, Feat_Minigun_Sentry);
 	ItemDefine("sentry", "Sentry_PreTB", CLASSFLAG_ENGINEER, Feat_Sentry);
 	ItemDefine("teleporter", "TeleporterCost_PreMYM", CLASSFLAG_ENGINEER | ITEMFLAG_DISABLED, Feat_Teleporter);
+	ItemDefine("medigun", "Medigun_PreMYM", CLASSFLAG_MEDIC | ITEMFLAG_DISABLED, Feat_Medigun);
+	ItemVariant(Feat_Medigun, "Medigun_PreTB");
 #if defined MEMORY_PATCHES
 	ItemDefine("sniperquickscope", "SniperQuickscope_Pre2008", CLASSFLAG_SNIPER | ITEMFLAG_DISABLED, Feat_SniperQuickscope, true);
 	ItemDefine("sniperrifles", "SniperRifle_PreLW", CLASSFLAG_SNIPER, Feat_SniperRifle, true);
@@ -1129,6 +1137,8 @@ public void OnPluginStart() {
 		dhook_CTFLunchBox_ApplyBiteEffects = DynamicDetour.FromConf(conf, "CTFLunchBox::ApplyBiteEffects");
 		dhook_GetPlayerClassData = DynamicDetour.FromConf(conf, "GetPlayerClassData");
 		dhook_InternalCalculateObjectCost = DynamicDetour.FromConf(conf, "InternalCalculateObjectCost");
+		dhook_CTeamplayRoundBasedRules_GetActiveRoundTimer = DynamicDetour.FromConf(conf, "CTeamplayRoundBasedRules::GetActiveRoundTimer");
+		dhook_CTFPlayer_MedicGetHealTarget = DynamicDetour.FromConf(conf, "CTFPlayer::MedicGetHealTarget");
 
 		CBaseObject_m_flHealth = view_as<Address>(FindSendPropInfo("CBaseObject", "m_bHasSapper") - 4);
 		CObjectSentrygun_m_flShieldFadeTime = view_as<Address>(FindSendPropInfo("CObjectSentrygun", "m_nShieldLevel") + 4);
@@ -1368,6 +1378,8 @@ public void OnPluginStart() {
 	if (dhook_CTFLunchBox_ApplyBiteEffects == null) SetFailState("Failed to create dhook_CTFLunchBox_ApplyBiteEffects");
 	if (dhook_GetPlayerClassData == null) SetFailState("Failed to create dhook_GetPlayerClassData");
 	if (dhook_InternalCalculateObjectCost == null) SetFailState("Failed to create dhook_InternalCalculateObjectCost");
+	if (dhook_CTeamplayRoundBasedRules_GetActiveRoundTimer == null) SetFailState("Failed to create dhook_CTeamplayRoundBasedRules_GetActiveRoundTimer");
+	if (dhook_CTFPlayer_MedicGetHealTarget == null) SetFailState("Failed to create dhook_CTFPlayer_MedicGetHealTarget");
 
 	dhook_CTFPlayer_CanDisguise.Enable(Hook_Post, DHookCallback_CTFPlayer_CanDisguise);
 	dhook_CTFPlayer_CalculateMaxSpeed.Enable(Hook_Post, DHookCallback_CTFPlayer_CalculateMaxSpeed);
@@ -1391,6 +1403,8 @@ public void OnPluginStart() {
 	dhook_GetPlayerClassData.Enable(Hook_Pre, DHookCallback_GetTFClassData);
 	dhook_GetPlayerClassData.Enable(Hook_Post, DHookCallback_GetTFClassData);
 	dhook_InternalCalculateObjectCost.Enable(Hook_Pre, DHookCallback_InternalCalculateObjectCost);
+	dhook_CTeamplayRoundBasedRules_GetActiveRoundTimer.Enable(Hook_Pre, DHookCallback_CTeamplayRoundBasedRules_GetActiveRoundTimer);
+	dhook_CTFPlayer_MedicGetHealTarget.Enable(Hook_Pre, DHookCallback_CTFPlayer_MedicGetHealTarget);
 
 	for (idx = 1; idx <= MaxClients; idx++) {
 		if (IsClientConnected(idx)) OnClientConnected(idx);
@@ -4798,6 +4812,10 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 					else if (StrEqual(class, "tf_weapon_pda_engineer_build")) {
 						player_weapons[client][Feat_Sentry] = true;
 						player_weapons[client][Feat_Teleporter] = true;
+					}
+
+					else if (StrEqual(class, "tf_weapon_medigun")) {
+						player_weapons[client][Feat_Medigun] = true;
 					}
 
 					else if (
@@ -8288,6 +8306,8 @@ MRESReturn DHookCallback_CTFBaseRocket_GetRadius(int entity, DHookReturn returnV
 }
 
 MRESReturn DHookCallback_CTFPlayer_CalculateMaxSpeed(int entity, DHookReturn returnValue) {
+	char class[64];
+
 	if (
 		entity >= 1 &&
 		entity <= MaxClients &&
@@ -8356,6 +8376,32 @@ MRESReturn DHookCallback_CTFPlayer_CalculateMaxSpeed(int entity, DHookReturn ret
 					multiplier *= TF2Attrib_HookValueFloat(1.0, "mult_player_aiming_movespeed", weapon); // accounts for brass beast
 				}
 				multiplier *= 0.478; // heavy slows down to 47% of his movespeed when revved
+			}
+		}
+
+		if (
+			ItemIsEnabled(Feat_Medigun) &&
+			TF2_GetPlayerClass(entity) == TFClass_Medic &&
+			player_weapons[entity][Feat_Medigun]
+		) {
+			// The player is a Medic who is not using the Quick-Fix and is healing a target. In that case, do not mirror their target's speed.
+			int weapon = GetEntPropEnt(entity, Prop_Send, "m_hActiveWeapon");
+
+			if (weapon > 0) {
+				GetEntityClassname(weapon, class, sizeof(class));
+				if (
+					StrEqual(class, "tf_weapon_medigun") &&
+					GetEntPropEnt(weapon, Prop_Send, "m_hHealingTarget") != -1 &&
+					GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") != 411
+				) {
+					if (TF2_IsPlayerInCondition(entity, TFCond_SpeedBuffAlly)) {
+						returnValue.Value = 425.0;
+						return MRES_Override;
+					} else if (!TF2_IsPlayerInCondition(entity, TFCond_SpeedBuffAlly)) {
+						returnValue.Value = 320.0;
+						return MRES_Override;
+					}
+				}
 			}
 		}
 
@@ -8584,6 +8630,10 @@ MRESReturn DHookCallback_CTFPlayer_RegenThink(int client)
 	// Don't proceed if in MvM
 	if (cvar_ref_tf_gamemode_mvm.BoolValue)
 		return MRES_Ignored;
+
+	// Tracking for Pre-TB All Mediguns Revert
+	if (GetItemVariant(Feat_Medigun) == 1)
+		players[client].regen_think = true;
 
 	if (
 		client > 0 &&
@@ -9148,11 +9198,21 @@ MRESReturn DHookCallback_CWeaponMedigun_FindAndHealTargets_Pre(int entity) {
 			cvar_ref_weapon_medigun_charge_rate.FloatValue /= divisor;
 		}
 	}
+
+	// Tracking for Pre-TB Medigun Revert, prevent 3x Uber build rate during setup time
+	if (GetItemVariant(Feat_Medigun) == 1) {	
+		BypassRoundTimerChecks = true;
+	}
 	return MRES_Ignored;
 }
 
 MRESReturn DHookCallback_CWeaponMedigun_FindAndHealTargets_Post(int entity) {
 	cvar_ref_weapon_medigun_charge_rate.RestoreDefault();
+
+	// Tracking for Pre-TB Medigun Revert, prevent 3x Uber build rate during setup time
+	if (GetItemVariant(Feat_Medigun) == 1) {
+		BypassRoundTimerChecks = false;
+	}	
 	return MRES_Ignored;
 }
 
@@ -9267,6 +9327,39 @@ MRESReturn DHookCallback_InternalCalculateObjectCost(DHookReturn returnValue, DH
 		return MRES_Supercede;
 	}
 	return MRES_Ignored;
+}
+
+MRESReturn DHookCallback_CTeamplayRoundBasedRules_GetActiveRoundTimer(DHookReturn returnValue)
+{
+	// Only also called with this function for the Medigun faster Uber build. Very hacky but it stops the Medic from building faster Uber during setup time.
+	if (
+		GetItemVariant(Feat_Medigun) == 1 &&
+		IsSetup() && BypassRoundTimerChecks
+	) {
+		returnValue.Value = false;
+		return MRES_Supercede;
+	}
+	return MRES_Ignored;
+}
+
+MRESReturn DHookCallback_CTFPlayer_MedicGetHealTarget(int entity, DHookReturn returnValue)
+{
+	// Do not gain more HP over time from healing injured patients.
+	if (
+		GetItemVariant(Feat_Medigun) == 1 &&
+		TF2_GetPlayerClass(entity) == TFClass_Medic && 
+		players[entity].regen_think
+	) {
+		players[entity].regen_think = false;
+		returnValue.Value = false;
+		return MRES_Supercede;
+	}
+	return MRES_Ignored;
+}
+
+bool IsSetup()
+{
+	return GameRules_GetProp("m_bInSetup") == 1;
 }
 
 stock void RewardChargeOnChargeKill(int client) // This is called next frame to compensate for charge bash kills.
