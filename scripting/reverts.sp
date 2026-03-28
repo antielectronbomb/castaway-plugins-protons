@@ -318,6 +318,9 @@ enum struct Player {
 	float time_since_charge_cancel;
 	bool is_last_shot;
 	int teleporter_metal;
+	bool has_built_object;
+	bool is_using_pda;
+	bool can_build_teleporter;
 }
 
 enum struct Entity {
@@ -1037,6 +1040,7 @@ public void OnPluginStart() {
 
 	HookEvent("player_spawn", OnGameEvent, EventHookMode_Post);
 	HookEvent("player_death", OnGameEvent, EventHookMode_Pre);
+	HookEvent("player_builtobject", OnGameEvent, EventHookMode_Post);
 	HookEvent("post_inventory_application", OnGameEvent, EventHookMode_Post);
 	HookEvent("object_destroyed", OnGameEvent, EventHookMode_Post);
 	HookEvent("crossbow_heal", OnGameEvent, EventHookMode_Pre);
@@ -2139,30 +2143,52 @@ public void OnGameFrame() {
 						// Pre-MYM Teleporter Build Metal Cost Amount GUI Revert
 						// Make build cost say 125 when the construction GUI pops up to prevent confusion
 						// This works by tricking the game by using the teleporter cost attribute bonus
-						// TODO: Need to find a way to make the if statements occur only once instead of every frame to prevent problems!
 						weapon = GetEntPropEnt(idx, Prop_Send, "m_hActiveWeapon");
 
 						if (weapon > 0) {
 							GetEntityClassname(weapon, class, sizeof(class));
 
 							if (ItemIsEnabled(Feat_Teleporter)) {
-								if (StrEqual(class, "tf_weapon_pda_engineer_build")) {
+								if (
+									StrEqual(class, "tf_weapon_pda_engineer_build") &&
+									!players[idx].has_built_object
+								) {
 									TF2Attrib_RemoveByDefIndex(idx, 790);
 										// PrintToChat(idx, "removed attrib 790");
+									players[idx].has_built_object = true;
+									players[idx].is_using_pda = true;
 								}
-								else if (
+								if (
 									!StrEqual(class, "tf_weapon_pda_engineer_build") &&
-									!StrEqual(class, "tf_weapon_builder")
+									!StrEqual(class, "tf_weapon_builder") &&
+									players[idx].has_built_object
 								) {
-									TF2Attrib_AddCustomPlayerAttribute(idx, "mod teleporter cost", 2.5, 0.1);
+									TF2Attrib_AddCustomPlayerAttribute(idx, "mod teleporter cost", 2.5, -1.0);
+									players[idx].has_built_object = false;
+									players[idx].is_using_pda = false;
 										// PrintToChat(idx, "applied attrib 790");
 								}
 
 								// Check if metal is less than 125 (or 62) so that the GUI says 'Not Enough Metal'
-								// Not a perfect workaround. Sometimes it bugs out, but its good enough.
-								if ((GetEntProp(idx, Prop_Data, "m_iAmmo", 4, TF_AMMO_METAL) < players[idx].teleporter_metal)) {
-									TF2Attrib_AddCustomPlayerAttribute(idx, "mod teleporter cost", 2.5, 0.1);
-								} 
+								if (
+									(GetEntProp(idx, Prop_Data, "m_iAmmo", 4, TF_AMMO_METAL) < players[idx].teleporter_metal) &&
+									players[idx].is_using_pda
+								) {
+									TF2Attrib_AddCustomPlayerAttribute(idx, "mod teleporter cost", 2.5, -1.0);
+										// PrintToChat(idx, "Not Enough Metal; applied attrib 790");
+									players[idx].is_using_pda = false;
+									players[idx].can_build_teleporter = true;
+								}
+
+								// Check if Engineer is still using PDA when he has less than 125/62 metal, gets refilled, then allow constructing teleporters again
+								if (
+									(GetEntProp(idx, Prop_Data, "m_iAmmo", 4, TF_AMMO_METAL) >= players[idx].teleporter_metal) &&
+									players[idx].can_build_teleporter
+								) {
+									TF2Attrib_RemoveByDefIndex(idx, 790);
+										// PrintToChat(idx, "Still using PDA but refilled metal to over 125/62; removed attrib 790");
+									players[idx].can_build_teleporter = false;
+								}
 							}
 						}
 					}
@@ -4491,6 +4517,39 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 				}
 			}
 		}
+
+		{
+			// Pre-MYM Teleporter Metal GUI Revert - Make sure attribute is toggled on spawn
+			if (
+				ItemIsEnabled(Feat_Teleporter) &&
+				TF2_GetPlayerClass(client) == TFClass_Engineer
+			) {
+				players[client].has_built_object = true;
+			}
+		}		
+	}
+
+	if (StrEqual(name, "player_builtobject")) {
+		client = GetClientOfUserId(GetEventInt(event, "userid"));
+		// PrintToChatAll("object = %i", GetEventInt(event, "object")); // teleporter object int is 1
+
+		{
+			// Pre-MYM Teleporter Build Metal Cost Amount GUI Revert Tracking
+			if (
+				ItemIsEnabled(Feat_Teleporter) &&
+				TF2_GetPlayerClass(client) == TFClass_Engineer
+			) {
+				weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+
+				if (weapon > 0) {
+					GetEntityClassname(weapon, class, sizeof(class));
+
+					if (GetEventInt(event, "object") > -1) {
+						players[client].has_built_object = true;
+					}
+				}
+			}
+		}
 	}
 
 	if (StrEqual(name, "player_death")) {
@@ -4649,7 +4708,6 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 
 			if (
 				ItemIsEnabled(Feat_Teleporter) &&
-				(GetItemVariant(Wep_EurekaEffect) != 0 || GetItemVariant(Wep_EurekaEffect) == 0) &&
 				IsPlayerAlive(client) &&
 				TF2_GetPlayerClass(client) == TFClass_Engineer
 			) {
@@ -4668,7 +4726,7 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 					}
 				}
 			}
-		}		
+		}
 
 		// apply pre-toughbreak weapon switch if cvar is enabled
 		if (cvar_pre_toughbreak_switch.BoolValue)
