@@ -4493,8 +4493,13 @@ public void TF2Items_OnGiveNamedItem_Post(int client, char[] class, int index, i
 		TF2Attrib_SetByDefIndex(entity, 264, (index == 357) ? 1.50 : 1.0); // melee range multiplier
 		TF2Attrib_SetByDefIndex(entity, 781, 0.0); // is a sword
 	} else if (
+		ItemIsEnabled(Feat_EngineerMechanics) &&
+		StrEqual(class, "tf_weapon_wrench")
+	) {
+		TF2Attrib_SetByDefIndex(entity, 94, 0.59); // Repair rate increased; decrease repair rate to 20 metal per 100 hp
+	} else if (
 		GetItemVariant(Feat_EngineerMechanics) == 1 &&
-		(StrEqual(class, "tf_weapon_pda_engineer_build"))
+		StrEqual(class, "tf_weapon_pda_engineer_build")
 	) {
 		TF2Attrib_SetByDefIndex(entity, 353, 1.0); // cannot pick up buildings 
 	} else if (
