@@ -150,6 +150,10 @@
 	{
 		"en"	"Minigun Sentry Dmg Penalty"
 	}
+	"engimechanics"
+	{
+		"en"	"Engineer Mechanics"
+	}
 	"sentry"
 	{
 		"en"	"All Sentry Guns"
@@ -659,6 +663,14 @@
 	"Minigun_Sentry_PreGM"
 	{
 		"en"	"Reverted to pre-gunmettle, Lvl 2 Sentries have 20%% resist (from 15%%), Lvl 3 Sentries have 33%% resist (from 20%%) penalties against all Miniguns"
+	}
+	"EngineerMechanics_PreGM"
+	{
+		"en"	"Reverted to pre-gunmettle, multiplicative construction boost, repairs cost 20 metal (from 33) per 100 HP, -25%% hauling speed (from -10%%), changing Wrenches destroys buildings"
+	}
+	"EngineerMechanics_PreEngiUpdate"
+	{
+		"en"	"Reverted to pre-Engineer Update, cannot carry buildings, multiplicative construction boost, repairs cost 20 metal (from 33) per 100 HP, -25%% hauling speed (from -10%%), changing Wrenches destroys buildings"
 	}
 	"Sentry_PreTB"
 	{

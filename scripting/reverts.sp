@@ -332,6 +332,9 @@ enum struct Entity {
 	int patient;
 	char class[MAX_NAME_LENGTH];
 	int attached_sapper;
+	// Construction boosts. Would make this a separate enum struct but enum structs are one-dimensional.
+	float construction_boost_expiry_times[MAXPLAYERS + 1];
+	float construction_boosts[MAXPLAYERS + 1];	
 }
 
 ConVar cvar_enable;
@@ -365,6 +368,7 @@ ConVar cvar_ref_tf_weapon_criticals;
 ConVar cvar_ref_weapon_medigun_charge_rate;
 ConVar cvar_ref_tf_dev_marked_for_death_lifetime;
 ConVar cvar_ref_tf_damageforcescale_pyro_jump;
+ConVar cvar_ref_tf_construction_build_rate_multiplier;
 
 #if defined MEMORY_PATCHES
 MemoryPatch patch_RevertDisciplinaryAction;
@@ -410,6 +414,7 @@ Handle sdkcall_JarExplode;
 Handle sdkcall_GetMaxHealth;
 Handle sdkcall_AwardAchievement;
 Handle sdkcall_CBaseObject_GetReversesBuildingConstructionSpeed;
+Handle sdkcall_CTFWrench_GetConstructionValue;
 Handle sdkcall_CTFWeaponBaseGun_GetProjectileDamage;
 Handle sdkcall_CTFWeaponBaseGun_GetWeaponSpread;
 Handle sdkcall_CWeaponMedigun_CanAttack;
@@ -446,6 +451,7 @@ DynamicDetour dhook_CTFRevolver_CanFireCriticalShot;
 DynamicDetour dhook_AI_CriteriaSet_AppendCriteria;
 DynamicDetour dhook_CBaseObject_OnConstructionHit;
 DynamicDetour dhook_CBaseObject_CreateAmmoPack;
+DynamicDetour dhook_CBaseObject_GetConstructionMultiplier;
 DynamicDetour dhook_CTFPlayerShared_AddToSpyCloakMeter;
 DynamicDetour dhook_CWeaponMedigun_FindAndHealTargets;
 DynamicDetour dhook_CTFLunchBox_ApplyBiteEffects;
@@ -499,6 +505,7 @@ enum
 	Feat_Sword, // All Swords	
 	Feat_Minigun, // All Miniguns
 	Feat_Minigun_Sentry, // Minigun Sentry Dmg Penalty
+	Feat_EngineerMechanics, // Pre-Gun Mettle Engineer Mechanics
 	Feat_Sentry, // All Sentry Guns
 	Feat_Teleporter, // All Teleporters
 	Feat_Medigun, // All Mediguns
@@ -689,6 +696,8 @@ public void OnPluginStart() {
 	ItemDefine("swords", "Swords_PreTB", CLASSFLAG_DEMOMAN, Feat_Sword);
 	ItemDefine("miniramp", "Minigun_ramp_PreLW", CLASSFLAG_HEAVY, Feat_Minigun);
 	ItemDefine("minigunsentry", "Minigun_Sentry_PreGM", CLASSFLAG_HEAVY | ITEMFLAG_DISABLED, Feat_Minigun_Sentry);
+	ItemDefine("engimechanics", "EngineerMechanics_PreGM", CLASSFLAG_ENGINEER | ITEMFLAG_DISABLED, Feat_EngineerMechanics);
+	ItemVariant(Feat_EngineerMechanics, "EngineerMechanics_PreGM");
 	ItemDefine("sentry", "Sentry_PreTB", CLASSFLAG_ENGINEER, Feat_Sentry);
 	ItemDefine("teleporter", "TeleporterCost_PreMYM", CLASSFLAG_ENGINEER | ITEMFLAG_DISABLED, Feat_Teleporter);
 	ItemDefine("medigun", "Medigun_PreMYM", CLASSFLAG_MEDIC | ITEMFLAG_DISABLED, Feat_Medigun);
@@ -1030,6 +1039,7 @@ public void OnPluginStart() {
 	cvar_ref_weapon_medigun_charge_rate = FindConVar("weapon_medigun_charge_rate");
 	cvar_ref_tf_dev_marked_for_death_lifetime = FindConVar("tf_dev_marked_for_death_lifetime");
 	cvar_ref_tf_damageforcescale_pyro_jump = FindConVar("tf_damageforcescale_pyro_jump");
+	cvar_ref_tf_construction_build_rate_multiplier = FindConVar("tf_construction_build_rate_multiplier");
 
 #if !defined MEMORY_PATCHES
 	cvar_ref_tf_dropped_weapon_lifetime.AddChangeHook(OnDroppedWeaponLifetimeCvarChange);
@@ -1089,6 +1099,11 @@ public void OnPluginStart() {
 		sdkcall_CBaseObject_GetReversesBuildingConstructionSpeed = EndPrepSDKCall();
 
 		StartPrepSDKCall(SDKCall_Entity);
+		PrepSDKCall_SetFromConf(conf, SDKConf_Signature, "CTFWrench::GetConstructionValue");
+		PrepSDKCall_SetReturnInfo(SDKType_Float, SDKPass_Plain);
+		sdkcall_CTFWrench_GetConstructionValue = EndPrepSDKCall();		
+
+		StartPrepSDKCall(SDKCall_Entity);
 		PrepSDKCall_SetFromConf(conf, SDKConf_Signature, "CTFWeaponBaseGun::GetProjectileDamage");
 		PrepSDKCall_SetReturnInfo(SDKType_Float, SDKPass_Plain);
 		sdkcall_CTFWeaponBaseGun_GetProjectileDamage = EndPrepSDKCall();
@@ -1132,6 +1147,7 @@ public void OnPluginStart() {
 		dhook_AI_CriteriaSet_AppendCriteria = DynamicDetour.FromConf(conf, "AI_CriteriaSet::AppendCriteria");
 		dhook_CBaseObject_OnConstructionHit = DynamicDetour.FromConf(conf, "CBaseObject::OnConstructionHit");
 		dhook_CBaseObject_CreateAmmoPack = DynamicDetour.FromConf(conf, "CBaseObject::CreateAmmoPack");
+		dhook_CBaseObject_GetConstructionMultiplier = DynamicDetour.FromConf(conf, "CBaseObject::GetConstructionMultiplier");
 		dhook_CTFPlayerShared_AddToSpyCloakMeter = DynamicDetour.FromConf(conf, "CTFPlayerShared::AddToSpyCloakMeter");
 		dhook_CWeaponMedigun_FindAndHealTargets = DynamicDetour.FromConf(conf, "CWeaponMedigun::FindAndHealTargets");
 		dhook_CTFLunchBox_ApplyBiteEffects = DynamicDetour.FromConf(conf, "CTFLunchBox::ApplyBiteEffects");
@@ -1344,6 +1360,7 @@ public void OnPluginStart() {
 	if (sdkcall_GetMaxHealth == null) SetFailState("Failed to create sdkcall_GetMaxHealth");
 	if (sdkcall_AwardAchievement == null) SetFailState("Failed to create sdkcall_AwardAchievement");
 	if (sdkcall_CBaseObject_GetReversesBuildingConstructionSpeed == null) SetFailState("Failed to create sdkcall_CBaseObject_GetReversesBuildingConstructionSpeed");
+	if (sdkcall_CTFWrench_GetConstructionValue == null) SetFailState("Failed to create sdkcall_CTFWrench_GetConstructionValue");
 	if (sdkcall_CTFWeaponBaseGun_GetProjectileDamage == null) SetFailState("Failed to create sdkcall_CTFWeaponBaseGun_GetProjectileDamage");
 	if (sdkcall_CTFWeaponBaseGun_GetWeaponSpread == null) SetFailState("Failed to create sdkcall_CTFWeaponBaseGun_GetWeaponSpread");
 	if (sdkcall_CWeaponMedigun_CanAttack == null) SetFailState("Failed to create sdkcall_CWeaponMedigun_CanAttack");
@@ -1373,6 +1390,7 @@ public void OnPluginStart() {
 	if (dhook_AI_CriteriaSet_AppendCriteria == null) SetFailState("Failed to create dhook_AI_CriteriaSet_AppendCriteria");
 	if (dhook_CBaseObject_OnConstructionHit == null) SetFailState("Failed to create dhook_CBaseObject_OnConstructionHit");
 	if (dhook_CBaseObject_CreateAmmoPack == null) SetFailState("Failed to create dhook_CBaseObject_CreateAmmoPack");
+	if (dhook_CBaseObject_GetConstructionMultiplier == null) SetFailState("Failed to create dhook_CBaseObject_GetConstructionMultiplier");
 	if (dhook_CTFPlayerShared_AddToSpyCloakMeter == null) SetFailState("Failed to create dhook_CTFPlayerShared_AddToSpyCloakMeter");
 	if (dhook_CWeaponMedigun_FindAndHealTargets == null) SetFailState("Failed to create dhook_CWeaponMedigun_FindAndHealTargets");
 	if (dhook_CTFLunchBox_ApplyBiteEffects == null) SetFailState("Failed to create dhook_CTFLunchBox_ApplyBiteEffects");
@@ -1395,6 +1413,7 @@ public void OnPluginStart() {
 	dhook_AI_CriteriaSet_AppendCriteria.Enable(Hook_Pre, DHookCallback_AI_CriteriaSet_AppendCriteria);
 	dhook_CBaseObject_OnConstructionHit.Enable(Hook_Pre, DHookCallback_CBaseObject_OnConstructionHit);
 	dhook_CBaseObject_CreateAmmoPack.Enable(Hook_Pre, DHookCallback_CBaseObject_CreateAmmoPack);
+	dhook_CBaseObject_GetConstructionMultiplier.Enable(Hook_Post, DHookCallback_CBaseObject_GetConstructionMultiplier);
 	dhook_CTFPlayerShared_AddToSpyCloakMeter.Enable(Hook_Pre, DHookCallback_CTFPlayerShared_AddToSpyCloakMeter);
 	dhook_CWeaponMedigun_FindAndHealTargets.Enable(Hook_Pre, DHookCallback_CWeaponMedigun_FindAndHealTargets_Pre);
 	dhook_CWeaponMedigun_FindAndHealTargets.Enable(Hook_Post, DHookCallback_CWeaponMedigun_FindAndHealTargets_Post);
@@ -2635,6 +2654,7 @@ public void OnGameFrame() {
 			SetConVarMaybe(cvar_ref_tf_sticky_airdet_radius, "1.0", ItemIsEnabled(Feat_Stickybomb));
 			SetConVarMaybe(cvar_ref_tf_sticky_radius_ramp_time, "0.0", ItemIsEnabled(Feat_Stickybomb));
 			SetConVarMaybe(cvar_ref_tf_dev_marked_for_death_lifetime, "10.0", GetItemVariant(Wep_FanOWar) == 1);
+			SetConVarMaybe(cvar_ref_tf_construction_build_rate_multiplier, "2.0", ItemIsEnabled(Feat_EngineerMechanics));
 		}
 	}
 }
@@ -2702,6 +2722,10 @@ public void OnEntityCreated(int entity, const char[] class) {
 
 	else if (StrContains(class, "obj_") == 0) {
 		SDKHook(entity, SDKHook_OnTakeDamage, SDKHookCB_OnTakeDamage_Building);
+
+		// For Pre-Gun Mettle Engineer Mechanics
+		for (int i = 0; i <= MAXPLAYERS; ++i)
+			entities[entity].construction_boost_expiry_times[i] = -1.0;
 
 		if (StrEqual(class, "obj_sentrygun")) {
 			dhook_CObjectSentrygun_OnWrenchHit.HookEntity(Hook_Pre, entity, DHookCallback_CObjectSentrygun_OnWrenchHit_Pre);
@@ -4469,6 +4493,11 @@ public void TF2Items_OnGiveNamedItem_Post(int client, char[] class, int index, i
 		TF2Attrib_SetByDefIndex(entity, 264, (index == 357) ? 1.50 : 1.0); // melee range multiplier
 		TF2Attrib_SetByDefIndex(entity, 781, 0.0); // is a sword
 	} else if (
+		GetItemVariant(Feat_EngineerMechanics) == 1 &&
+		(StrEqual(class, "tf_weapon_pda_engineer_build"))
+	) {
+		TF2Attrib_SetByDefIndex(entity, 353, 1.0); // cannot pick up buildings 
+	} else if (
 		GetItemVariant(Wep_Vaccinator) == 1 &&
 		StrEqual(class, "tf_weapon_medigun") &&
 		index == 998
@@ -4810,6 +4839,7 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 					}
 
 					else if (StrEqual(class, "tf_weapon_pda_engineer_build")) {
+						player_weapons[client][Feat_EngineerMechanics] = true;
 						player_weapons[client][Feat_Sentry] = true;
 						player_weapons[client][Feat_Teleporter] = true;
 					}
@@ -8405,6 +8435,18 @@ MRESReturn DHookCallback_CTFPlayer_CalculateMaxSpeed(int entity, DHookReturn ret
 			}
 		}
 
+		if (
+			ItemIsEnabled(Feat_EngineerMechanics) &&
+			TF2_GetPlayerClass(entity) == TFClass_Engineer &&
+			GetEntProp(entity, Prop_Send, "m_bCarryingObject") && 
+			!cvar_ref_tf_gamemode_mvm.BoolValue && 
+			!TF2_IsPlayerInCondition(entity, TFCond_HalloweenBombHead)
+		) {
+			// If an Engineer is carrying a building, slow him down by 25% instead of 10%.
+			returnValue.Value = view_as<float>(returnValue.Value) / 0.90 * 0.75;
+			return MRES_Override;
+		}
+
 		if (multiplier != 1.0)
 		{
 			returnValue.Value = view_as<float>(returnValue.Value) * multiplier;
@@ -8819,7 +8861,7 @@ MRESReturn DHookCallback_CObjectSentrygun_Construct_Post(int entity, DHookReturn
 	return MRES_Ignored;
 }
 
-MRESReturn DHookCallback_CBaseObject_OnConstructionHit(int entity, DHookReturn returnValue) {
+MRESReturn DHookCallback_CBaseObject_OnConstructionHit(int entity, DHookParam parameters) {
 	char class[64];
 	if (
 		ItemIsEnabled(Wep_Gunslinger) &&
@@ -8831,6 +8873,20 @@ MRESReturn DHookCallback_CBaseObject_OnConstructionHit(int entity, DHookReturn r
 			// Do not allow mini sentries to be construction boosted.
 			return MRES_Supercede;
 		}
+	}
+
+	if (
+		ItemIsEnabled(Feat_EngineerMechanics) ||
+		(
+			ItemIsEnabled(Feat_EngineerMechanics) && 
+			!GetEntProp(entity, Prop_Send, "m_bMiniBuilding") && 
+			!ItemIsEnabled(Wep_Gunslinger)
+		)
+	) {
+		// Allow for construction boost on hit on all buildings except for mini sentries
+		int client = parameters.Get(1);
+		entities[entity].construction_boost_expiry_times[client] = GetGameTime() + 1;
+		entities[entity].construction_boosts[client] = SDKCall(sdkcall_CTFWrench_GetConstructionValue, parameters.Get(2));
 	}
 	return MRES_Ignored;
 }
@@ -9321,8 +9377,11 @@ MRESReturn DHookCallback_CObjectSapper_FinishedBuilding(int entity)
 
 MRESReturn DHookCallback_InternalCalculateObjectCost(DHookReturn returnValue, DHookParam parameters)
 {
-	if (parameters.Get(1) == OBJ_TELEPORTER) // Revert the teleporter cost to 125. This won't affect the client however...
-	{
+	// Revert the teleporter cost to 125. This won't affect the client however...
+	if (
+		ItemIsEnabled(Feat_Teleporter) &&
+		parameters.Get(1) == OBJ_TELEPORTER
+	) {
 		returnValue.Value = 125;
 		return MRES_Supercede;
 	}
@@ -9353,6 +9412,16 @@ MRESReturn DHookCallback_CTFPlayer_MedicGetHealTarget(int entity, DHookReturn re
 		players[entity].regen_think = false;
 		returnValue.Value = false;
 		return MRES_Supercede;
+	}
+	return MRES_Ignored;
+}
+
+MRESReturn DHookCallback_CBaseObject_GetConstructionMultiplier(int entity, DHookReturn returnValue)
+{
+	if (ItemIsEnabled(Feat_EngineerMechanics)) {
+		// The actual function is still called so the CUtlMap is still properly managed.
+		returnValue.Value = GetBuildingConstructionMultiplier_NoHook(entity);
+		return MRES_Override;
 	}
 	return MRES_Ignored;
 }
@@ -9700,6 +9769,35 @@ stock void ExtendDebuffs(int client)
 			}
 		}
 	}
+}
+
+stock float GetBuildingConstructionMultiplier_NoHook(int entity)
+{
+	// Construction hit boosts are now mulitplicative again, rather than additive.
+	if (SDKCall(sdkcall_CBaseObject_GetReversesBuildingConstructionSpeed, entity)) // Is the building being sapped by the Red Tape Recorder?
+		return -1.0;
+	float multiplier = 1.0;
+
+	// All construction boosts.
+	for (int i = 1; i <= MAXPLAYERS; ++i)
+	{
+		if (entities[entity].construction_boost_expiry_times[i] < GetGameTime())
+			entities[entity].construction_boost_expiry_times[i] = -1.0;
+		else if (entities[entity].construction_boost_expiry_times[i] > 0)
+			multiplier *= entities[entity].construction_boosts[i];
+	}
+
+	// Increase the speed if the building is being redeployed or if it is a mini sentry.
+	multiplier += GetEntProp(entity, Prop_Send, "m_bCarryDeploy") ? 2.0 : 0.0;
+	if (ItemIsEnabled(Wep_Gunslinger) && GetEntProp(entity, Prop_Send, "m_bMiniBuilding")) {
+		multiplier += 3.0;
+	} else 	if (!ItemIsEnabled(Wep_Gunslinger) && GetEntProp(entity, Prop_Send, "m_bMiniBuilding")) {
+		// If Gunslinger revert is disabled, don't modify its default construction speed (+150% build speed)
+		multiplier += 2.5;
+	} else if (!GetEntProp(entity, Prop_Send, "m_bMiniBuilding")) {
+		multiplier += 0.0;
+	}
+	return multiplier;
 }
 
 // math stocks
