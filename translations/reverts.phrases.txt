@@ -890,7 +890,7 @@
 	}
 	"Targe_Pre2013"
 	{
-		"en"	"Reverted to pre-July 10, 2013; 40%% blast resistance, crit after bash, no debuff removal, bash dmg at end of charge"
+		"en"	"Reverted to pre-Summer 2013, 40%% blast resistance, crit after bash, no debuff removal, bash dmg at end of charge"
 	}
 	"Claidheamh_PreTB"
 	{
@@ -928,6 +928,10 @@
 	{
 		"en"	"Reverted to pre-toughbreak, regenerates +2 HP/s flat regardless if user recently took damage"
 	}
+	"Concheror_Pre2013"
+	{
+		"en"	"Reverted to pre-Summer 2013, no health regen passive"
+	}	
 	"ConniversKunai_PreGM"
 	{
 		"en"	"Reverted to pre-gunmettle, -65 max health on wearer, max 180 hp overheal, no min health gain cap"
@@ -962,7 +966,7 @@
 	}
 	"CozyCamper_Pre2013"
 	{
-		"en"	"Reverted to pre-July 10, 2013, +1 health per second, -80%% slower move speed while aiming, flinch resist at any charge level"
+		"en"	"Reverted to pre-Summer 2013, +1 health per second, -80%% slower move speed while aiming, flinch resist at any charge level"
 	}
 	"CozyCamper_Release"
 	{
@@ -1062,7 +1066,7 @@
 	}
 	"Ringer_Pre2013"
 	{
-		"en"	"Reverted to pre-July 10, 2013; can pick up ammo, constant 90%% dmg resist for 6s, no speedboost, no afterburn immunity after feign, no debuff reduction when cloaked"
+		"en"	"Reverted to pre-Summer 2013, can pick up ammo, constant 90%% dmg resist for 6s, no speedboost, no afterburn immunity after feign, no debuff reduction when cloaked"
 	}	
 	"Degreaser_PreTB"
 	{
@@ -1158,7 +1162,7 @@
 	}
 	"EscapePlan_PreJuly2013"
 	{
-		"en"	"Reverted to pre-July 10, 2013; while active: blocks Medic healing, can't call for Medics, no mark-for-death"
+		"en"	"Reverted to pre-Summer 2013, while active: blocks Medic healing, can't call for Medics, no mark-for-death"
 	}	
 	"Eureka_SpawnRefill"
 	{

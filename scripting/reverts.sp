@@ -784,6 +784,7 @@ public void OnPluginStart() {
 	ItemVariant(Wep_CleanerCarbine, "Carbine_PreTB");
 	ItemDefine("cloakanddagger", "CloakAndDagger_Release", CLASSFLAG_SPY | ITEMFLAG_DISABLED, Wep_CloakAndDagger);
 	ItemDefine("concheror", "Concheror_PreTB", CLASSFLAG_SOLDIER, Wep_Concheror);
+	ItemVariant(Wep_Concheror, "Concheror_Pre2013");
 	ItemDefine("kunai", "ConniversKunai_PreGM", CLASSFLAG_SPY | ITEMFLAG_DISABLED, Wep_ConniversKunai);
 	ItemDefine("cowmangler", "CowMangler_Release", CLASSFLAG_SOLDIER, Wep_CowMangler);
 	ItemVariant(Wep_CowMangler, "CowMangler_Pre2013");
@@ -3504,8 +3505,16 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 			TF2Items_SetAttribute(itemNew, 2, 810, 1.00); // mod_cloak_no_regen_from_items (Attrib_NoCloakFromAmmo)
 		}}
 		case 354: { if (ItemIsEnabled(Wep_Concheror)) {
-			TF2Items_SetNumAttributes(itemNew, 1);
-			TF2Items_SetAttribute(itemNew, 0, 57, 2.0); // +2 health regenerated per second on wearer
+			switch (GetItemVariant(Wep_Concheror)) {
+				case 0: { // Pre-Tough Break Concheror
+					TF2Items_SetNumAttributes(itemNew, 1);
+					TF2Items_SetAttribute(itemNew, 0, 57, 2.0); // +2 health regenerated per second on wearer
+				}
+				case 1: { // Pre-Summer 2013 Concheror
+					TF2Items_SetNumAttributes(itemNew, 1);
+					TF2Items_SetAttribute(itemNew, 0, 57, 0.0); // +0 health regenerated per second on wearer
+				}
+			}
 		}}
 		case 356: { if (ItemIsEnabled(Wep_ConniversKunai)) {
 			TF2Items_SetNumAttributes(itemNew, 2);
