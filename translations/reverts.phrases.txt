@@ -184,7 +184,7 @@
 	}
 	"spywalkspeed"
 	{
-		"en"	"Walk Speed"
+		"en"	"Spy Walk Speed"
 	}
 	"spymechanics"
 	{
