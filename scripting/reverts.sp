@@ -878,6 +878,7 @@ public void OnPluginStart() {
 	ItemDefine("gunslinger", "Gunslinger_PreGM", CLASSFLAG_ENGINEER, Wep_Gunslinger);
 	ItemVariant(Wep_Gunslinger, "Gunslinger_Release");
 	ItemDefine("zatoichi", "Zatoichi_PreTB", CLASSFLAG_SOLDIER | CLASSFLAG_DEMOMAN, Wep_Zatoichi);
+	ItemVariant(Wep_Zatoichi, "Zatoichi_PreJul2011");
 	ItemDefine("huolong", "HuoLong_PreMYM", CLASSFLAG_HEAVY | ITEMFLAG_DISABLED, Wep_HuoLongHeater);
 	ItemDefine("huntsman", "Huntsman_Pre2013", CLASSFLAG_SNIPER, Wep_Huntsman);
 	ItemVariant(Wep_Huntsman, "Huntsman_PreTB");
@@ -2539,7 +2540,7 @@ public void OnGameFrame() {
 					{
 						// zatoichi honorbound
 
-						if (ItemIsEnabled(Wep_Zatoichi)) {
+						if (GetItemVariant(Wep_Zatoichi) == 0) {
 							weapon = GetEntPropEnt(idx, Prop_Send, "m_hActiveWeapon");
 
 							if (weapon > 0) {

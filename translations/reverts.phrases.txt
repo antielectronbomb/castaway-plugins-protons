@@ -1272,6 +1272,10 @@
 	{
 		"en"	"Reverted to pre-toughbreak, fast switch, less range, cannot switch until kill, full heal, has random crits"
 	}
+	"Zatoichi_PreJul2011"
+	{
+		"en"	"Reverted to pre-July 7, 2011; fast switch, less range, can switch weapons, full heal, has random crits"
+	}
 	"Hibernate_Release"
 	{
 		"en"	"Restored release item set bonus, +5%% crit resist. Equip the Brass Beast, Buffalo Steak Sandvich and Warrior's Spirit to gain the bonus, the hat is not required"
