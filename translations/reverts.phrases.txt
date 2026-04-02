@@ -792,6 +792,10 @@
 	{
 		"en"	"Reverted to pre-toughbreak, can redeploy, more air speed, while deployed float mid-air when on fire"
 	}
+	"BaseJumper_PreJI"
+	{
+		"en"	"Reverted to pre-inferno, can redeploy, more air speed"
+	}
 	"BabyFace_PreGM"
 	{
 		"en"	"Reverted to pre-gunmettle, no boost loss on damage, only -25%% boost loss on air jumps"

@@ -750,6 +750,7 @@ public void OnPluginStart() {
 	ItemVariant(Wep_Backburner, "Backburner_119");
 	ItemVariant(Wep_Backburner, "Backburner_Release");
 	ItemDefine("basejump", "BaseJumper_PreTB", CLASSFLAG_SOLDIER | CLASSFLAG_DEMOMAN, Wep_BaseJumper);
+	ItemVariant(Wep_BaseJumper, "BaseJumper_PreJI");
 	ItemDefine("babyface", "BabyFace_PreGM", CLASSFLAG_SCOUT, Wep_BabyFace);
 	ItemVariant(Wep_BabyFace, "BabyFace_Release");
 	ItemDefine("bazaar", "Bazaar_PreGM", CLASSFLAG_SNIPER | ITEMFLAG_DISABLED, Wep_BazaarBargain);
@@ -2669,7 +2670,7 @@ public void OnGameFrame() {
 			// these cvars are global, set them to the desired value
 			SetConVarMaybe(cvar_ref_tf_fireball_radius, "30.0", ItemIsEnabled(Wep_DragonFury));
 			SetConVarMaybe(cvar_ref_tf_parachute_maxspeed_xy, "400.0", ItemIsEnabled(Wep_BaseJumper));
-			SetConVarMaybe(cvar_ref_tf_parachute_maxspeed_onfire_z, "10.0", ItemIsEnabled(Wep_BaseJumper));
+			SetConVarMaybe(cvar_ref_tf_parachute_maxspeed_onfire_z, "10.0", GetItemVariant(Wep_BaseJumper) == 0);
 			SetConVarMaybe(cvar_ref_tf_parachute_deploy_toggle_allowed, "1", ItemIsEnabled(Wep_BaseJumper));
 			SetConVarMaybe(cvar_ref_tf_sticky_airdet_radius, "1.0", ItemIsEnabled(Feat_Stickybomb));
 			SetConVarMaybe(cvar_ref_tf_sticky_radius_ramp_time, "0.0", ItemIsEnabled(Feat_Stickybomb));
