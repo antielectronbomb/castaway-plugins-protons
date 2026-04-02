@@ -888,6 +888,10 @@
 	{
 		"en"	"Reverted to pre-toughbreak, 40%% blast resistance, afterburn immunity, crit after bash, no debuff removal, bash dmg at end of charge"
 	}
+	"Targe_Pre2013"
+	{
+		"en"	"Reverted to pre-July 10, 2013; 40%% blast resistance, crit after bash, no debuff removal, bash dmg at end of charge"
+	}
 	"Claidheamh_PreTB"
 	{
 		"en"	"Reverted to pre-toughbreak, -15 max health, no damage vuln, longer charge is passive"

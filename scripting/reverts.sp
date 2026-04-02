@@ -774,6 +774,7 @@ public void OnPluginStart() {
 	ItemVariant(Wep_BuffaloSteak, "BuffaloSteak_Pre2011");
 	ItemDefine("buffbanner", "BuffBanner_Release", CLASSFLAG_SOLDIER | ITEMFLAG_DISABLED, Wep_BuffBanner);
 	ItemDefine("targe", "Targe_PreTB", CLASSFLAG_DEMOMAN, Wep_CharginTarge);
+	ItemVariant(Wep_CharginTarge, "Targe_Pre2013");
 	ItemDefine("claidheamh", "Claidheamh_PreTB", CLASSFLAG_DEMOMAN, Wep_Claidheamh);
 	ItemVariant(Wep_Claidheamh, "Claidheamh_PreGM");
 	ItemVariant(Wep_Claidheamh, "Claidheamh_PreJI");
@@ -4385,12 +4386,19 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 					TF2Items_SetAttribute(itemNew, 4, 2, 1.35); // +35% dmg bonus
 				}
 			}
-
 		}}
 		case 131, 1144: { if (ItemIsEnabled(Wep_CharginTarge)) {
-			TF2Items_SetNumAttributes(itemNew, 2);
-			TF2Items_SetAttribute(itemNew, 0, 64, 0.6); // dmg taken from blast reduced
-			TF2Items_SetAttribute(itemNew, 1, 527, 1.0); // afterburn immunity
+			switch (GetItemVariant(Wep_CharginTarge)) {
+				case 0: { // Pre-Tough Break
+					TF2Items_SetNumAttributes(itemNew, 2);
+					TF2Items_SetAttribute(itemNew, 0, 64, 0.6); // dmg taken from blast reduced
+					TF2Items_SetAttribute(itemNew, 1, 527, 1.0); // afterburn immunity
+				}
+				case 1: { // Pre-July 10, 2013 Summer Update/Uber Update
+					TF2Items_SetNumAttributes(itemNew, 1);
+					TF2Items_SetAttribute(itemNew, 0, 64, 0.6); // dmg taken from blast reduced
+				}
+			}
 		}}
 		case 424: { if (ItemIsEnabled(Wep_Tomislav)) {
 			switch (GetItemVariant(Wep_Tomislav)) {
