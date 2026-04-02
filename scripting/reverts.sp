@@ -149,6 +149,7 @@ int resistance_mapping[] =
 #define OBJ_TELEPORTER 1
 #define OBJ_SENTRYGUN 2
 #define OBJ_ATTACHMENT_SAPPER 3
+// #define OBJ_LAST 4
 #define LUNCHBOX_DROP_MODEL  "models/items/plate.mdl"
 #define LUNCHBOX_STEAK_DROP_MODEL  "models/workshop/weapons/c_models/c_buffalo_steak/plate_buffalo_steak.mdl"
 #define LUNCHBOX_ROBOT_DROP_MODEL  "models/items/plate_robo_sandwich.mdl"
@@ -421,6 +422,7 @@ Handle sdkcall_CWeaponMedigun_CanAttack;
 #if defined MEMORY_PATCHES
 Handle sdkcall_CTFPipebombLauncher_SecondaryAttack;
 #endif
+Handle sdkcall_CBaseObject_DetonateObject;
 
 DynamicHook dhook_CTFWeaponBase_PrimaryAttack;
 DynamicHook dhook_CTFWeaponBase_SecondaryAttack;
@@ -437,6 +439,8 @@ DynamicHook dhook_CWeaponMedigun_ItemPostFrame;
 DynamicHook dhook_CTFBall_Ornament_Explode;
 DynamicHook dhook_CTFProjectile_HealingBolt_ImpactTeamPlayer;
 DynamicHook dhook_CObjectSapper_FinishedBuilding;
+// DynamicHook dhook_CTFWrench_Equip;
+DynamicHook dhook_CTFWrench_Detach;
 
 DynamicDetour dhook_CTFPlayer_CanDisguise;
 DynamicDetour dhook_CTFPlayer_CalculateMaxSpeed;
@@ -1118,6 +1122,11 @@ public void OnPluginStart() {
 		PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_Plain);
 		sdkcall_CWeaponMedigun_CanAttack = EndPrepSDKCall();
 
+		StartPrepSDKCall(SDKCall_Entity);
+		PrepSDKCall_SetFromConf(conf, SDKConf_Virtual, "CBaseObject::DetonateObject");
+		PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_Plain);
+		sdkcall_CBaseObject_DetonateObject = EndPrepSDKCall();
+
 		dhook_CTFWeaponBase_PrimaryAttack = DynamicHook.FromConf(conf, "CTFWeaponBase::PrimaryAttack");
 		dhook_CTFWeaponBase_SecondaryAttack = DynamicHook.FromConf(conf, "CTFWeaponBase::SecondaryAttack");
 		dhook_CTFBaseRocket_GetRadius = DynamicHook.FromConf(conf, "CTFBaseRocket::GetRadius");
@@ -1132,6 +1141,8 @@ public void OnPluginStart() {
 		dhook_CTFBall_Ornament_Explode = DynamicHook.FromConf(conf, "CTFBall_Ornament::Explode");
 		dhook_CTFProjectile_HealingBolt_ImpactTeamPlayer = DynamicHook.FromConf(conf, "CTFProjectile_HealingBolt::ImpactTeamPlayer");
 		dhook_CObjectSapper_FinishedBuilding = DynamicHook.FromConf(conf, "CObjectSapper::FinishedBuilding");
+		// dhook_CTFWrench_Equip = DynamicHook.FromConf(conf, "CTFWrench::Equip");
+		dhook_CTFWrench_Detach = DynamicHook.FromConf(conf, "CTFWrench::Detach");
 
 		dhook_CTFPlayer_CanDisguise = DynamicDetour.FromConf(conf, "CTFPlayer::CanDisguise");
 		dhook_CTFPlayer_CalculateMaxSpeed = DynamicDetour.FromConf(conf, "CTFPlayer::TeamFortress_CalculateMaxSpeed");
@@ -1364,6 +1375,7 @@ public void OnPluginStart() {
 	if (sdkcall_CTFWeaponBaseGun_GetProjectileDamage == null) SetFailState("Failed to create sdkcall_CTFWeaponBaseGun_GetProjectileDamage");
 	if (sdkcall_CTFWeaponBaseGun_GetWeaponSpread == null) SetFailState("Failed to create sdkcall_CTFWeaponBaseGun_GetWeaponSpread");
 	if (sdkcall_CWeaponMedigun_CanAttack == null) SetFailState("Failed to create sdkcall_CWeaponMedigun_CanAttack");
+	if (sdkcall_CBaseObject_DetonateObject == null) SetFailState("Failed to create sdkcall_CBaseObject_DetonateObject");
 
 	if (dhook_CTFWeaponBase_PrimaryAttack == null) SetFailState("Failed to create dhook_CTFWeaponBase_PrimaryAttack");
 	if (dhook_CTFWeaponBase_SecondaryAttack == null) SetFailState("Failed to create dhook_CTFWeaponBase_SecondaryAttack");
@@ -2735,7 +2747,16 @@ public void OnEntityCreated(int entity, const char[] class) {
 			dhook_CObjectSentrygun_Construct.HookEntity(Hook_Post, entity, DHookCallback_CObjectSentrygun_Construct_Post);
 		} 
 	} 
-	
+
+	else if ( // Still used for Pre-Gun Mettle Engineer Mechanics
+		StrEqual(class, "tf_weapon_wrench") ||
+		StrEqual(class, "tf_weapon_robot_arm") ||
+		StrEqual(class, "saxxy") // i am not sure if this will cause issues
+	) {
+		// dhook_CTFWrench_Equip.HookEntity(Hook_Pre, entity, DHookCallback_CTFWrench_Equip);
+		dhook_CTFWrench_Detach.HookEntity(Hook_Pre, entity, DHookCallback_CTFWrench_Detach);		
+	}
+
 	else if (StrContains(class, "item_ammopack") == 0) {
 		dhook_CAmmoPack_MyTouch.HookEntity(Hook_Pre, entity, DHookCallback_CAmmoPack_MyTouch);
 	} 
@@ -2761,7 +2782,7 @@ public void OnEntityCreated(int entity, const char[] class) {
 	) {
 		dhook_CTFWeaponBase_SecondaryAttack.HookEntity(Hook_Pre, entity, DHookCallback_CTFWeaponBase_SecondaryAttack);
 	} 
-	
+
 	else if (StrEqual(class, "tf_weapon_mechanical_arm")) {
 		dhook_CTFWeaponBase_PrimaryAttack.HookEntity(Hook_Pre, entity, DHookCallback_CTFWeaponBase_PrimaryAttack);
 		dhook_CTFWeaponBase_SecondaryAttack.HookEntity(Hook_Pre, entity, DHookCallback_CTFWeaponBase_SecondaryAttack);
@@ -9332,7 +9353,7 @@ MRESReturn DHookCallback_CTFProjectile_HealingBolt_ImpactTeamPlayer(int entity, 
 		weapon = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
 
 		if (weapon > 0) {
-			GetEntityClassname(weapon, class, sizeof(class));								
+			GetEntityClassname(weapon, class, sizeof(class));
 			
 			if (StrEqual(class, "tf_weapon_medigun")) {
 				SetEntPropFloat(weapon, Prop_Send, "m_flChargeLevel", players[client].medic_medigun_charge);
@@ -9427,6 +9448,40 @@ MRESReturn DHookCallback_CBaseObject_GetConstructionMultiplier(int entity, DHook
 		// The actual function is still called so the CUtlMap is still properly managed.
 		returnValue.Value = GetBuildingConstructionMultiplier_NoHook(entity);
 		return MRES_Override;
+	}
+	return MRES_Ignored;
+}
+
+// I am not sure why NotnHeavy had to use DHookCallback_CTFWrench_Equip, when all it does it call DestroyAllBuildings twice on wrench change.
+// When DestroyAllBuildings is called twice, this causes buildings to leave duplicate gibs.
+// I'm leaving this commented out just in case.
+// MRESReturn DHookCallback_CTFWrench_Equip(int entity, DHookParam parameters)
+// {
+// 	if (ItemIsEnabled(Feat_EngineerMechanics)) {
+// 		int client = parameters.Get(1);
+// 		if (
+// 			client > 0 && client <= MaxClients && 
+// 			TF2_GetPlayerClass(client) == TFClass_Engineer && 
+// 			entity == GetPlayerWeaponSlot(client, TFWeaponSlot_Melee)
+// 		)
+// 			DestroyAllBuildings(client);
+// 	}
+// 	return MRES_Ignored;
+// }
+
+MRESReturn DHookCallback_CTFWrench_Detach(int entity)
+{
+	if (ItemIsEnabled(Feat_EngineerMechanics)) {	
+		int client = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
+		if (
+			client > 0 && client <= MaxClients && 
+			TF2_GetPlayerClass(client) == TFClass_Engineer && 
+			entity == GetPlayerWeaponSlot(client, TFWeaponSlot_Melee)
+		) {
+			if (cvar_ref_tf_gamemode_mvm.BoolValue && TF2_GetClientTeam(client) != TFTeam_Red)
+				return MRES_Ignored; // MvM Engineer bots should have their buildings left alone.
+			DestroyAllBuildings(client);
+		}
 	}
 	return MRES_Ignored;
 }
@@ -9695,6 +9750,63 @@ stock int FindSentryGunOwnedByClient(int client)
 	return -1;
 }
 
+// Get the dispenser of a specific engineer
+stock int FindDispenserOwnedByClient(int client)
+{
+	if (!IsClientInGame(client) || GetClientTeam(client) < 2)
+		return -1;
+
+	int ent = -1;
+	while ((ent = FindEntityByClassname(ent, "obj_dispenser")) != -1)
+	{
+		int owner = GetEntPropEnt(ent,Prop_Send,"m_hBuilder");
+		if (owner == client)
+			return ent;
+	}
+
+	return -1;
+}
+
+// Get the teleporter entrance (regardless of state) of a specific engineer
+stock int FindTeleporterEntranceOwnedByClient(int client)
+{
+	if (!IsClientInGame(client) || GetClientTeam(client) < 2)
+		return -1;
+
+	int ent = -1;
+	while ((ent = FindEntityByClassname(ent, "obj_teleporter")) != -1)
+	{
+		int owner = GetEntPropEnt(ent,Prop_Send,"m_hBuilder");
+		if (
+			owner == client &&
+			GetEntProp(ent, Prop_Data, "m_iTeleportType") == 1 // TTYPE_ENTRANCE
+		)
+			return ent;
+	}
+
+	return -1;
+}
+
+// Get the teleporter exit (regardless of state) of a specific engineer
+stock int FindTeleporterExitOwnedByClient(int client)
+{
+	if (!IsClientInGame(client) || GetClientTeam(client) < 2)
+		return -1;
+
+	int ent = -1;
+	while ((ent = FindEntityByClassname(ent, "obj_teleporter")) != -1)
+	{
+		int owner = GetEntPropEnt(ent,Prop_Send,"m_hBuilder");
+		if (
+			owner == client &&
+			GetEntProp(ent, Prop_Data, "m_iTeleportType") == 2 // TTYPE_EXIT
+		)
+			return ent;
+	}
+
+	return -1;
+}
+
 // Get the built (construction finished) teleporter exit of a specific engineer
 stock int FindBuiltTeleporterExitOwnedByClient(int client)
 {
@@ -9803,6 +9915,27 @@ stock float GetBuildingConstructionMultiplier_NoHook(int entity)
 		multiplier += 0.0;
 	}
 	return multiplier;
+}
+
+void DestroyAllBuildings(int client)
+{
+	// SDKCall_CBaseObject_DetonateObject does not seem to work? This must be why NotnHeavy had DestroyAllBuildings commented out.
+    int buildings[4];
+    
+    buildings[0] = FindSentryGunOwnedByClient(client);
+    buildings[1] = FindDispenserOwnedByClient(client);
+    buildings[2] = FindTeleporterEntranceOwnedByClient(client);
+    buildings[3] = FindTeleporterExitOwnedByClient(client);
+
+    // Loop through all buildings and destroy if valid
+    for (int i = 0; i < 4; i++)
+    {
+        if (IsValidEntity(buildings[i]))
+        {
+            SetVariantInt(1000);
+            AcceptEntityInput(buildings[i], "RemoveHealth");
+        }
+    }	
 }
 
 // math stocks

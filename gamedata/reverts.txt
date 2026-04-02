@@ -305,6 +305,21 @@
 				"windows" "344"
 				"linux"   "346"
 			}
+			"CTFWrench::Equip"
+			{
+				"windows" "234"
+				"linux"   "240"
+			}
+			"CTFWrench::Detach"
+			{
+				"windows" "271"
+				"linux"   "277"
+			}
+			"CBaseObject::DetonateObject"
+			{
+				"windows" "353"
+				"linux"   "354"
+			}
 
 			// ╔══════════════════════════════════════════════╗
 			// ║       Private/Protected Member Offsets       ║
@@ -887,6 +902,27 @@
 				"callconv"  "thiscall"
 				"this"      "entity"
 				"return"    "cbaseentity"
+			}
+			"CTFWrench::Equip"
+			{
+				"offset"   "CTFWrench::Equip"
+				"hooktype" "entity"
+				"this"     "entity"
+				"return"   "void"
+				"arguments"
+				{
+					"pOwner"
+					{
+						"type" "cbaseentity"
+					}
+				}
+			}
+			"CTFWrench::Detach"
+			{
+				"offset"   "CTFWrench::Detach"
+				"hooktype" "entity"
+				"this"     "entity"
+				"return"   "void"
 			}
 		}
 	}
