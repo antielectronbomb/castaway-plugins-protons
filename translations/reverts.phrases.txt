@@ -1128,6 +1128,10 @@
 	{
 		"en"	"Reverted to release, +20%% damage bonus overall, random crits, no piercing, +0.5s cloak time increase penalty"
 	}
+	"Enforcer_PreMYM"
+	{
+		"en"	"Reverted to pre-matchmaking, no piercing"
+	}
 	"Equalizer_PrePyro"
 	{
 		"en"	"Merged back to pre-Pyromania; while active: blocks Medic healing, can't call for Medics, no mark-for-death, 107 dmg at 1 HP"

@@ -844,6 +844,7 @@ public void OnPluginStart() {
 #endif
 	ItemDefine("enforcer", "Enforcer_PreGM", CLASSFLAG_SPY, Wep_Enforcer);
 	ItemVariant(Wep_Enforcer, "Enforcer_Release");
+	ItemVariant(Wep_Enforcer, "Enforcer_PreMYM");
 	ItemDefine("equalizer", "Equalizer_PrePyro", CLASSFLAG_SOLDIER, Wep_Equalizer);
 	ItemVariant(Wep_Equalizer, "Equalizer_PreHat");
 	ItemVariant(Wep_Equalizer, "Equalizer_Release");
@@ -3633,6 +3634,10 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 					TF2Items_SetAttribute(itemNew, 3, 253, 0.5); // 0.5 sec increase in time taken to cloak
 					TF2Items_SetAttribute(itemNew, 4, 410, 1.0); // remove damage bonus while disguised
 					TF2Items_SetAttribute(itemNew, 5, 797, 0.0); // dmg pierces resists absorbs
+				}
+				case 2: {
+					TF2Items_SetNumAttributes(itemNew, 1);
+					TF2Items_SetAttribute(itemNew, 0, 797, 0.0); // dmg pierces resists absorbs
 				}
 				default: {
 					TF2Items_SetNumAttributes(itemNew, 3);
