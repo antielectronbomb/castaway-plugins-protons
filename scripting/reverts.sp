@@ -740,6 +740,7 @@ public void OnPluginStart() {
 	ItemVariant(Wep_Ambassador, "Ambassador_Release");
 	ItemDefine("amputator", "Amputator_PreTB", CLASSFLAG_MEDIC, Wep_Amputator);
 	ItemVariant(Wep_Amputator, "Amputator_PreTB_Historical");
+	ItemVariant(Wep_Amputator, "Amputator_Release");
 	ItemDefine("atomizer", "Atomizer_PreJI", CLASSFLAG_SCOUT, Wep_Atomizer);
 	ItemVariant(Wep_Atomizer, "Atomizer_PreBM");
 	ItemDefine("axtinguish", "Axtinguisher_PreLW", CLASSFLAG_PYRO, Wep_Axtinguisher);
@@ -2257,7 +2258,7 @@ public void OnGameFrame() {
 
 								// amputator prevent uber on taunt
 								if (
-									GetItemVariant(Wep_Amputator) == 1 &&
+									(GetItemVariant(Wep_Amputator) == 1 || GetItemVariant(Wep_Amputator) == 2) &&
 									player_weapons[idx][Wep_Amputator] &&
 									TF2_IsPlayerInCondition(idx, TFCond_Taunting)
 								) {
@@ -3200,6 +3201,16 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 					TF2Items_SetNumAttributes(itemNew, 2);
 					TF2Items_SetAttribute(itemNew, 0, 266, 1.0); // projectile_penetration
 					TF2Items_SetAttribute(itemNew, 1, 868, 0.0); // crit dmg falloff
+				}
+			}
+		}}
+		case 304: { if (ItemIsEnabled(Wep_Amputator)) {
+			switch (GetItemVariant(Wep_Amputator)) {
+				case 2: { // Release Amputator
+					TF2Items_SetNumAttributes(itemNew, 3);
+					TF2Items_SetAttribute(itemNew, 0, 1, 1.00); // damage penalty
+					TF2Items_SetAttribute(itemNew, 1, 57, 0.0); // health regen; add_health_regen
+					TF2Items_SetAttribute(itemNew, 2, 128, 0.0); // provide on active
 				}
 			}
 		}}
@@ -5377,7 +5388,7 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 		client = GetClientOfUserId(GetEventInt(event, "healer"));
 
 		if (
-			GetItemVariant(Wep_Amputator) == 1 &&
+			(GetItemVariant(Wep_Amputator) == 1 || GetItemVariant(Wep_Amputator) == 2) &&
 			player_weapons[client][Wep_Amputator] &&
 			TF2_IsPlayerInCondition(client, TFCond_Taunting)
 		) {
@@ -8324,7 +8335,7 @@ MRESReturn DHookCallback_CTFPlayer_Taunt(int entity, DHookParam parameters) {
 
 	// amputator track uber level right upon taunting, this is done to track uber for amputator only when needed
 	if (
-		GetItemVariant(Wep_Amputator) == 1 && 
+		(GetItemVariant(Wep_Amputator) == 1 || GetItemVariant(Wep_Amputator) == 2) && 
 		player_weapons[entity][Wep_Amputator]							
 	) {
 		weapon = GetPlayerWeaponSlot(entity, TFWeaponSlot_Secondary);
@@ -8766,7 +8777,8 @@ MRESReturn DHookCallback_CTFPlayer_RegenThink(int client)
 		weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 		
 		if (
-			ItemIsEnabled(Wep_Amputator) &&
+			ItemIsEnabled(Wep_Amputator) && 
+			GetItemVariant(Wep_Amputator) != 2 &&
 			weapon > 0
 		) {
 			if (GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 304) {
