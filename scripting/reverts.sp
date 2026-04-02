@@ -87,7 +87,7 @@ public Plugin myinfo = {
 	url = PLUGIN_URL
 };
 
-#define MAX_VARIANTS 6 // not including base version
+#define MAX_VARIANTS 10 // not including base version
 #define BALANCE_CIRCUIT_METAL 15
 #define BALANCE_CIRCUIT_DAMAGE 20.0
 #define BALANCE_CIRCUIT_RECOVERY 0.67
@@ -5326,7 +5326,7 @@ Action OnGameEvent(Event event, const char[] name, bool dontbroadcast) {
 				cvar_enable.BoolValue &&
 				!g_hClientMessageCookie.GetInt(client, cvar_no_reverts_info_by_default.BoolValue ? 1 : 0) //inverted because the default is zero
 			) {
-				char msg[6][256];
+				char msg[10][256];
 				int count = 0;
 				int variant_idx;
 				for (int i = 0; i < NUM_ITEMS; i++) {
