@@ -1524,6 +1524,10 @@
 	{
 		"en"	"Reverted to pre-inferno, can be overhealed, shield does not regenerate"
 	}
+	"Razorback_Release"
+	{
+		"en"	"Reverted to release, can be overhealed, shield does not regenerate, -15%% movement speed penalty"
+	}
 	"RedTapeRecorder_Release"
 	{
 		"en"	"Reverted to release, faster downgrade speed on upgraded enemy buildings (1.6 s)"

@@ -951,6 +951,7 @@ public void OnPluginStart() {
 	ItemVariant(Wep_Quickiebomb, "Quickiebomb_PreTB");
 	ItemVariant(Wep_Quickiebomb, "Quickiebomb_Release");
 	ItemDefine("razorback", "Razorback_PreJI", CLASSFLAG_SNIPER, Wep_Razorback);
+	ItemVariant(Wep_Razorback, "Razorback_Release");
 	ItemDefine("redtape", "RedTapeRecorder_Release", CLASSFLAG_SPY | ITEMFLAG_DISABLED, Wep_RedTapeRecorder);
 	ItemDefine("rescueranger", "RescueRanger_PreGM", CLASSFLAG_ENGINEER, Wep_RescueRanger);
 	ItemVariant(Wep_RescueRanger, "RescueRanger_PreJI");
@@ -4101,8 +4102,19 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 			TF2Items_SetAttribute(itemNew, 5, 782, 0.0); // Ammo boxes collected also (don't) give Charge
 		}}
 		case 57: { if (ItemIsEnabled(Wep_Razorback)) {
-			TF2Items_SetNumAttributes(itemNew, 1);
-			TF2Items_SetAttribute(itemNew, 0, 800, 1.0); // -0% maximum overheal on wearer
+			switch (GetItemVariant(Wep_Razorback)) {
+				case 0: {
+					// Pre-Jungle Inferno Razorback
+					TF2Items_SetNumAttributes(itemNew, 1);
+					TF2Items_SetAttribute(itemNew, 0, 800, 1.0); // -0% maximum overheal on wearer
+				}
+				case 1: {
+					// Release Razorback
+					TF2Items_SetNumAttributes(itemNew, 2);
+					TF2Items_SetAttribute(itemNew, 0, 800, 1.0); // -0% maximum overheal on wearer
+					TF2Items_SetAttribute(itemNew, 1, 54, 0.85); // -15% move speed penalty; mult_player_movespeed
+				}
+			}
 		}}
 		case 411: { if (ItemIsEnabled(Wep_QuickFix)) {
 			switch (GetItemVariant(Wep_QuickFix)) {
