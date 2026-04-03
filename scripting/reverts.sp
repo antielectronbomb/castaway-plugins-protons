@@ -915,6 +915,7 @@ public void OnPluginStart() {
 	ItemDefine("natascha", "Natascha_PreMYM", CLASSFLAG_HEAVY, Wep_Natascha);
 	ItemVariant(Wep_Natascha, "Natascha_PreGM");
 	ItemVariant(Wep_Natascha, "Natascha_PreDec2010");
+	ItemVariant(Wep_Natascha, "Natascha_Pre2014");
 	ItemDefine("overdose", "Overdose_PreMYM", CLASSFLAG_MEDIC | ITEMFLAG_DISABLED, Wep_Overdose);
 	ItemDefine("panic", "Panic_PreJI", CLASSFLAG_SOLDIER | CLASSFLAG_PYRO | CLASSFLAG_HEAVY | CLASSFLAG_ENGINEER, Wep_PanicAttack);
 	ItemVariant(Wep_PanicAttack, "Panic_PreBM");
@@ -3952,6 +3953,10 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 					TF2Items_SetNumAttributes(itemNew, 2);
 					TF2Items_SetAttribute(itemNew, 0, 86, 1.0); // 0% slower spin up time
 					TF2Items_SetAttribute(itemNew, 1, 738, 1.0); // 0% damage resistance when below 50% health and spun up
+				}
+				case 3: {
+					TF2Items_SetNumAttributes(itemNew, 1);
+					TF2Items_SetAttribute(itemNew, 0, 738, 1.0); // 0% damage resistance when below 50% health and spun up
 				}
 			}
 			// no distance falloff for natascha slowdown handled elsewhere
@@ -6992,7 +6997,7 @@ Action SDKHookCB_OnTakeDamageAlive(
 					}
 
 					switch (GetItemVariant(Wep_Natascha)) {
-						case 1: {
+						case 1, 3: {
 							if (TF2_IsPlayerInCondition(victim, TFCond_Healing)) {
 								// do not slow enemies who are being healed
 								stun = false;
