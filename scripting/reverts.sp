@@ -927,6 +927,7 @@ public void OnPluginStart() {
 	ItemVariant(Wep_Phlogistinator, "Phlog_TB");
 	ItemVariant(Wep_Phlogistinator, "Phlog_Release");
 	ItemVariant(Wep_Phlogistinator, "Phlog_March2012");
+	ItemVariant(Wep_Phlogistinator, "Phlog_PreJan2016");
 	ItemDefine("pomson", "Pomson_PreGM", CLASSFLAG_ENGINEER, Wep_Pomson);
 	ItemVariant(Wep_Pomson, "Pomson_Release");
 	ItemVariant(Wep_Pomson, "Pomson_PreGM_Historical");
@@ -3100,9 +3101,9 @@ public Action TF2_OnAddCond(int client, TFCond &condition, float &time, int &pro
 				FloatAbs(2.6 - time) < 0.01
 			) {
 				// increase condition time to 3s, TF2 normally applies 2.6s
-				time = 3.0;
+				time = (GetItemVariant(Wep_Phlogistinator) == 4) ? 2.6 : 3.0;
 
-				if (GetItemVariant(Wep_Phlogistinator) != 1) {
+				if (GetItemVariant(Wep_Phlogistinator) != 1 || GetItemVariant(Wep_Phlogistinator) != 4) {
 					// replace invuln with 75% damage resist
 					if (condition == TFCond_UberchargedCanteen) {
 						condition = TFCond_DefenseBuffMmmph;

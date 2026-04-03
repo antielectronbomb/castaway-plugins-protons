@@ -1444,6 +1444,10 @@
 	{
 		"en"	"Reverted to March 15, 2012; activating MMMPH instantly restores to full health with 90%% dmg resist and no Uber while taunting, MMMPH requires 225 fire damage, -10%% dmg penalty"
 	}
+	"Phlog_PreJan2016"
+	{
+		"en"	"Reverted to pre-Jan 20, 2016, activating MMMPH instantly restores to full health, MMMPH requires 225 fire damage"
+	}
 	"Pomson_PreGM"
 	{
 		"en"	"Increased hitbox size, passes through team, no charge drain fall-off, pierces bullet resists, ignites friendly Huntsman arrows"
