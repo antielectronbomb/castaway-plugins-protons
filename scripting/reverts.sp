@@ -986,6 +986,8 @@ public void OnPluginStart() {
 	ItemDefine("shortstop", "Shortstop_PreMnvy", CLASSFLAG_SCOUT, Wep_Shortstop);
 	ItemVariant(Wep_Shortstop, "Shortstop_PreGM");
 	ItemVariant(Wep_Shortstop, "Shortstop_Release");
+	ItemVariant(Wep_Shortstop, "Shortstop_Pre2013");
+	ItemVariant(Wep_Shortstop, "Shortstop_Pre2014");
 	ItemDefine("sodapop", "Sodapop_PreMYM", CLASSFLAG_SCOUT, Wep_SodaPopper);
 	ItemVariant(Wep_SodaPopper, "Sodapop_Pre2013");
 	ItemDefine("solemn", "Solemn_PreGM", CLASSFLAG_MEDIC, Wep_Solemn);
@@ -4294,7 +4296,21 @@ public Action TF2Items_OnGiveNamedItem(int client, char[] class, int index, Hand
 					TF2Items_SetAttribute(itemNew, 2, 534, 1.00); // airblast vulnerability multiplier hidden
 					TF2Items_SetAttribute(itemNew, 3, 535, 1.00); // damage force increase hidden
 				}
-			}	
+				case 3: {
+					// Pre-Summer 2013 Shortstop
+					TF2Items_SetNumAttributes(itemNew, 2);
+					TF2Items_SetAttribute(itemNew, 0, 534, 1.00); // airblast vulnerability multiplier hidden
+					TF2Items_SetAttribute(itemNew, 1, 535, 1.00); // damage force increase hidden
+				}
+				case 4: {
+					// Pre-February 7, 2014 Shortstop
+					TF2Items_SetNumAttributes(itemNew, 4);
+					TF2Items_SetAttribute(itemNew, 0, 128, 0.0); // When weapon is active:
+					TF2Items_SetAttribute(itemNew, 1, 526, 1.20); // 20% bonus healing from all sources
+					TF2Items_SetAttribute(itemNew, 2, 534, 1.80); // 80% airblast vulnerability multiplier hidden
+					TF2Items_SetAttribute(itemNew, 3, 535, 1.80); // 80% damage force increase hidden
+				}
+			}
 		}}
 		case 230: { if (ItemIsEnabled(Wep_SydneySleeper)) {
 			switch (GetItemVariant(Wep_SydneySleeper)) {
