@@ -1,3 +1,8 @@
+## Notice
+This branch is a fork of the plugins used on castaway.tf, specifically the Extended Weapon Reverts plugin.
+
+The weapon reverts plugin used here is the pre-purge version (https://github.com/rsedxcftvgyhbujnkiqwe/castaway-plugins/pull/409), and as such, contains more reverts that may be of interest to server owners.
+
 ## Introduction
 Repository for plugins used on [castaway.tf](https://castaway.tf/)
 
