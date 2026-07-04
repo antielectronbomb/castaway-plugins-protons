@@ -7227,8 +7227,8 @@ MRESReturn DHookCallback_CTFPlayer_CalculateMaxSpeed(int client, DHookReturn ret
 			if (
 				ItemIsEnabled(Wep_CritCola) &&
 				GetItemVariant(Wep_CritCola) != 4 &&
-				TF2_IsPlayerInCondition(entity, TFCond_CritCola) &&
-				player_weapons[entity][Wep_CritCola]
+				TF2_IsPlayerInCondition(client, TFCond_CritCola) &&
+				player_weapons[client][Wep_CritCola]
 			) {
 				// Crit-a-Cola speed boost.
 				multiplier *= 1.25;
@@ -7277,9 +7277,9 @@ MRESReturn DHookCallback_CTFPlayer_CalculateMaxSpeed(int client, DHookReturn ret
 			// Heavy still slows down when revved under Steak effects; include additional 4% speed increase from the revert while slowing down
 			if (
 				GetItemVariant(Wep_BuffaloSteak) == 3 &&
-				TF2_IsPlayerInCondition(entity, TFCond_Slowed)
+				TF2_IsPlayerInCondition(client, TFCond_Slowed)
 			) {
-				int weapon = GetEntPropEnt(entity, Prop_Send, "m_hActiveWeapon");
+				int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 				if (weapon > 0) {
 					multiplier *= TF2Attrib_HookValueFloat(1.0, "mult_player_aiming_movespeed", weapon); // accounts for brass beast
 				}
