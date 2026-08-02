@@ -569,6 +569,7 @@ enum
 	Wep_SplendidScreen,
 	Wep_Spycicle,
 	Wep_StickyJumper,
+	Wep_SunOnAStick,
 	Wep_SydneySleeper,
 	Wep_ThermalThruster,
 	Wep_TideTurner,
@@ -813,6 +814,9 @@ public void OnPluginStart() {
 	ItemDefine("stkjumper", "StkJumper_Pre2013", CLASSFLAG_DEMOMAN, Wep_StickyJumper);
 	ItemVariant(Wep_StickyJumper, "StkJumper_Pre2013_Intel");
 	ItemVariant(Wep_StickyJumper, "StkJumper_Pre2011");
+	ItemDefine("sunstick", "SunOnAStick_PreMYM", CLASSFLAG_SCOUT | ITEMFLAG_DISABLED, Wep_SunOnAStick);
+	ItemVariant(Wep_SunOnAStick, "SunOnAStick_PreHatless");
+	ItemVariant(Wep_SunOnAStick, "SunOnAStick_Release");
 	ItemDefine("sleeper", "Sleeper_PreBM", CLASSFLAG_SNIPER, Wep_SydneySleeper);
 	ItemVariant(Wep_SydneySleeper, "Sleeper_PreGM");
 	ItemDefine("thermal", "ThermalThrust_May2025", CLASSFLAG_PYRO, Wep_ThermalThruster);
@@ -3080,6 +3084,24 @@ public void ApplyRevertsToItem(int entity) {
 				TF2Attrib_SetByDefIndex(entity, 400, 0.0); // cannot_pick_up_intelligence
 			}
 		}}
+		case 349: { switch (GetItemVariant(Wep_SunOnAStick)) {
+			case 0: { // Pre-Meet your Match
+				TF2Attrib_SetByDefIndex(entity, 794, 1.0); // 0% fire damage resistance while deployed
+			}
+			case 1: { // Pre-Hatless
+				TF2Attrib_SetByDefIndex(entity, 794, 1.0); // 0% fire damage resistance while deployed
+				TF2Attrib_SetByDefIndex(entity, 20, 0.0); // no 100% critical hit vs burning players 
+				TF2Attrib_SetByDefIndex(entity, 209, 1.0); // 100% minicrits vs burning players 
+				TF2Attrib_SetByDefIndex(entity, 1, 0.85); // -15% dmg penalty
+			}
+			case 2: { // Release
+				TF2Attrib_SetByDefIndex(entity, 794, 1.0); // 0% fire damage resistance while deployed
+				TF2Attrib_SetByDefIndex(entity, 20, 0.0); // no 100% critical hit vs burning players 
+				TF2Attrib_SetByDefIndex(entity, 21, 0.55); // -45% damage vs non-burning players
+				TF2Attrib_SetByDefIndex(entity, 1, 1.00); // -0% dmg penalty
+				TF2Attrib_SetByDefIndex(entity, 2, 1.35); // +35% dmg bonus
+			}
+		}}
 		case 131, 1144: { if (ItemIsEnabled(Wep_CharginTarge)) {
 			TF2Attrib_SetByDefIndex(entity, 64, 0.6); // dmg taken from blast reduced
 			TF2Attrib_SetByDefIndex(entity, 527, 1.0); // afterburn immunity
@@ -3520,6 +3542,7 @@ void CacheWeapons(int client) {
 					case 220: player_weapons[client][Wep_Shortstop] = true;
 					case 649: player_weapons[client][Wep_Spycicle] = true;
 					case 265: player_weapons[client][Wep_StickyJumper] = true;
+					case 349: player_weapons[client][Wep_SunOnAStick] = true;
 					case 424: player_weapons[client][Wep_Tomislav] = true;
 					case 171: player_weapons[client][Wep_TribalmansShiv] = true;
 					case 998: player_weapons[client][Wep_Vaccinator] = true;
