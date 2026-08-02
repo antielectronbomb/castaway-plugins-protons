@@ -136,6 +136,10 @@ int resistance_mapping[] =
 #define FLIGHT_TIME_TO_MAX_STUN	1.0
 #define TF_CANNONBALL_FORCE_SCALE 80.0
 #define TF_CANNONBALL_FORCE_UPWARD 300.0
+#define AC_STATE_IDLE          0
+#define AC_STATE_FIRING        2
+#define AC_STATE_SPINNING      3
+#define AC_STATE_SPINNINGSTOP  5
 
 enum
 {
@@ -532,6 +536,7 @@ enum
 	Wep_Gunslinger,
 	Wep_Zatoichi, // Half-Zatoichi
 	Wep_Huntsman,
+	Wep_HuoLongHeater,
 #if defined MEMORY_PATCHES	
 	Wep_IronBomber,
 #endif
@@ -739,6 +744,8 @@ public void OnPluginStart() {
 	ItemVariant(Wep_Gunslinger, "Gunslinger_Release");
 	ItemDefine("zatoichi", "Zatoichi_PreTB", CLASSFLAG_SOLDIER | CLASSFLAG_DEMOMAN, Wep_Zatoichi);
 	ItemDefine("huntsman", "Huntsman_Pre2013", CLASSFLAG_SNIPER, Wep_Huntsman);
+	ItemDefine("huolong", "HuoLong_PreMYM", CLASSFLAG_HEAVY | ITEMFLAG_DISABLED, Wep_HuoLongHeater);
+	ItemVariant(Wep_HuoLongHeater, "HuoLong_Release");
 #if defined MEMORY_PATCHES
 	ItemDefine("ironbomber", "IronBomber_Pre2022", CLASSFLAG_DEMOMAN | ITEMFLAG_DISABLED, Wep_IronBomber, true);
 #endif
@@ -2214,6 +2221,8 @@ public void OnEntityCreated(int entity, const char[] class) {
 	else if (StrEqual(class, "tf_weapon_minigun")) {
 		dhook_CTFMinigun_GetProjectileDamage.HookEntity(Hook_Pre, entity, DHookCallback_CTFMinigun_GetProjectileDamage);
 		dhook_CTFMinigun_GetWeaponSpread.HookEntity(Hook_Pre, entity, DHookCallback_CTFMinigun_GetWeaponSpread);
+		dhook_CTFWeaponBase_PrimaryAttack.HookEntity(Hook_Pre, entity, DHookCallback_CTFWeaponBase_PrimaryAttack);
+		dhook_CBaseCombatWeapon_ItemPostFrame.HookEntity(Hook_Post, entity, DHookCallback_CBaseCombatWeapon_ItemPostFrame_Post);
 	}
 	else if (StrEqual(class, "tf_weapon_lunchbox")) {
 		dhook_CTFWeaponBase_SecondaryAttack.HookEntity(Hook_Post, entity, DHookCallback_CTFWeaponBase_SecondaryAttack_Post);
@@ -2792,6 +2801,22 @@ public void ApplyRevertsToItem(int entity) {
 		case 812, 833: { if (ItemIsEnabled(Wep_Cleaver)) {
 			TF2Attrib_SetByDefIndex(entity, 437, 65536.0); // 100% critical hit vs stunned players
 		}}
+		case 811, 832: {
+			// common
+			if (ItemIsEnabled(Wep_HuoLongHeater)) {
+				TF2Attrib_SetByDefIndex(entity, 1, 1.00); // -0% damage penalty
+				TF2Attrib_SetByDefIndex(entity, 795, 1.00); // 0% damage bonus vs burning players
+			}
+			// specific
+			switch (GetItemVariant(Wep_HuoLongHeater)) {
+				case 0: { // Pre-MYM
+					TF2Attrib_SetByDefIndex(entity, 431, 6.00); // Consumes an additional 6 ammo per second while spun up
+				}
+				case 1: { // Release
+					TF2Attrib_SetByDefIndex(entity, 431, 0.00); // Consumes an additional 0 ammo per second while spun up
+				}
+			}
+		}
 		case 329: { switch (GetItemVariant(Wep_Jag)) {
 			case 0: {
 				TF2Attrib_SetByDefIndex(entity, 775, 1.00); // -0% damage penalty vs buildings
@@ -3508,6 +3533,7 @@ void CacheWeapons(int client) {
 					case 239, 1084, 1100: player_weapons[client][Wep_GRU] = true;
 					case 812, 833: player_weapons[client][Wep_Cleaver] = true;
 					case 56, 1005, 1092: player_weapons[client][Wep_Huntsman] = true;
+					case 811, 832: player_weapons[client][Wep_HuoLongHeater] = true;
 					case 142: player_weapons[client][Wep_Gunslinger] = true;
 #if defined MEMORY_PATCHES
 					case 1151: player_weapons[client][Wep_IronBomber] = true;
@@ -4634,6 +4660,20 @@ Action SDKHookCB_OnTakeDamage(
 					// increase damage from splendid screen attribute
 					damage *= TF2Attrib_HookValueFloat(1.0, "charge_impact_damage", weapon);
 					
+					return Plugin_Changed;
+				}
+			}
+
+			{
+				// Huo-Long Heater Fire Pulse Damage Revert imported from NotnHeavy's plugin
+				if (
+					ItemIsEnabled(Wep_HuoLongHeater) &&
+					StrEqual(class, "tf_weapon_minigun") &&
+					(GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 811 ||
+					GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 832) && // 832 is for Genuine quality
+					damage_type & DMG_IGNITE
+				) { // Huo-Long Heater Ring of Fire attack.
+					damage = 15.00;
 					return Plugin_Changed;
 				}
 			}
@@ -6053,6 +6093,7 @@ MRESReturn DHookCallback_CTFWeaponBase_PrimaryAttack(int entity) {
 	owner = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
 	if (owner > 0) {
 		GetEntityClassname(entity, class, sizeof(class));
+		int index = GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
 
 		if (
 			ItemIsEnabled(Wep_ShortCircuit) &&
@@ -6069,6 +6110,20 @@ MRESReturn DHookCallback_CTFWeaponBase_PrimaryAttack(int entity) {
 				}
 			}
 		}
+
+		if (
+			GetItemVariant(Wep_HuoLongHeater) == 1 &&
+			StrEqual(class, "tf_weapon_minigun") &&
+			IsPlayerAlive(owner) &&
+			(index == 811 || index == 832) &&
+			TF2Attrib_HookValueFloat(0.0, "uses_ammo_while_aiming", entity) == 6.0
+		) {
+			// release huo long heater, prevent ammo drain when holding attack2 then firing later
+			TF2Attrib_SetByDefIndex(entity, 431, 0.0);
+			// PrintToServer("set attrib to ZERO ammo consumption!");
+			// PrintToServer("weapon state: %d", GetEntProp(entity, Prop_Send, "m_iWeaponState"));		
+		}
+
 		else if (
 			ItemIsEnabled(Wep_BazaarBargain) &&
 			StrEqual(class, "tf_weapon_sniperrifle_decap") &&
@@ -7177,6 +7232,29 @@ MRESReturn DHookCallback_CBaseCombatWeapon_ItemPostFrame_Post(int entity) {
 	) {
 		TF2Attrib_SetByDefIndex(entity, 819, 0.0);
 	}
+
+	// Release Huo-Long Heater revert: firing does not drain additional ammo, but only spinning up does drain ammo
+	if (GetItemVariant(Wep_HuoLongHeater) == 1) {
+		if (
+			TF2Attrib_HookValueFloat(0.0, "uses_ammo_while_aiming", entity) < 6.0 &&
+			GetEntProp(entity, Prop_Send, "m_iWeaponState") == AC_STATE_SPINNING &&
+			GetEntProp(entity, Prop_Send, "m_iWeaponState") != AC_STATE_FIRING
+		) {
+			// only consume additional ammo while spun up; if weapon is being fired do not consume additional ammo.
+			TF2Attrib_SetByDefIndex(entity, 431, 6.0);
+			// PrintToServer("set attrib to -6 ammo consumption!");
+			// PrintToServer("weapon state: %d", GetEntProp(entity, Prop_Send, "m_iWeaponState"));
+		} else if (
+			TF2Attrib_HookValueFloat(0.0, "uses_ammo_while_aiming", entity) == 6.0 &&
+			GetEntProp(entity, Prop_Send, "m_iWeaponState") == AC_STATE_IDLE ||
+			GetEntProp(entity, Prop_Send, "m_iWeaponState") == AC_STATE_SPINNINGSTOP
+		) {
+			TF2Attrib_SetByDefIndex(entity, 431, 0.0);
+			// PrintToServer("set attrib to ZERO ammo consumption!");
+			// PrintToServer("weapon state: %d", GetEntProp(entity, Prop_Send, "m_iWeaponState"));			
+		}
+	}
+	
 	return MRES_Ignored;
 }
 

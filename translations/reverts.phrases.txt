@@ -362,6 +362,10 @@
 	{
 		"en"	"Huntsman"
 	}
+	"huolong"
+	{
+		"en"	"Huo-Long Heater"
+	}
 	"ironbomber"
 	{
 		"en"	"Iron Bomber"
@@ -911,6 +915,14 @@
 	"Huntsman_Pre2013"
 	{
 		"en"	"Restored taunt bug to pre-December 20, 2013; repeatedly and rapidly press taunt attack with an enemy Huntsman Sniper to stun each other forever as humanly as possible"
+	}
+	"HuoLong_PreMYM"
+	{
+		"en"	"Reverted to pre-matchmaking, 15 fire pulse dmg (from 12), no dmg penalty, no dmg bonus against burning players, -6 ammo/sec while spun up"
+	}
+	"HuoLong_Release"
+	{
+		"en"	"Reverted to release, 15 fire pulse dmg (from 12), no dmg penalty, no dmg bonus against burning players, -6 ammo/sec while spun up, firing does not consume additional ammo"
 	}
 	"IronBomber_Pre2022"
 	{
