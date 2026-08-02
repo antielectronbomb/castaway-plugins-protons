@@ -711,6 +711,7 @@ public void OnPluginStart() {
 	ItemVariant(Wep_DeadRinger, "Ringer_Pre2013");
 	ItemDefine("degreaser", "Degreaser_PreTB", CLASSFLAG_PYRO, Wep_Degreaser);
 	ItemDefine("directhit", "DirectHit_PreJI", CLASSFLAG_SOLDIER, Wep_DirectHit);
+	ItemVariant(Wep_DirectHit, "DirectHit_PreDec2009");
 	ItemDefine("disciplinary", "Disciplinary_PreMYM", CLASSFLAG_SOLDIER, Wep_Disciplinary);
 #if defined MEMORY_PATCHES
 	ItemDefine("dragonfury", "DragonFury_Release", CLASSFLAG_PYRO, Wep_DragonFury, true);
@@ -4636,11 +4637,16 @@ Action SDKHookCB_OnTakeDamage(
 				if (
 					ItemIsEnabled(Wep_DirectHit) &&
 					StrEqual(class, "tf_weapon_rocketlauncher_directhit") &&
-					GetEntityFlags(victim) & FL_ONGROUND == 0 &&
-					GetEntProp(victim, Prop_Data, "m_nWaterLevel") == 0 &&
-					TF2_IsPlayerInCondition(victim, TFCond_KnockedIntoAir) == true
+					GetEntityFlags(victim) & FL_ONGROUND == 0
 				) {
-					TF2_AddCondition(victim, TFCond_MarkedForDeathSilent, 0.001, 0);
+					if (
+						GetItemVariant(Wep_DirectHit) == 0 &&
+						GetEntProp(victim, Prop_Data, "m_nWaterLevel") == 0 &&
+						TF2_IsPlayerInCondition(victim, TFCond_KnockedIntoAir) == true
+					) {
+						TF2_AddCondition(victim, TFCond_MarkedForDeathSilent, 0.001, 0);
+					} else if (GetItemVariant(Wep_DirectHit) == 1) // minicrit regardless of cause if enemy is mid-air
+						TF2_AddCondition(victim, TFCond_MarkedForDeathSilent, 0.001, 0);
 				}
 			}
 
