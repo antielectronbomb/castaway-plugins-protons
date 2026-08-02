@@ -36,6 +36,12 @@
 				// this is weird, blame makesig.idc for this
 				"windows" "\x57\x8B\xF9\x8B\x0D\x2A\x2A\x2A\x2A\xE8\x2A\x2A\x2A\x2A\x84\xC0\x0F\x85\x2A\x2A\x2A\x2A"
 			}
+			"CTFSniperRifle::CanFireCriticalShot" // search for sniper_crit_no_scope and scroll down a bit until you find 0.2
+			{
+				"library" "server"
+				"windows" "\x55\x8B\xEC\x53\x57\xFF\x75\x2A\x8B\xF9\xFF\x75"
+				"linux"	  "@_ZN14CTFSniperRifle19CanFireCriticalShotEbP11CBaseEntity"
+			}
 			"CTFFlameManager::GetFlameDamageScale"
 			{
 				"library"	"server"
@@ -360,8 +366,25 @@
 				// ╔══════════════════════════════════════════════╗
 				// ║                   Sniper                     ║
 				// ╚══════════════════════════════════════════════╝
-
-				// No patches for Sniper at the moment.
+				
+				// ================================================
+				//	Pre-February 14, 2008 Sniper Rifles Quickscope (no 200 ms quickscope delay)
+				"CTFSniperRifle::CanFireCriticalShot_SniperNo200msQuickscopeDelay"
+				{
+					"signature" "CTFSniperRifle::CanFireCriticalShot"
+					"windows"
+					{
+						"offset"	"231"
+						"verify"	"\x77\x2A"	// JA
+						"patch"		"\x90\x90"	// NOP 2x
+					}
+					"linux"
+					{
+						"offset"	"354"
+						"verify"	"\x76\x8A"	// JBE (-118)
+						"patch"		"\xEB\x8A"	// JMP (-118)
+					}
+				}
 
 				// ╔══════════════════════════════════════════════╗
 				// ║                     Spy                      ║

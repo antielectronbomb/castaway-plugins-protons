@@ -46,11 +46,11 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define PLUGIN_NAME "TF2 Weapon Reverts Extended"
-#define PLUGIN_DESC "Reverts nerfed weapons back to their glory days"
+#define PLUGIN_NAME "TF2 Weapon Reverts Time Capsule"
+#define PLUGIN_DESC "Reverts weapons back to the past"
 #define PLUGIN_AUTHOR "Bakugo, NotnHeavy, random, huutti, VerdiusArcana, MindfulProtons, EricZhang456"
 
-#define PLUGIN_VERSION_NUM "2.0.1"
+#define PLUGIN_VERSION_NUM "3.0.0-beta"
 // Add a OS suffix if Memorypatch reverts are used
 // to make it easier to see which OS the plugin is compiled for. 
 // To server owners, before you raise hell, do: sm plugins list 
@@ -71,7 +71,7 @@
 #define PLUGIN_VERSION_GIT PLUGIN_VERSION ... "%GIT_COMMIT%"
 #endif
 
-#define PLUGIN_URL "https://castaway.tf"
+#define PLUGIN_URL ""
 
 public Plugin myinfo = {
 	name = PLUGIN_NAME,
@@ -327,6 +327,7 @@ ConVar cvar_ref_weapon_medigun_charge_rate;
 MemoryPatch patch_RevertDragonsFury_CenterHitForBonusDmg;
 MemoryPatch patch_RevertFlamethrowers_Density_DmgScale;
 MemoryPatch patch_RevertFlamethrowers_Density_OnCollide;
+MemoryPatch patch_RevertSniperQuickscopeDelay;
 MemoryPatch patch_RevertQuickFix_Uber_CannotCapturePoint;
 MemoryPatch patch_RevertIronBomber_PipeHitbox;
 MemoryPatch patch_DroppedWeapon;
@@ -463,6 +464,9 @@ enum
 	Feat_Medigun, // All Mediguns
 	Feat_Minigun, // All Miniguns
 	Feat_Sentry, // All Sentry Guns
+#if defined MEMORY_PATCHES
+	Feat_SniperQuickscope, // Sniper 200ms Quickscope Delay Revert
+#endif
 	Feat_SniperRifle, // All Sniper Rifles
 	Feat_Stickybomb, // All Stickybomb Launchers
 	Feat_Sword, // All Swords
@@ -632,6 +636,9 @@ public void OnPluginStart() {
 	ItemDefine("medigun", "Medigun_PreMYM", CLASSFLAG_MEDIC, Feat_Medigun);
 	ItemDefine("miniramp", "Minigun_ramp_PreLW", CLASSFLAG_HEAVY, Feat_Minigun);
 	ItemDefine("sentry", "Sentry_PreTB", CLASSFLAG_ENGINEER, Feat_Sentry);
+#if defined MEMORY_PATCHES	
+	ItemDefine("sniperquickscope", "SniperQuickscope_Pre2008", CLASSFLAG_SNIPER | ITEMFLAG_DISABLED, Feat_SniperQuickscope, true);
+#endif
 	ItemDefine("sniperrifles", "SniperRifle_PreLW", CLASSFLAG_SNIPER, Feat_SniperRifle);
 	ItemDefine("stickybomb", "Stickybomb_PreLW", CLASSFLAG_DEMOMAN | ITEMFLAG_DISABLED, Feat_Stickybomb);
 	ItemDefine("swords", "Swords_PreTB", CLASSFLAG_DEMOMAN, Feat_Sword);
@@ -983,6 +990,7 @@ public void OnPluginStart() {
 		patch_RevertDragonsFury_CenterHitForBonusDmg = MemoryPatch.CreateFromConf(conf, "CTFProjectile_BallOfFire::Burn_SkipCenterHitRequirement");
 		patch_RevertFlamethrowers_Density_DmgScale = MemoryPatch.CreateFromConf(conf, "CTFFlameManager::GetFlameDamageScale_SkipDensityClampingFlameDamage");
 		patch_RevertFlamethrowers_Density_OnCollide = MemoryPatch.CreateFromConf(conf, "CTFFlameManager::OnCollide_SkipDensityClampingFlameDamage");
+		patch_RevertSniperQuickscopeDelay = MemoryPatch.CreateFromConf(conf, "CTFSniperRifle::CanFireCriticalShot_SniperNo200msQuickscopeDelay");
 		patch_RevertQuickFix_Uber_CannotCapturePoint = MemoryPatch.CreateFromConf(conf, "CTFGameRules::PlayerMayCapturePoint_QuickFixUberCanCapturePoint");
 		patch_RevertMadMilk_ChgFloatAddr = MemoryPatch.CreateFromConf(conf, "CTFWeaponBase::ApplyOnHitAttributes_Milk_HealAmount");
 		patch_DroppedWeapon = MemoryPatch.CreateFromConf(conf, "CTFPlayer::DropAmmoPack");
@@ -1099,6 +1107,7 @@ public void OnPluginStart() {
 	VALIDATE_PATCH(patch_RevertDragonsFury_CenterHitForBonusDmg);
 	VALIDATE_PATCH(patch_RevertFlamethrowers_Density_DmgScale);
 	VALIDATE_PATCH(patch_RevertFlamethrowers_Density_OnCollide);
+	VALIDATE_PATCH(patch_RevertSniperQuickscopeDelay);
 	VALIDATE_PATCH(patch_RevertQuickFix_Uber_CannotCapturePoint);
 	VALIDATE_PATCH(patch_RevertMadMilk_ChgFloatAddr);
 	VALIDATE_PATCH(patch_DroppedWeapon);
@@ -1225,6 +1234,7 @@ public void OnConfigsExecuted() {
 	ToggleMemoryPatchReverts(ItemIsEnabled(Wep_DragonFury),Wep_DragonFury);
 	ToggleMemoryPatchReverts(ItemIsEnabled(Feat_Flamethrower),Feat_Flamethrower);
 	ToggleMemoryPatchReverts(ItemIsEnabled(Feat_Stickybomb),Feat_Stickybomb);
+	ToggleMemoryPatchReverts(ItemIsEnabled(Feat_SniperQuickscope),Feat_SniperQuickscope);
 	ToggleMemoryPatchReverts(ItemIsEnabled(Wep_QuickFix),Wep_QuickFix);
 	ToggleMemoryPatchReverts(ItemIsEnabled(Wep_MadMilk),Wep_MadMilk);
 	ToggleMemoryPatchReverts(ItemIsEnabled(Wep_IronBomber),Wep_IronBomber);
@@ -1305,6 +1315,13 @@ void ToggleMemoryPatchReverts(bool enable, int wep_enum) {
 				patch_RevertCannotDetonateStickiesWhileTaunting.Enable();
 			} else {
 				patch_RevertCannotDetonateStickiesWhileTaunting.Disable();
+			}
+		}
+		case Feat_SniperQuickscope: { 
+			if (enable) {
+				patch_RevertSniperQuickscopeDelay.Enable();
+			} else {
+				patch_RevertSniperQuickscopeDelay.Disable();
 			}
 		}
 		case Wep_QuickFix: {
@@ -3320,11 +3337,13 @@ void CacheWeapons(int client) {
 						player_weapons[client][Feat_Flamethrower] = true;
 					}
 				}
+				else if (StrContains(class, "tf_weapon_sniperrifle")) {
+					player_weapons[client][Feat_SniperQuickscope] = true;
+				}
 				else if (StrContains(class, "tf_weapon_sniperrifle") == 0) {
 					player_weapons[client][Feat_SniperRifle] = true;
-#endif
 				}
-
+#endif
 				else if (StrEqual(class, "tf_weapon_lunchbox")) {
 					player_weapons[client][Feat_Lunchbox] = true;					
 				}
