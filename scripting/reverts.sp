@@ -280,6 +280,10 @@ enum struct Player {
 	int whip_frame;
 	int fireproof_frame;
 	int cannonball_frame;
+	bool has_used_jetpack;
+	bool was_jump_key_pressed;
+	bool blast_jump_sound_loop;
+	int bunnyhop_frame;
 }
 
 enum struct Entity {
@@ -564,6 +568,7 @@ enum
 	Wep_Spycicle,
 	Wep_StickyJumper,
 	Wep_SydneySleeper,
+	Wep_ThermalThruster,
 	Wep_TideTurner,
 	Wep_Tomislav,	
 	Wep_TribalmansShiv,
@@ -804,6 +809,7 @@ public void OnPluginStart() {
 	ItemVariant(Wep_StickyJumper, "StkJumper_Pre2011");
 	ItemDefine("sleeper", "Sleeper_PreBM", CLASSFLAG_SNIPER, Wep_SydneySleeper);
 	ItemVariant(Wep_SydneySleeper, "Sleeper_PreGM");
+	ItemDefine("thermal", "ThermalThrust_May2025", CLASSFLAG_PYRO, Wep_ThermalThruster);
 	ItemDefine("turner", "Turner_PreTB", CLASSFLAG_DEMOMAN, Wep_TideTurner);
 	ItemVariant(Wep_TideTurner, "Turner_PreDec2014");
 	ItemDefine("tomislav", "Tomislav_PreLWSoundOnly", CLASSFLAG_HEAVY, Wep_Tomislav);
@@ -3355,6 +3361,10 @@ void CacheWeapons(int client) {
 					player_weapons[client][Feat_Medigun] = true;
 				}
 
+				if (StrContains(class, "tf_weapon_rocketpack") == 0) {
+					player_weapons[client][Wep_ThermalThruster] = true;
+				}
+
 				if (StrEqual(class, "tf_weapon_minigun")) {
 					player_weapons[client][Feat_Minigun] = true;
 				}
@@ -3490,6 +3500,7 @@ void CacheWeapons(int client) {
 					case 133: player_weapons[client][Wep_Gunboats] = true;
 					case 406: player_weapons[client][Wep_SplendidScreen] = true;
 					case 131, 1144: player_weapons[client][Wep_CharginTarge] = true;
+					case 1179: player_weapons[client][Wep_ThermalThruster] = true;
 					case 1099: player_weapons[client][Wep_TideTurner] = true;
 				}
 			}
@@ -5295,6 +5306,68 @@ public Action OnPlayerRunCmd(
 			}			
 		}
 
+		case TFClass_Pyro:
+		{
+			if (
+				ItemIsEnabled(Wep_ThermalThruster) &&
+				player_weapons[client][Wep_ThermalThruster] &&
+				IsPlayerAlive(client)
+			) {
+				// Pre-May 1, 2025 Thermal Thruster Revert - keep stomp condition when bunnyhopping
+
+				// check if thermal thruster got used or not, simplest but hacky way to do it
+				if (TF2_IsPlayerInCondition(client, TFCond_RocketPack) && TF2_IsPlayerInCondition(client, TFCond_Dazed))
+					players[client].has_used_jetpack = true;
+				else if (!TF2_IsPlayerInCondition(client, TFCond_RocketPack) && (GetEntityFlags(client) & FL_ONGROUND))
+					players[client].has_used_jetpack = false; // this should be good enough
+
+				// preserve stomp condition when bunnyhopping
+				if (players[client].has_used_jetpack) {
+					if (
+						!players[client].was_jump_key_pressed && // check if jump key was pressed, NOT held. prevents command spam and lag
+						(buttons & IN_JUMP) && (GetEntityFlags(client) & FL_ONGROUND) // the check for bunnyhopping, game thinks player is in the air and on ground at the same time
+					) {
+						players[client].bunnyhop_frame = GetGameTickCount();
+						players[client].has_used_jetpack = true;
+						players[client].was_jump_key_pressed = true;
+						// PrintToChat(client, "Bunnyhop detected and used jetpack");
+					}
+
+					if (
+						players[client].bunnyhop_frame + 1 == GetGameTickCount() &&
+						!(GetEntityFlags(client) & FL_ONGROUND) // check if player is in the air
+					) {
+						players[client].was_jump_key_pressed = true;
+						// PrintToChat(client, "Player is in air");
+						if (!TF2_IsPlayerInCondition(client, TFCond_RocketPack)) { 
+							TF2_AddCondition(client, TFCond_RocketPack);
+							// Get rid of landing sound spam (somewhat) on a successful bunnyhop, replace it with air whistle sound
+							EmitGameSoundToAll("Weapon_RocketPack.Land", client, SND_STOP);
+							EmitGameSoundToAll("Weapon_RocketPack.BoostersShutdown", client, SND_STOP);
+							EmitGameSoundToAll("BlastJump.Whistle", client);
+							players[client].blast_jump_sound_loop = true;
+							// PrintToChat(client, "Valid bhop, added TFCond_RocketPack stomp attribute, removed & added sounds, reverted jetpack stomp bhop");
+						}
+					}
+					
+					// stop air whistling sound when bunnyhopping ends
+					if (
+						players[client].blast_jump_sound_loop && 
+						(GetEntityFlags(client) & FL_ONGROUND)
+					) {
+						players[client].blast_jump_sound_loop = false;
+						EmitGameSoundToAll("BlastJump.Whistle", client, SND_STOP);
+						// PrintToChat(client, "Removed air whistling loop sound");
+					}
+				}
+
+				// if jump key is currently not held, always set variable to false
+				if (!(buttons & IN_JUMP)) {
+					players[client].was_jump_key_pressed = false;
+				}
+			}
+		}
+
 		case TFClass_Heavy:
 		{
 			if (
@@ -5523,7 +5596,7 @@ void ItemFinalize() {
 		}
 
 		Format(cvar_name, sizeof(cvar_name), "sm_reverts__item_%s", items[idx].key);
-		Format(cvar_desc, sizeof(cvar_desc), (PLUGIN_NAME ... " - Revert nerfs to %T\n\n"), items[idx].key, LANG_SERVER);
+		Format(cvar_desc, sizeof(cvar_desc), (PLUGIN_NAME ... " - Revert stats to %T\n\n"), items[idx].key, LANG_SERVER);
 		StrCat(cvar_desc, sizeof(cvar_desc), "0: Disable\n");
 		char item_desc[256];
 		Format(item_desc, sizeof(item_desc), "1: %T\n", items_desc[idx][0], LANG_SERVER);
