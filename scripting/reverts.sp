@@ -85,7 +85,7 @@ public Plugin myinfo = {
 	url = PLUGIN_URL
 };
 
-#define MAX_VARIANTS 3 // not including base version, increase as needed
+#define MAX_VARIANTS 8 // not including base version, increase as needed
 #define BALANCE_CIRCUIT_METAL 15
 #define BALANCE_CIRCUIT_DAMAGE 20.0
 #define BALANCE_CIRCUIT_RECOVERY 0.67
@@ -242,6 +242,7 @@ enum struct Player {
 	float resupply_time;
 	int headshot_frame;
 	bool hit_by_headshot;
+	int ambassador_kill_frame;
 	int projectile_touch_frame;
 	int projectile_touch_entity;
 	int beggars_ammo;
@@ -663,6 +664,8 @@ public void OnPluginStart() {
 	// Specific weapons
 	ItemDefine("airstrike", "Airstrike_PreTB", CLASSFLAG_SOLDIER, Wep_Airstrike);
 	ItemDefine("ambassador", "Ambassador_PreJI", CLASSFLAG_SPY, Wep_Ambassador);
+	ItemVariant(Wep_Ambassador, "Ambassador_PreJune2009");
+	ItemVariant(Wep_Ambassador, "Ambassador_Release");
 	ItemDefine("amputator", "Amputator_PreTB", CLASSFLAG_MEDIC, Wep_Amputator);
 	ItemVariant(Wep_Amputator, "Amputator_PreTB_Historical");
 	ItemDefine("atomizer", "Atomizer_PreJI", CLASSFLAG_SCOUT, Wep_Atomizer);
@@ -1996,6 +1999,25 @@ public void OnGameFrame() {
 					}
 
 					{
+						// cancel machina penetration sounds with 2009 ambassador variants
+
+						if (GetItemVariant(Wep_Ambassador) >= 1) {
+							weapon = GetEntPropEnt(idx, Prop_Send, "m_hActiveWeapon");
+
+							if (weapon > 0) {
+
+								if (
+									(GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 61 ||
+									GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 1006) &&
+									players[idx].ambassador_kill_frame + 1 == GetGameTickCount()
+								) {
+									EmitGameSoundToAll("Game.PenetrationKill", idx, SND_STOP);
+								}
+							}
+						}
+					}
+
+					{
 						// release spycicle prevent melting when hit by fire while taunting
 						if (GetItemVariant(Wep_Spycicle) == 1) {
 							weapon = GetEntPropEnt(idx, Prop_Send, "m_hActiveWeapon");
@@ -2485,7 +2507,15 @@ public void ApplyRevertsToItem(int entity) {
 	// part 1
 	switch (index) {
 		case 61, 1006: { if (ItemIsEnabled(Wep_Ambassador)) {
-			TF2Attrib_SetByDefIndex(entity, 868, 0.0); // crit dmg falloff
+			switch (GetItemVariant(Wep_Ambassador)) {
+				case 0: { // Pre-Jungle Inferno
+					TF2Attrib_SetByDefIndex(entity, 868, 0.0); // crit dmg falloff
+				}
+				default: { // 2009 variants
+					TF2Attrib_SetByDefIndex(entity, 266, 1.0); // projectile_penetration
+					TF2Attrib_SetByDefIndex(entity, 868, 0.0); // crit dmg falloff
+				}
+			}
 		}}
 		case 450: { switch (GetItemVariant(Wep_Atomizer)) {
 			case 0: { // Pre-Jungle Inferno
@@ -3288,6 +3318,21 @@ public Action Event_OnPlayerDeath(Event event, const char[] name, bool dontBroad
 					RequestFrame(ApplyOverhealOnKill, weapon);
 				}
 			}
+
+			{
+				// ambassador machina sound fix
+
+				if (StrEqual(class, "tf_weapon_revolver")) {
+					// track ambassador kills for cancelling machina penetration sounds
+					if (
+						GetItemVariant(Wep_Ambassador) >= 1 &&
+						GetEventInt(event, "attacker") != -1 &&
+						GetEventInt(event, "playerpenetratecount") > 0
+					) {
+						players[attacker].ambassador_kill_frame = GetGameTickCount();
+					}
+				}
+			}			
 		}
 	}
 	return Plugin_Continue;
@@ -4138,7 +4183,11 @@ Action SDKHookCB_TraceAttack(
 	) {
 		if (hitgroup == 1) {
 			if (
-				damage_type & DMG_USE_HITLOCATIONS != 0 ||
+				( // hit tracking for ambassador
+					damage_type & DMG_USE_HITLOCATIONS != 0 ||
+					GetItemVariant(Wep_Ambassador) >= 1 &&
+					player_weapons[attacker][Wep_Ambassador]
+				) ||
 				TF2_GetPlayerClass(attacker) == TFClass_Sniper
 			) {
 				players[attacker].headshot_frame = GetGameTickCount();
@@ -4605,6 +4654,36 @@ Action SDKHookCB_OnTakeDamage(
 					players[victim].hit_by_headshot
 				) {
 					players[attacker].bazaar_shot = BAZAAR_GAIN;
+				}
+			}
+
+			{
+				// Ambassador reverts: allow crits/mini-crits on headshot with no cooldown
+				if (
+					ItemIsEnabled(Wep_Ambassador) &&
+					StrEqual(class, "tf_weapon_revolver") &&
+					players[attacker].headshot_frame == GetGameTickCount() &&
+					players[victim].hit_by_headshot &&
+					(	
+						GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 61 ||
+						GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 1006
+					)
+				) {
+					if (GetItemVariant(Wep_Ambassador) == 1) {
+						// full crits
+						damage_type |= DMG_CRIT;
+						// PrintToChatAll("full crit no cooldown triggered");
+						return Plugin_Changed;
+					} else if (
+						GetItemVariant(Wep_Ambassador) == 2 &&
+						!PlayerIsCritboosted(attacker)
+					) {
+						// mini-crits
+						damage_type &= ~DMG_CRIT;
+						TF2_AddCondition(victim, TFCond_MarkedForDeathSilent, 0.001, 0);
+						// PrintToChatAll("minicrit no cooldown triggered");
+						return Plugin_Changed;
+					}
 				}
 			}
 
