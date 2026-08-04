@@ -3292,6 +3292,7 @@ public Action Event_OnPlayerSpawn(Event event, const char[] name, bool dontBroad
 public Action Event_OnPlayerDeath(Event event, const char[] name, bool dontBroadcast) {
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
 	int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
+	int victim = GetClientOfUserId(GetEventInt(event, "userid"));
 	int weapon;
 	char class[64];
 
@@ -3385,7 +3386,39 @@ public Action Event_OnPlayerDeath(Event event, const char[] name, bool dontBroad
 						players[attacker].ambassador_kill_frame = GetGameTickCount();
 					}
 				}
-			}			
+			}
+
+			{
+				// ambassador headshot kill icon
+
+				if (
+					GetEventInt(event, "customkill") != TF_CUSTOM_HEADSHOT &&
+					(
+						(	// redundant check for default ambassador revert just in case the dhook method does not work or gets broken in the next tf2 update
+							GetItemVariant(Wep_Ambassador) == 0 &&
+							players[attacker].headshot_frame == GetGameTickCount() 
+						) ||
+						(	// make sure headshot kill icon pops up when victims are killed from rapid fire headshots
+							GetItemVariant(Wep_Ambassador) >= 1 &&
+							players[attacker].headshot_frame <= GetGameTickCount() + 66 &&
+							players[victim].hit_by_headshot
+						)
+					)
+				) {
+					weapon = GetEntPropEnt(attacker, Prop_Send, "m_hActiveWeapon");
+
+					if (weapon > 0) {
+						GetEntityClassname(weapon, class, sizeof(class));
+						if (
+							ItemIsEnabled(Wep_Ambassador) &&
+							StrEqual(class, "tf_weapon_revolver")
+						) {
+							event.SetInt("customkill", TF_CUSTOM_HEADSHOT);
+							return Plugin_Changed;
+						}
+					}
+				}
+			}
 		}
 	}
 	return Plugin_Continue;
