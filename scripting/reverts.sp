@@ -7234,7 +7234,11 @@ MRESReturn DHookCallback_CBaseCombatWeapon_ItemPostFrame_Post(int entity) {
 	}
 
 	// Release Huo-Long Heater revert: firing does not drain additional ammo, but only spinning up does drain ammo
-	if (GetItemVariant(Wep_HuoLongHeater) == 1) {
+	if (
+		GetItemVariant(Wep_HuoLongHeater) == 1 &&
+		(GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex") == 811 || 
+		GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex") == 832) // Genuine Quality Huo-Long Heater
+	) {
 		if (
 			TF2Attrib_HookValueFloat(0.0, "uses_ammo_while_aiming", entity) < 6.0 &&
 			GetEntProp(entity, Prop_Send, "m_iWeaponState") == AC_STATE_SPINNING &&
