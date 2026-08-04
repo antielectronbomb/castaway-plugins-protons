@@ -294,6 +294,10 @@
 	{
 		"en"	"Degreaser"
 	}
+	"demopan"
+	{
+		"en"	"Demopan"
+	}
 	"directhit"
 	{
 		"en"	"Direct Hit"
@@ -807,6 +811,10 @@
 	"Degreaser_PreTB"
 	{
 		"en"	"Reverted to pre-toughbreak, 65%% faster weapon switch, -10%% damage, -25%% afterburn damage, no airblast cost penalty"
+	}
+	"Demopan_April2011"
+	{
+		"en"	"Restored April Fools' 2011 item set bonus, +1000%% chance of trading your Stout Shako for 2 refined. Equip the Chargin' Targe and Frying Pan to gain the bonus, cosmetics not required"
 	}
 	"DirectHit_PreJI"
 	{

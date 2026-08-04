@@ -489,6 +489,7 @@ enum
 	Set_Medieval,		// Medic
 	Set_CrocoStyle,		// Sniper
 	Set_Saharan, 		// Spy
+	Set_Demopan,		// Demopan (https://wiki.teamfortress.com/wiki/Team_Fortress_Wiki:April_Fools%27_Day/2011/Demopan)
 	
 	// Specific weapons
 	Wep_Airstrike,
@@ -667,6 +668,7 @@ public void OnPluginStart() {
 	ItemDefine("crocostyle", "CrocoStyle_Release", CLASSFLAG_SNIPER | ITEMFLAG_DISABLED, Set_CrocoStyle);
 	ItemDefine("saharan", "Saharan_Release", CLASSFLAG_SPY | ITEMFLAG_DISABLED, Set_Saharan);
 	ItemVariant(Set_Saharan, "Saharan_ExtraCloak");
+	ItemDefine("demopan", "Demopan_April2011", CLASSFLAG_DEMOMAN, Set_Demopan);
 
 	// Specific weapons
 	ItemDefine("airstrike", "Airstrike_PreTB", CLASSFLAG_SOLDIER, Wep_Airstrike);
@@ -3661,6 +3663,7 @@ void CacheWeapons(int client) {
 			case TFClass_DemoMan:
 			{
 				TF2Attrib_RemoveByDefIndex(client, 492); // SET BONUS: dmg taken from fire reduced set bonus
+				TF2Attrib_RemoveByDefIndex(client, 537); // SET BONUS: calling card on kill
 			}
 			case TFClass_Heavy:
 			{
@@ -3779,6 +3782,20 @@ void CacheWeapons(int client) {
 								break;
 							}
 						}
+
+						if (
+							ItemIsEnabled(Set_Demopan) &&
+							(
+								index == 264 || // frying pan
+								index == 1071 // golden frying pan
+							)
+						) {
+							wep_count++;
+							if (wep_count == 1) {
+								active_set = Set_Demopan;
+								break;
+							}
+						}
 					}
 					case TFClass_Heavy:
 					{
@@ -3870,6 +3887,13 @@ void CacheWeapons(int client) {
 				valid = false;
 			}
 
+			if (
+				active_set == Set_Demopan &&
+				!player_weapons[client][Wep_CharginTarge]
+			) {
+				valid = false;
+			}
+
 			if (valid)
 			{
 				switch (active_set)
@@ -3919,6 +3943,11 @@ void CacheWeapons(int client) {
 						{
 							TF2Attrib_SetByDefIndex(first_wep, 83, 1.0); // +0% cloak duration
 						}
+					}
+					case Set_Demopan:
+					{
+						player_weapons[client][Set_Demopan] = true;
+						TF2Attrib_SetByDefIndex(client, 537, 1.0); // SET BONUS: calling card on kill
 					}
 				}
 			}
