@@ -824,9 +824,25 @@
 	{
 		"en"	"Reverted to pre-inferno, can refill cloak via ammo while uncloaked"
 	}
+	"Ringer_PreTB"
+	{
+		"en"	"Reverted to pre-toughbreak, same modern stats but 50%% initial dmg resist, can pick up ammo while uncloaked, 35%% less cloak from ammo boxes"
+	}
 	"Ringer_Pre2013"
 	{
 		"en"	"Reverted to pre-Summer 2013, can refill via ammo (35%% cap), 90%% damage resist for 6s, no speedboost or afterburn immunity, no debuff reduction when cloaked"
+	}
+	"Ringer_Pre2010"
+	{
+		"en"	"Reverted to pre-Jan 6, 2010; can fully pick up ammo, 90%% dmg resist for 6s, no speedboost, up to 40%% drain on early decloak, no afterburn immunity after feign, no debuff reduction when cloaked"
+	}
+	"Ringer_PostRelease"
+	{
+		"en"	"Reverted to post-release, 90%% dmg resist for 6s, no speedboost, full drain on early decloak, no afterburn immunity after feign, no debuff reduction when cloaked"
+	}
+	"Ringer_Release"
+	{
+		"en"	"Reverted to release, 90%% dmg resist for 6s, no speedboost, no drain on early decloak, no afterburn immunity after feign, no debuff reduction when cloaked"
 	}
 	"Degreaser_PreTB"
 	{

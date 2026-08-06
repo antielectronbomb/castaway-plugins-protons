@@ -724,7 +724,11 @@ public void OnPluginStart() {
 	ItemVariant(Wep_Darwin, "Darwin_Pre2013");
 	ItemDefine("ringer", "Ringer_PreGM", CLASSFLAG_SPY, Wep_DeadRinger);
 	ItemVariant(Wep_DeadRinger, "Ringer_PreJI");
+	ItemVariant(Wep_DeadRinger, "Ringer_PreTB");
 	ItemVariant(Wep_DeadRinger, "Ringer_Pre2013");
+	ItemVariant(Wep_DeadRinger, "Ringer_Pre2010");
+	ItemVariant(Wep_DeadRinger, "Ringer_PostRelease");
+	ItemVariant(Wep_DeadRinger, "Ringer_Release");
 	ItemDefine("degreaser", "Degreaser_PreTB", CLASSFLAG_PYRO, Wep_Degreaser);
 	ItemDefine("directhit", "DirectHit_PreJI", CLASSFLAG_SOLDIER, Wep_DirectHit);
 	ItemVariant(Wep_DirectHit, "DirectHit_PreDec2009");
@@ -1980,7 +1984,7 @@ public void OnGameFrame() {
 							player_weapons[idx][Wep_DeadRinger] &&
 							(
 								GetItemVariant(Wep_DeadRinger) == 0 ||
-								GetItemVariant(Wep_DeadRinger) == 2
+								GetItemVariant(Wep_DeadRinger) >= 3
 							)
 						) {
 							for (int i = 0; i < sizeof(debuffs); ++i) {
@@ -2344,10 +2348,18 @@ public void TF2_OnConditionRemoved(int client, TFCond condition) {
 				float cloak = -1.0;
 
 				switch (GetItemVariant(Wep_DeadRinger)) {
-					case 0, 2: { // pre-GM
+					case 0, 3: { // pre-GM
 						// when uncloaking, cloak is drained to 40%
 						cloak = 40.0;
 					}
+					case 4: { // pre-2010
+						// when uncloaking, cloak is drained to 60%
+						cloak = 60.0;
+					}
+					case 5: { // post-release
+						// fully drain meter when uncloaking
+						cloak = 0.0;
+					} // release dead ringer did not drain cloak meter when uncloaking
 				}
 
 				if (
@@ -2368,7 +2380,7 @@ public Action TF2_OnAddCond(int client, TFCond &condition, float &time, int &pro
 			condition == TFCond_DeadRingered &&
 			(
 				GetItemVariant(Wep_DeadRinger) == 0 ||
-				GetItemVariant(Wep_DeadRinger) == 2
+				GetItemVariant(Wep_DeadRinger) >= 3
 			)
 		) {
 			// undo 50% drain on activated
@@ -3037,14 +3049,20 @@ public void ApplyRevertsToItem(int entity) {
 			}
 		}
 		case 59: { switch (GetItemVariant(Wep_DeadRinger)) {
-			case 0, 2: {
+			case 0, 3, 4: { // pre-gm, pre-2013, pre-2010 dead ringers
 				TF2Attrib_SetByDefIndex(entity, 35, 1.8); // mult cloak meter regen rate
 				TF2Attrib_SetByDefIndex(entity, 82, 1.6); // cloak consume rate increased
 				TF2Attrib_SetByDefIndex(entity, 83, 1.0); // cloak consume rate decreased
 				TF2Attrib_SetByDefIndex(entity, 726, 1.0); // cloak consume on feign death activate
 				TF2Attrib_SetByDefIndex(entity, 810, 0.0); // mod cloak no regen from items
 			}
-			case 1: {
+			case 5, 6: { // post-release and release dead ringers - they could not pick up ammo back then
+				TF2Attrib_SetByDefIndex(entity, 35, 1.8); // mult cloak meter regen rate
+				TF2Attrib_SetByDefIndex(entity, 82, 1.6); // cloak consume rate increased
+				TF2Attrib_SetByDefIndex(entity, 83, 1.0); // cloak consume rate decreased
+				TF2Attrib_SetByDefIndex(entity, 726, 1.0); // cloak consume on feign death activate
+			}
+			case 1, 2: { // pre-inferno and pre-tough break dead ringers
 				TF2Attrib_SetByDefIndex(entity, 728, 1.0); // No cloak meter from ammo boxes when invisible
 				TF2Attrib_SetByDefIndex(entity, 729, 0.65); // -35% cloak meter from ammo boxes
 				TF2Attrib_SetByDefIndex(entity, 810, 0.0); // mod cloak no regen from items
@@ -4407,14 +4425,22 @@ Action SDKHookCB_OnTakeDamage(
 				if (player_weapons[victim][Wep_DeadRinger]) {
 					switch (GetItemVariant(Wep_DeadRinger)) {
 						case -1, 1: {
-							// "New-Style" Dead Ringer
+							// Pre-Inferno and Vanilla Dead Ringer
 							cvar_ref_tf_feign_death_duration.RestoreDefault();
 							cvar_ref_tf_feign_death_speed_duration.RestoreDefault();
 							cvar_ref_tf_feign_death_activate_damage_scale.RestoreDefault();
 							cvar_ref_tf_feign_death_damage_scale.RestoreDefault();
 						}
-						case 0, 2: {
-							// "Old-Style" Dead Ringer
+						case 2: {
+							// Pre-Tough Break Dead Ringer
+							cvar_ref_tf_feign_death_duration.RestoreDefault();
+							cvar_ref_tf_feign_death_speed_duration.RestoreDefault();
+							cvar_ref_tf_feign_death_activate_damage_scale.FloatValue = 0.50;
+							cvar_ref_tf_feign_death_damage_scale.RestoreDefault();
+							cvar_ref_tf_stealth_damage_reduction.RestoreDefault();
+						}
+						case 0, 3, 4, 5, 6: {
+							// "Old-Style" Dead Ringers (Pre-GM, Pre-2013, Pre-2010, Post-Release, Release)
 							cvar_ref_tf_feign_death_duration.FloatValue = -1.0;
 							cvar_ref_tf_feign_death_speed_duration.FloatValue = 0.0;
 							cvar_ref_tf_feign_death_activate_damage_scale.FloatValue = 0.10;
@@ -7401,10 +7427,10 @@ MRESReturn DHookCallback_CTFPlayerShared_AddToSpyCloakMeter(Address pThis, DHook
 			player_weapons[client][Wep_DeadRinger] &&
 			(
 				GetItemVariant(Wep_DeadRinger) == 0 ||
-				GetItemVariant(Wep_DeadRinger) == 2
+				GetItemVariant(Wep_DeadRinger) == 3
 			)
 		) {
-			// cap dead ringer cloak gain to 35%
+			// cap pre-gm and pre-2013 dead ringer cloak gain to 35%
 			float val = parameters.Get(1);
 			parameters.Set(1, floatMin(val, 35.00));
 			return MRES_ChangedHandled;	
