@@ -768,6 +768,10 @@
 	{
 		"en"	"Reverted to pre-Summer 2013, 5 shots, cannot be crit-boosted, -10%% damage penalty, 5%% slower reload time"
 	}
+	"CowMangler_Release"
+	{
+		"en"	"Reverted to release, 5 shots, cannot be crit-boosted, uses old damage formula, +150%% max rampup (121 max dmg, 81 base dmg, 43 min dmg)"
+	}
 	"CozyCamper_PreMYM"
 	{
 		"en"	"Reverted to pre-matchmaking, flinch resist at any charge level"

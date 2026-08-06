@@ -709,6 +709,7 @@ public void OnPluginStart() {
 	ItemVariant(Wep_CleanerCarbine, "Carbine_PreTB");
 	ItemDefine("concheror", "Concheror_PreTB", CLASSFLAG_SOLDIER, Wep_Concheror);
 	ItemDefine("cowmangler", "CowMangler_Pre2013", CLASSFLAG_SOLDIER | ITEMFLAG_DISABLED, Wep_CowMangler);
+	ItemVariant(Wep_CowMangler, "CowMangler_Release");
 	ItemDefine("cozycamper", "CozyCamper_PreMYM", CLASSFLAG_SNIPER, Wep_CozyCamper);
 	ItemDefine("crossbow", "CrusadersCrossbow_PreJI", CLASSFLAG_MEDIC, Wep_Crossbow);
 	ItemDefine("critcola", "CritCola_PreMYM", CLASSFLAG_SCOUT, Wep_CritCola);
@@ -2688,12 +2689,20 @@ public void ApplyRevertsToItem(int entity) {
 		case 354: { if (ItemIsEnabled(Wep_Concheror)) {
 			TF2Attrib_SetByDefIndex(entity, 57, 2.0); // +2 health regenerated per second on wearer
 		}}
-		case 441: { if (ItemIsEnabled(Wep_CowMangler)) {
-			TF2Attrib_SetByDefIndex(entity, 1, 0.90); // -10% damage penalty
-			TF2Attrib_SetByDefIndex(entity, 96, 1.05); // 5% slower reload time
-			TF2Attrib_SetByDefIndex(entity, 288, 1.0); // Cannot be crit boosted (does nothing, handled elsewhere)
-			TF2Attrib_SetByDefIndex(entity, 335, 1.25); // +25% clip size
-			TF2Attrib_SetByDefIndex(entity, 869, 0.0); // Minicrits whenever it would normally crit
+		case 441: { switch (GetItemVariant(Wep_CowMangler)) {
+			case 0: {
+				TF2Attrib_SetByDefIndex(entity, 1, 0.90); // -10% damage penalty
+				TF2Attrib_SetByDefIndex(entity, 96, 1.05); // 5% slower reload time
+				TF2Attrib_SetByDefIndex(entity, 288, 1.0); // Cannot be crit boosted (does nothing, handled elsewhere)
+				TF2Attrib_SetByDefIndex(entity, 335, 1.25); // +25% clip size
+				TF2Attrib_SetByDefIndex(entity, 869, 0.0); // Minicrits whenever it would normally crit
+			}
+			case 1: {
+				TF2Attrib_SetByDefIndex(entity, 1, 0.90); // -10% damage penalty
+				TF2Attrib_SetByDefIndex(entity, 288, 1.0); // Cannot be crit boosted (does nothing, handled elsewhere)
+				TF2Attrib_SetByDefIndex(entity, 335, 1.25); // +25% clip size
+				TF2Attrib_SetByDefIndex(entity, 869, 0.0); // Minicrits whenever it would normally crit
+			}
 		}}
 		case 163: { switch (GetItemVariant(Wep_CritCola)) {
 			case 0, 1: {
@@ -4932,6 +4941,8 @@ Action SDKHookCB_OnTakeDamageAlive(
 	int healer;
 	float rage;
 	float charge;
+	float pos1[3];
+	float pos2[3];
 
 	bool resist_damage = false;
 	if (weapon > 0) {
@@ -5217,6 +5228,44 @@ Action SDKHookCB_OnTakeDamageAlive(
 					}
 				}
 			}
+		}
+
+		{
+			// release cow mangler 5000 old damage and rampup
+			if (StrEqual(class, "tf_projectile_energy_ball")) {
+				GetEntityClassname(weapon, class, sizeof(class));
+				
+				if (
+					GetItemVariant(Wep_CowMangler) == 1 && StrEqual(class, "tf_weapon_particle_cannon")
+				) {
+						// Base damage has been set to 81 from 90 (10% dmg penalty) via attributes elsewhere
+
+						// Do not use internal rampup/falloff.
+						damage_type &= ~DMG_USEDISTANCEMOD;
+
+						GetEntPropVector(attacker, Prop_Send, "m_vecOrigin", pos1);
+						GetEntPropVector(victim, Prop_Send, "m_vecOrigin", pos2);
+						
+						float distance = GetVectorDistance(pos1, pos2, true);
+						float distance_512hu = Pow(512.0, 2.0);
+						float distance_1024hu = Pow(1024.0, 2.0);
+						
+						// PrintToChatAll("pos1: %f, pos2: %f", pos1, pos2);
+						// PrintToChatAll("GetVectorDistance: %f", GetVectorDistance(pos1, pos2, false));
+						
+						// Deal damage with 150% rampup, 52.8% falloff.
+						if (distance <= distance_512hu)
+							damage *= ValveRemapVal(distance, 0.0, distance_512hu, 1.5, 1.0);
+						else if (damage_type & DMG_CRIT) // DMG_CRIT checks for crits AND minicrits, and cow mangler does not deal crits so use this
+							damage *= 1.0; // minicrits ignore damage falloff by design, so do not decrease damage
+						else if (distance <= distance_1024hu)
+							damage *= ValveRemapVal(distance, distance_512hu, distance_1024hu, 1.0, 0.528);
+						else
+							damage *= 0.528;
+							
+					return Plugin_Changed;
+				}
+			} 
 		}
 
 		if (weapon > 0) {
