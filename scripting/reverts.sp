@@ -266,6 +266,7 @@ enum struct Player {
 	int charge_tick;
 	int fall_dmg_tick;
 	bool holding_jump;
+	bool holding_attack1;
 	bool holding_attack2;
 	int drain_victim;
 	float drain_time;
@@ -514,6 +515,7 @@ enum
 	Wep_Bushwacka,
 	Wep_CharginTarge,
 	Wep_Claidheamh,
+	Wep_Classic,
 	Wep_CleanerCarbine,
 	Wep_Concheror,
 	Wep_CowMangler,
@@ -706,6 +708,7 @@ public void OnPluginStart() {
 	ItemDefine("buffbanner", "BuffBanner_Release", CLASSFLAG_SOLDIER | ITEMFLAG_DISABLED, Wep_BuffBanner);
 	ItemDefine("targe", "Targe_PreTB", CLASSFLAG_DEMOMAN, Wep_CharginTarge);
 	ItemDefine("claidheamh", "Claidheamh_PreTB", CLASSFLAG_DEMOMAN, Wep_Claidheamh);
+	ItemDefine("classic", "Classic_TFC", CLASSFLAG_SNIPER | ITEMFLAG_DISABLED, Wep_Classic);
 	ItemDefine("carbine", "Carbine_Release", CLASSFLAG_SNIPER, Wep_CleanerCarbine);
 	ItemVariant(Wep_CleanerCarbine, "Carbine_PreTB");
 	ItemDefine("concheror", "Concheror_PreTB", CLASSFLAG_SOLDIER, Wep_Concheror);
@@ -1425,6 +1428,7 @@ public void OnMapStart() {
 	PrecacheSound("misc/banana_slip.wav");
 	PrecacheScriptSound("BaseCombatCharacter.AmmoPickup");
 	PrecacheScriptSound("Jar.Explode");
+	PrecacheScriptSound("Player.UseDeny");
 	PrecacheScriptSound("Player.ResistanceLight");
 	PrecacheParticleSystem("doublejump_puff_alt");
 	PrecacheParticleSystem("dxhr_arm_muzzleflash");
@@ -2689,6 +2693,10 @@ public void ApplyRevertsToItem(int entity) {
 			TF2Attrib_SetByDefIndex(entity, 128, 0.0); // When weapon is active:
 			TF2Attrib_SetByDefIndex(entity, 412, 1.00); // 0% damage vulnerability on wearer
 		}}
+		case 1098: { if (ItemIsEnabled(Wep_Classic)) {
+			TF2Attrib_SetByDefIndex(entity, 76, 3.0); // +300% max primary ammo on wearer
+			TF2Attrib_SetByDefIndex(entity, 306, 0.0); // no headshots when fully charged
+		}}
 		case 354: { if (ItemIsEnabled(Wep_Concheror)) {
 			TF2Attrib_SetByDefIndex(entity, 57, 2.0); // +2 health regenerated per second on wearer
 		}}
@@ -3582,6 +3590,7 @@ void CacheWeapons(int client) {
 					case 996: player_weapons[client][Wep_LooseCannon] = true;
 					case 751: player_weapons[client][Wep_CleanerCarbine] = true;
 					case 327: player_weapons[client][Wep_Claidheamh] = true;
+					case 1098: player_weapons[client][Wep_Classic] = true;
 					case 354: player_weapons[client][Wep_Concheror] = true;
 					case 441: player_weapons[client][Wep_CowMangler] = true;
 					case 163: player_weapons[client][Wep_CritCola] = true;
@@ -5559,6 +5568,7 @@ public Action OnPlayerRunCmd(
 	Action returnValue = Plugin_Continue;
 	int weapon1;
 	char class[64];
+	float velocity[3];
 
 	switch (TF2_GetPlayerClass(client))
 	{
@@ -5694,6 +5704,41 @@ public Action OnPlayerRunCmd(
 				}
 			}
 		}
+
+		case TFClass_Sniper:
+		{
+			if (
+				ItemIsEnabled(Wep_Classic) &&
+				player_weapons[client][Wep_Classic] &&
+				IsPlayerAlive(client)
+			) {
+				weapon1 = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+				GetEntPropVector(client, Prop_Data, "m_vecVelocity", velocity);
+				if (weapon1 > 0) {
+					GetEntityClassname(weapon1, class, sizeof(class));
+
+					if (
+						StrEqual(class, "tf_weapon_sniperrifle_classic") &&
+						GetVectorLength(velocity) > 200.0 && 
+						(buttons & IN_ATTACK) &&
+						(GetEntityFlags(client) & FL_ONGROUND)
+					) {
+						buttons &= ~IN_ATTACK;
+						SetEntPropFloat(weapon1, Prop_Send, "m_flNextPrimaryAttack", GetGameTime() + 0.3);
+						if (!players[client].holding_attack1) {
+							// play these sounds to help with players know it does not fire while moving
+							EmitGameSoundToClient(client, "Player.UseDeny");
+							EmitGameSoundToAll("Weapon_ClassicSniperRifle.Single", client, SND_STOP);
+							EmitGameSoundToAll("Weapon_ClassicSniperRifle.SingleCrit", client, SND_STOP);
+							EmitGameSoundToAll("Weapon_SniperRailgun.NonScoped", client);
+							players[client].holding_attack1 = true;
+						}							
+						// PrintToChatAll("is moving; prevented firing");
+						return Plugin_Changed;
+					}
+				}
+			}
+		}
 	}
 
 	if (buttons & IN_JUMP) {
@@ -5702,6 +5747,13 @@ public Action OnPlayerRunCmd(
 		}
 	} else {
 		players[client].holding_jump = false;
+	}
+	if (buttons & IN_ATTACK) {
+		if (!players[client].holding_attack1) {
+			players[client].holding_attack1 = true;
+		}
+	} else {
+		players[client].holding_attack1 = false;
 	}
 	if (buttons & IN_ATTACK2) {
 		if (!players[client].holding_attack2) {

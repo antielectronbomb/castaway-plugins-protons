@@ -254,6 +254,10 @@
 	{
 		"en"	"Cleaner's Carbine"
 	}
+	"classic"
+	{
+		"en"	"Classic"
+	}
 	"concheror"
 	{
 		"en"	"Concheror"
@@ -751,6 +755,10 @@
 	"Claidheamh_PreTB"
 	{
 		"en"	"Reverted to pre-toughbreak, -15 max health, no damage vuln, longer charge is passive"
+	}
+	"Classic_TFC"
+	{
+		"en"	"Partially reverted to the Team Fortress Classic version, full charge not required for headshots, 75 max ammo, cannot fire while moving; must stand still to fire and charge"
 	}
 	"Carbine_Release"
 	{
