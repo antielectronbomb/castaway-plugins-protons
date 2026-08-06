@@ -699,6 +699,8 @@ public void OnPluginStart() {
 	ItemDefine("bushwacka", "Bushwacka_PreLW", CLASSFLAG_SNIPER, Wep_Bushwacka);
 	ItemVariant(Wep_Bushwacka, "Bushwacka_PreGM");
 	ItemDefine("buffalosteak", "BuffaloSteak_PreMYM", CLASSFLAG_HEAVY, Wep_BuffaloSteak, true);
+	ItemVariant(Wep_BuffaloSteak, "BuffaloSteak_PreMnvy");
+	ItemVariant(Wep_BuffaloSteak, "BuffaloSteak_Pre2011");
 	ItemVariant(Wep_BuffaloSteak, "BuffaloSteak_Release");
 	ItemDefine("buffbanner", "BuffBanner_Release", CLASSFLAG_SOLDIER | ITEMFLAG_DISABLED, Wep_BuffBanner);
 	ItemDefine("targe", "Targe_PreTB", CLASSFLAG_DEMOMAN, Wep_CharginTarge);
@@ -1398,7 +1400,7 @@ void ToggleMemoryPatchReverts(bool enable, int wep_enum) {
 			if (enable) {
 				patch_RevertSteakBoostValue.Enable();
 				StoreToAddress(patch_RevertSteakBoostValue.Address + view_as<Address>(4), AddressOf_g_flSteakBoostTarget, NumberType_Int32);
-				if (GetItemVariant(Wep_BuffaloSteak) == 1) {
+				if (GetItemVariant(Wep_BuffaloSteak) == 3) {
 					patch_RevertSteakCapValue.Enable();
 					StoreToAddress(patch_RevertSteakCapValue.Address + view_as<Address>(4), AddressOf_g_flSteakCapTarget, NumberType_Int32);
 				} else {
@@ -2372,6 +2374,17 @@ public Action TF2_OnAddCond(int client, TFCond &condition, float &time, int &pro
 		if (condition == TFCond_Charging) {
 			players[client].charge_tick = GetGameTickCount();
 			return Plugin_Continue;
+		}
+	}
+	{
+		// pre-july 7, 2011 steak restrict to melee duration modification
+		// force heavy to switch to melee first then allow him to switch weapons again to replicate the bug
+		if (
+			GetItemVariant(Wep_BuffaloSteak) == 2 && 
+			condition == TFCond_RestrictToMelee
+		) {
+			time = 0.4; // this is the lowest this can go while forcing the heavy to switch to melee first. this number was determined via trial and error
+			return Plugin_Changed;
 		}
 	}
 	{
@@ -6585,7 +6598,7 @@ MRESReturn DHookCallback_CTFPlayer_CalculateMaxSpeed(int client, DHookReturn ret
 				multiplier *= 1.35 / 1.30;
 			}
 
-			if (GetItemVariant(Wep_BuffaloSteak) == 1) {
+			if (GetItemVariant(Wep_BuffaloSteak) == 3) {
 				// apply various movespeed modifications
 
 				if (TF2_IsPlayerInCondition(client, TFCond_SpeedBuffAlly)) {
