@@ -330,6 +330,7 @@ ConVar cvar_ref_tf_scout_stunball_base_duration;
 ConVar cvar_ref_tf_stealth_damage_reduction;
 ConVar cvar_ref_tf_sticky_airdet_radius;
 ConVar cvar_ref_tf_sticky_radius_ramp_time;
+ConVar cvar_ref_tf_weapon_criticals;
 ConVar cvar_ref_weapon_medigun_charge_rate;
 
 #if defined MEMORY_PATCHES
@@ -831,6 +832,7 @@ public void OnPluginStart() {
 	ItemVariant(Wep_SunOnAStick, "SunOnAStick_Release");
 	ItemDefine("sleeper", "Sleeper_PreBM", CLASSFLAG_SNIPER, Wep_SydneySleeper);
 	ItemVariant(Wep_SydneySleeper, "Sleeper_PreGM");
+	ItemVariant(Wep_SydneySleeper, "Sleeper_Release");
 	ItemDefine("thermal", "ThermalThrust_May2025", CLASSFLAG_PYRO, Wep_ThermalThruster);
 	ItemDefine("turner", "Turner_PreTB", CLASSFLAG_DEMOMAN, Wep_TideTurner);
 	ItemVariant(Wep_TideTurner, "Turner_PreDec2014");
@@ -880,6 +882,7 @@ public void OnPluginStart() {
 	cvar_ref_tf_stealth_damage_reduction = FindConVar("tf_stealth_damage_reduction");
 	cvar_ref_tf_sticky_airdet_radius = FindConVar("tf_sticky_airdet_radius");
 	cvar_ref_tf_sticky_radius_ramp_time = FindConVar("tf_sticky_radius_ramp_time");
+	cvar_ref_tf_weapon_criticals = FindConVar("tf_weapon_criticals");
 	cvar_ref_weapon_medigun_charge_rate = FindConVar("weapon_medigun_charge_rate");
 
 	RegConsoleCmd("sm_revert", Command_Menu, (PLUGIN_NAME ... " - Open reverts menu"), 0);
@@ -3082,6 +3085,13 @@ public void ApplyRevertsToItem(int entity) {
 			case 1: {
 				TF2Attrib_SetByDefIndex(entity, 175, 0.0); // jarate duration
 			}
+			case 2: {
+				TF2Attrib_SetByDefIndex(entity, 28, 1.0); // crit mod disabled; doesn't work
+				TF2Attrib_SetByDefIndex(entity, 41, 1.0); // +0% charge rate
+				TF2Attrib_SetByDefIndex(entity, 175, 0.0); // jarate duration
+				TF2Attrib_SetByDefIndex(entity, 308, 1.0); // sniper_penetrate_players_when_charged
+				// temporary penetration attribute used for penetration until a way to penetrate targets when above 75% charge is found
+			}
 		}}
 		case 448: { switch (GetItemVariant(Wep_SodaPopper)) {
 			case 0: {
@@ -4589,8 +4599,7 @@ Action SDKHookCB_OnTakeDamage(
 				if (
 					ItemIsEnabled(Wep_SydneySleeper) &&
 					StrEqual(class, "tf_weapon_sniperrifle") &&
-					GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 230 &&
-					!PlayerIsInvulnerable(victim)
+					GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 230
 				) {
 					charge = GetEntPropFloat(weapon, Prop_Send, "m_flChargedDamage");
 
@@ -4601,28 +4610,51 @@ Action SDKHookCB_OnTakeDamage(
 						charge > 0.1 &&
 						GetGameTime() - players[attacker].aiming_cond_time >= 1.0)
 					) {
-						players[attacker].sleeper_piss_frame = GetGameTickCount();
-						players[attacker].sleeper_piss_explode = false;
+						if (
+							!PlayerIsInvulnerable(victim) || // For variants 0 and 1, do not apply jarate explosion on invulnerable players
+							GetItemVariant(Wep_SydneySleeper) == 2
+						) {
+							players[attacker].sleeper_piss_frame = GetGameTickCount();
+							players[attacker].sleeper_piss_explode = false;
 
-						// this should cause a jarate application
-						switch (GetItemVariant(Wep_SydneySleeper)) {
-							case 0: {
-								players[attacker].sleeper_piss_duration = ValveRemapVal(charge, 50.0, 150.0, 2.0, 8.0);
-								if (
-									charge > 149.0 ||
-									players[attacker].headshot_frame == GetGameTickCount() &&
-									players[victim].hit_by_headshot
-								) {
-									// this should also cause a jarate explosion
-									players[attacker].sleeper_piss_explode = true;
+							// this should cause a jarate application
+							switch (GetItemVariant(Wep_SydneySleeper)) {
+								case 0: {
+									players[attacker].sleeper_piss_duration = ValveRemapVal(charge, 50.0, 150.0, 2.0, 8.0);
+									if (
+										charge > 149.0 ||
+										players[attacker].headshot_frame == GetGameTickCount() &&
+										players[victim].hit_by_headshot
+									) {
+										// this should also cause a jarate explosion
+										players[attacker].sleeper_piss_explode = true;
+									}
+
+									// Remove sleeper attrib for now to prevent vanilla headshot bonuses
+									// Attrib will get restored in OnTakeDamagePost
+									TF2Attrib_SetByDefIndex(weapon, 175, 0.0);
 								}
-
-								// Remove sleeper attrib for now to prevent vanilla headshot bonuses
-								// Attrib will get restored in OnTakeDamagePost
-								TF2Attrib_SetByDefIndex(weapon, 175, 0.0);
+								case 1, 2:
+									players[attacker].sleeper_piss_duration = 8.0;
 							}
-							case 1:
-								players[attacker].sleeper_piss_duration = 8.0;
+						}
+					}
+
+					if (
+						GetItemVariant(Wep_SydneySleeper) == 2 &&
+						cvar_ref_tf_weapon_criticals.BoolValue
+					) {
+						// random crits on release sydney sleeper
+
+						float crit_mult = ValveRemapVal(float(GetEntProp(attacker, Prop_Send, "m_iCritMult")), 0.0, 255.0, 1.0, 4.0);
+						float crit_threshold = 0.02 * crit_mult;
+						float crit_roll = GetRandomFloat(0.0, 1.0);
+
+						if (crit_roll <= crit_threshold) {
+							damage_type |= DMG_CRIT;
+							// critical hit lightning sound doesn't play, so add it back.
+							EmitGameSoundToAll("Weapon_SydneySleeper.SingleCrit", attacker);
+							return Plugin_Changed;
 						}
 					}
 				}
