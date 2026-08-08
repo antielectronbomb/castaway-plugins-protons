@@ -1,0 +1,155 @@
+https://www.youtube.com/watch?v=JNxg5stxlhk
+TF2: You Will (Not) Play
+
+Timestamps:
+
+00:00:00 INTRO
+
+PART 0
+00:03:19 GENESIS
+00:03:40 TF2 Origins from Quake
+00:04:25 John Carmack Creator of Quake Interview - Quake isn't Approachable to New Players
+00:04:55 Quake Team Fortress (1996) and Classes
+00:05:30 Robin Walker on TF's Core Game Design Philosophy - Game Accessible for Everyone including Newbies
+00:06:25 Engineer as an example for a class designed for non-hardcore players as said by Robin Walker
+00:07:40 Quake bunnyhopping
+00:08:01 Players are able to switch classes at any time they want as said by Charlie Brown (TF2 Dev)
+00:09:19 TF2's large team sizes create the illusion of teamwork as said by Robin Walker
+
+PART 1
+00:11:50 OUR PRIME
+00:21:34 Comp TF2 Frag Montage, Origins, Basic Rules & Explanation
+00:25:58 Gas Passer LOL
+00:27:27 Peak TF2 Dates
+00:34:00 The Quickplay Era
+
+PART 2
+00:49:21 IMITATION
+00:47:38 Post-2013 Quickplay Era Features (The best version of Quickplay)
+00:49:21 Imitation of other games (microtransactions, and eSports)
+00:54:00 Where was TF2 when Dota 2 and CSGO grew very fast?
+00:55:45 Why was TF2 not growing?
+01:00:10 Valve tries to copy eSports formula from CSGO and DOTA2 into TF2
+01:03:40 Why Comp TF2 didn't grow
+01:04:20 Vanilla and Comp TF2 are different game modes and why Comp TF2 is not popular
+01:07:32 CS:GO has the same fundamental gamemode for both casual and competitive and seamless transition from casual to competitive in CS
+01:08:26 Valve couldn't push comp TF2 to casual TF2 players
+01:08:35 The fabled "Gap" between Vanilla and Competitive TF2; but the gap is a chasm
+01:19:27 Valve interview on Casual and Competitive TF2 and tried to make both into one
+01:11:08 Comp players meet with Valve on 2013
+01:14:00 Most anticipated updates in TF2 history
+01:17:00 Comp Players send a letter to Valve
+01:20:50 Option 1 - No class limits or weapon bans; Rebalance for a new format
+01:26:00 Option 2 - Create a new competitive format
+01:29:30 TF2 was designed to be FUN FIRST
+01:13:20 Skillbased Matchmaking Problems
+01:37:00 TF2 Competitive Beta
+
+PART 3
+01:37:32 THE BETAS
+01:50:30 No restrictions Sixes clips
+01:53:32 Overwatch releases
+01:54:30 "Neato"
+
+PART 4
+01:58:43 YOU WILL NOT PLAY
+01:58:10 Meet your Match Update and its problems
+02:02:23 Quickplay Removed, Casual Mode Implemented
+02:08:55 Casual Mode Day One
+02:11:30 Skill-based Matchmaking does not work
+02:19:03 Post-2013 Quickplay Era Features vs Meet your Match Features
+02:22:32 Valve not listening to bring back Quickplay, TF2 gets review bombed, Valve only listened to the minority of the playerbase
+02:23:24 Uncle Dane's thoughts on bridging Casual and Competitive
+
+PART 5
+02:25:20 TF2 IS BROKEN
+02:26:20 Casual Mode Update History
+02:28:50 Nightfall and Pipeline were popular maps back in the day
+02:29:00 Casual Queuing vs. Quickplay Queuing
+02:30:40 Options
+02:31:40 Too many maps and long queue times
+02:33:35 Games end too quickly
+02:33:46 Payload's the only gamemode that serves the longest amount of playtime due to Casual (and why Payload is popular nowadays)
+02:36:00 21 days after Meet your Match launched
+02:36:28 Matchmaking system breaks TF2
+02:37:10 Quickplay vs Casual Mode in Detail, Problems with Casual Mode
+02:41:50 Why many games in TF2 are total stomps and why you keep re-queuing
+02:43:00 67 days after Meet your Match launched
+02:44:50 Casual vs Quickplay Loading Times
+02:45:50 82 days after Wait your Match launched
+02:48:00 167 days after Wait your Match launched
+02:48:30 Map votes when map timer used to be 45 minutes
+02:50:00 Player incentivized to leave after maps end because of Casual mode
+02:51:36 Valve reintroduces autobalance (another feature of Quickplay added back to Casual mode)
+02:53:00 Autobalance interrupted by the matchmaking system
+02:54:00 There is no functional middleground between Casual and Quickplay due to the existence of the matchmaking system
+02:54:15 470 days after Meet your match - Jungle Inferno update
+02:55:30 TF2 community gaslighted while waiting to queue (even though Quickplay allowed you to do stuff)
+02:56:53 Example of live frustration queuing for Casual with friends - WAITING (another reason why Quickplay and ad-hoc connections are better)
+02:59:00 Jungle Inferno did nothing to improve gameplay at its core
+03:00:00 629 days after Wait your Match 
+03:01:30 Valve overhauled Competitive Mode? (and failed)
+03:02:41 3,052 days after Meet your Match (Nov. 14, 2024) - Matchmaking improvements (band-aids)
+03:04:30 TF2 in 2025 still broken
+03:06:00 Quickplay was QUICK
+03:08:05 Valve admits matchmaking doesn't work yet tries to keep Casual mode due to sunk cost
+03:11:55 Stockholm Syndrome'd to keep leaving and queueing for Casual examples
+03:12:10 Final version of Quickplay being referred to is the 2014 version
+
+PART 6
+03:13:00 DEATH OF COMMUNITY SERVERS
+03:14:40 Quickplay defaulting to Valve servers was necessary to combat predatory servers
+03:15:10 Community servers could still be searched with Quickplay and were still alive even after Valve servers were defaulted in Quickplay
+03:16:36 Meet your Match arrived and killed off Community Servers, removed Show Servers option
+03:17:30 Rapid Extinction of Community Servers due to Meet your Match
+03:18:50 Prisoner's Dilemma
+03:20:30 Only Community servers left in TF2 (also Castaway servers too)
+03:22:30 Old True TF2 Community Server Culture Soul Gone - Modern TF2 is a shadow of its former self
+03:23:20 CastawayTF Community Weapon Reverts Server footage in 2024
+03:23:53 Valve tried to turn TF2 into another eSport
+03:24:35 Valve worked on Meet your Match for 4 years (fails and gives up)
+03:25:40 Valve interview on Counter-Strike gambling (if TF2 dies so will CS)
+
+PART 7
+03:27:13 BOTS - One Final Gift from Meet your Match
+03:27:30 How a full server during the quickplay era stops cheaters
+03:29:10 How Casual matchmaking gives cheaters ideal conditions for exploitation
+03:31:35 Example of bot hoster
+03:32:14 Appearance of Cheater Bots days after Meet your Match
+03:34:27 Bot hoster screenshots
+03:35:15 Valve ignored bots for the first 4 years
+03:36:10 Valve mutes F2Ps because of bots
+03:38:00 One Valve Contractor works on TF2 part-time because they couldn't play the game
+03:40:00 Valve starts working on Deadlock, pushes out fix for bots
+03:41:45 How much money TF2 made during the Bot Crisis? (multi-millions)
+03:42:30 The only reason why Valve gets a pass because of something 20 years ago (old Valve is gone)
+
+PART 8
+03:43:21 ACCOUNTABILITY
+03:43:22 Uncle Dane - matchmaking system
+03:43:39 Array Seven - TF2 has a future as an eSport
+03:44:14 Former Valve Writer - Chet Falizek on Competitive push killing old TF2
+03:45:00 Muselk - Valve only listened to Comp TF2 players and should have listened to other players who are the majority of their playerbase; Valve does not understand its game.
+03:46:15 Ster - Meet your Match was the worst update ever, competitive TF2 is a very small minority, Ster meets toxic comp players
+03:47:55 Zesty Jesus' Thoughts and Opinions on Valve
+03:49:20 TF2 is a brutally loyal fanbase - Valve is very lucky
+03:49:44 Valve is a product and service company that made good games 20 years ago
+03:50:15 Valve has a history of mishandling their games including Counter-Strike
+03:51:00 Bots are slowly coming back to TF2 again in 2025
+03:51:50 Valve does not care, only money
+03:53:00 It's okay to talk about the game's problems, you're a consumer
+03:56:20 If the state of TF2 continues on, it will go down in history
+
+CREDITS
+03:56:41 Music Outro & Credits
+03:59:00 Steam Reviews throughout 2016
+03:59:15 "Our time of glory has passed."
+03:59:27 "Unapologetic, casual laziness"
+03:59:31 "TF2 is a staple in your community. You are - it up by trying to be something you're not."
+03:59:37 "They can turn this around by listening to their players. They just chose not to."
+03:59:42 "They demolished what was so special about this game to cater to the 3% that plays competitively."
+03:59:48 "Valve decided to worsen what was bad and remove what was good."
+03:59:54 "We cared about having fun in the moment. Valve decided that TF2 should become the opposite."
+03:59:58 "The best part was how relaxed it was. Nobody cared about winning."
+04:00:03 "The whole atmosphere of the game changed, TF2 turned into a game I do not know."
+04:00:09 "I can't understand why...Valve, what have you done?"
