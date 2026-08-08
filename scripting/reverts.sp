@@ -304,6 +304,7 @@ enum struct Entity {
 ConVar cvar_enable;
 ConVar cvar_show_moonshot;
 ConVar cvar_old_falldmg_sfx;
+ConVar cvar_spawn_demopan_stout_shako;
 ConVar cvar_no_reverts_info_by_default;
 #if defined MEMORY_PATCHES
 ConVar cvar_dropped_weapon_enable;
@@ -629,6 +630,7 @@ public void OnPluginStart() {
 	cvar_enable = CreateConVar("sm_reverts__enable", "1", (PLUGIN_NAME ... " - Enable plugin"), _, true, 0.0, true, 1.0);
 	cvar_show_moonshot = CreateConVar("sm_reverts__show_moonshot", "0", (PLUGIN_NAME ... " - Show a HUD message when someone lands a moonshot"), _, true, 0.0, true, 1.0);
 	cvar_old_falldmg_sfx = CreateConVar("sm_reverts__old_falldmg_sfx", "0", (PLUGIN_NAME ... " - Enable old (pre-inferno) fall damage sound (old bone crunch, no hurt voicelines)"), _, true, 0.0, true, 1.0);
+	cvar_spawn_demopan_stout_shako = CreateConVar("sm_reverts__spawn_demopan_stout_shako", "1", (PLUGIN_NAME ... " - Spawn a Stout Shako whenever a Demopan kills a player"), _, true, 0.0, true, 1.0);
 #if defined MEMORY_PATCHES
 	cvar_dropped_weapon_enable = CreateConVar("sm_reverts__enable_dropped_weapon", "0", (PLUGIN_NAME ... " - Revert dropped weapon behaviour"), _, true, 0.0, true, 1.0);
 	cvar_allow_detonate_stickies_while_taunting = CreateConVar("sm_reverts__allow_detonate_stickies_while_taunting", "0", (PLUGIN_NAME ... " - Revert so demoman can detonate stickies while taunting. Requires "), _, true, 0.0, true, 1.0);
@@ -3431,6 +3433,45 @@ public Action Event_OnPlayerDeath(Event event, const char[] name, bool dontBroad
 					players[attacker].old_health = GetClientHealth(attacker);
 					RequestFrame(ApplyOverhealOnKill, weapon);
 				}
+
+				if (
+					ItemIsEnabled(Set_Demopan) &&
+					// StrEqual(class, "tf_wearable_demoshield") &&
+					ItemIsEnabled(Wep_CharginTarge) && player_weapons[attacker][Wep_CharginTarge] &&
+					(GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 264 ||
+					GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 1071)
+				) { 
+					// destroy the ears of anyone nearby. play the same sound 3x to make it louder
+					// PrintToChatAll("louder pan sounds"); // this is needed because the tester went deaf with testing
+					EmitGameSoundToAll("FryingPan.HitFlesh", attacker);
+					EmitGameSoundToAll("FryingPan.HitFlesh", attacker);
+					EmitGameSoundToAll("FryingPan.HitFlesh", attacker);
+
+					if(cvar_spawn_demopan_stout_shako.BoolValue) {
+						// spawn a stout shako at the enemy player's death position
+						float pos[3];
+						GetClientAbsOrigin(victim, pos);
+
+						int shako = CreateEntityByName("prop_physics_override");
+
+						if (shako != -1)
+						{
+							DispatchKeyValue(shako, "model", "models/player/items/soldier/soldier_shako.mdl");
+							DispatchKeyValue(shako, "OnUser1", "!self,Kill,,5,-1");
+
+							DispatchSpawn(shako);
+
+							SetEntProp(shako, Prop_Send, "m_CollisionGroup", 1); // COLLISION_GROUP_DEBRIS = 1
+							SetEntProp(shako, Prop_Send, "m_usSolidFlags", 16); // FSOLID_NOT_STANDABLE = 16
+
+							SetEntProp(shako, Prop_Send, "m_nSkin", GetClientTeam(attacker) == 3 ? 1 : 0);
+
+							TeleportEntity(shako, pos, NULL_VECTOR, NULL_VECTOR);
+
+							AcceptEntityInput(shako, "FireUser1");
+						}
+					}
+				}
 			}
 
 			{
@@ -3722,7 +3763,9 @@ void CacheWeapons(int client) {
 			case TFClass_DemoMan:
 			{
 				TF2Attrib_RemoveByDefIndex(client, 492); // SET BONUS: dmg taken from fire reduced set bonus
-				TF2Attrib_RemoveByDefIndex(client, 537); // SET BONUS: calling card on kill
+				TF2Attrib_RemoveByDefIndex(client, 391); // SET BONUS: mystery solving time decrease
+				TF2Attrib_RemoveByDefIndex(client, 401); // SET BONUS: chance of hunger decrease
+				TF2Attrib_RemoveByDefIndex(client, 693); // SET BONUS: alien isolation xeno bonus pos
 			}
 			case TFClass_Heavy:
 			{
@@ -3849,11 +3892,8 @@ void CacheWeapons(int client) {
 								index == 1071 // golden frying pan
 							)
 						) {
-							wep_count++;
-							if (wep_count == 1) {
-								active_set = Set_Demopan;
-								break;
-							}
+							active_set = Set_Demopan;
+							break;
 						}
 					}
 					case TFClass_Heavy:
@@ -4006,7 +4046,9 @@ void CacheWeapons(int client) {
 					case Set_Demopan:
 					{
 						player_weapons[client][Set_Demopan] = true;
-						TF2Attrib_SetByDefIndex(client, 537, 1.0); // SET BONUS: calling card on kill
+						TF2Attrib_SetByDefIndex(client, 391, 10.0); // SET BONUS: mystery solving time decrease
+						TF2Attrib_SetByDefIndex(client, 401, 10.0); // SET BONUS: chance of hunger decrease
+						TF2Attrib_SetByDefIndex(client, 693, 1.0); // SET BONUS: alien isolation xeno bonus pos
 					}
 				}
 			}
