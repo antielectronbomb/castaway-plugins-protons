@@ -638,7 +638,7 @@
 	}
 	"Amputator_PreTB"
 	{
-		"en"	"Reverted to pre-toughbreak, regenerates +3 HP/s flat when active regardless if user recently took damage"
+		"en"	"Partially reverted to pre-toughbreak, regenerates +3 HP/s flat when active regardless if user recently took damage"
 	}
 	"Amputator_PreTB_Historical"
 	{
@@ -1050,11 +1050,11 @@
 	}
 	"Pomson_PreGM"
 	{
-		"en"	"Increased hitbox size, passes through team, no charge drain fall-off, pierces bullet resists, ignites friendly Huntsman arrows"
+		"en"	"Partially reverted to pre-GM, increased hitbox size, passes through team, no charge drain fall-off, pierces bullet resists, ignites friendly Huntsman arrows"
 	}
 	"Pomson_Release"
 	{
-		"en"	"Increased hitbox size, penetrates targets, no charge drain fall-off, pierces bullet resists, ignites friendly Huntsman arrows, drains cloak per-tick if target is disguised or cloaked"
+		"en"	"Partially reverted to release, increased hitbox size, penetrates targets, no charge drain fall-off, pierces bullet resists, ignites friendly Huntsman arrows, drains cloak per-tick if target is disguised or cloaked"
 	}
 	"Pomson_PreGM_Historical"
 	{
@@ -1134,7 +1134,7 @@
 	}
 	"Bison_PreMYM"
 	{
-		"en"	"Increased hitbox size (can hit same target many times), pierces bullet resists, ignites friendly Huntsman arrows"
+		"en"	"Partially reverted to pre-matchmaking, increased hitbox size (can hit same target many times), pierces bullet resists, ignites friendly Huntsman arrows"
 	}
 	"Bison_PreTB"
 	{
