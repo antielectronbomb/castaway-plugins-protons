@@ -126,10 +126,6 @@
 	{
 		"en"	"Airblast"
 	}
-	"airstrike"
-	{
-		"en"	"Air Strike"
-	}
 	"flamethrower"
 	{
 		"en"	"All Flamethrowers"
@@ -169,6 +165,10 @@
 	"swords"
 	{
 		"en"	"All Swords"
+	}
+	"airstrike"
+	{
+		"en"	"Air Strike"
 	}
 	"ambassador"
 	{
@@ -778,7 +778,7 @@
 	}
 	"CowMangler_Release"
 	{
-		"en"	"Reverted to release, 5 shots, cannot be crit-boosted, uses old damage formula, +150%% max rampup (121 max dmg, 81 base dmg, 43 min dmg)"
+		"en"	"Reverted to release, 5 shots, cannot be crit-boosted, uses old damage formula, +150%% max dmg rampup (121 max dmg, 81 base dmg, 43 min dmg)"
 	}
 	"CozyCamper_PreMYM"
 	{
