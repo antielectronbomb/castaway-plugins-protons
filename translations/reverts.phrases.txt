@@ -778,7 +778,11 @@
 	}
 	"CowMangler_Release"
 	{
-		"en"	"Reverted to release, 5 shots, cannot be crit-boosted, uses old damage formula, +150%% max dmg rampup (121 max dmg, 81 base dmg, 43 min dmg)"
+		"en"	"Partially reverted to release, 5 shots, cannot be crit-boosted"
+	}
+	"CowMangler_Release_Historical"
+	{
+		"en"	"Reverted to release, 5 shots, cannot be crit-boosted, uses old damage formula, +150%% max dmg rampup, higher charge shot dmg"
 	}
 	"CozyCamper_PreMYM"
 	{

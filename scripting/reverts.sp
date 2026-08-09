@@ -716,6 +716,7 @@ public void OnPluginStart() {
 	ItemDefine("concheror", "Concheror_PreTB", CLASSFLAG_SOLDIER, Wep_Concheror);
 	ItemDefine("cowmangler", "CowMangler_Pre2013", CLASSFLAG_SOLDIER | ITEMFLAG_DISABLED, Wep_CowMangler);
 	ItemVariant(Wep_CowMangler, "CowMangler_Release");
+	ItemVariant(Wep_CowMangler, "CowMangler_Release_Historical");
 	ItemDefine("cozycamper", "CozyCamper_PreMYM", CLASSFLAG_SNIPER, Wep_CozyCamper);
 	ItemDefine("crossbow", "CrusadersCrossbow_PreJI", CLASSFLAG_MEDIC, Wep_Crossbow);
 	ItemDefine("critcola", "CritCola_PreMYM", CLASSFLAG_SCOUT, Wep_CritCola);
@@ -2723,6 +2724,11 @@ public void ApplyRevertsToItem(int entity) {
 				TF2Attrib_SetByDefIndex(entity, 869, 0.0); // Minicrits whenever it would normally crit
 			}
 			case 1: {
+				TF2Attrib_SetByDefIndex(entity, 288, 1.0); // Cannot be crit boosted (does nothing, handled elsewhere)
+				TF2Attrib_SetByDefIndex(entity, 335, 1.25); // +25% clip size
+				TF2Attrib_SetByDefIndex(entity, 869, 0.0); // Minicrits whenever it would normally crit
+			}
+			case 2: {
 				TF2Attrib_SetByDefIndex(entity, 1, 0.90); // -10% damage penalty
 				TF2Attrib_SetByDefIndex(entity, 288, 1.0); // Cannot be crit boosted (does nothing, handled elsewhere)
 				TF2Attrib_SetByDefIndex(entity, 335, 1.25); // +25% clip size
@@ -5345,9 +5351,12 @@ Action SDKHookCB_OnTakeDamageAlive(
 				GetEntityClassname(weapon, class, sizeof(class));
 				
 				if (
-					GetItemVariant(Wep_CowMangler) == 1 && StrEqual(class, "tf_weapon_particle_cannon")
+					GetItemVariant(Wep_CowMangler) == 2 && StrEqual(class, "tf_weapon_particle_cannon")
 				) {
-						// Base damage has been set to 81 from 90 (10% dmg penalty) via attributes elsewhere
+						// Base damage has been set to 81 from 90 (10% dmg penalty) via here and in attributes elsewhere
+						bool charged = GetEntProp(inflictor, Prop_Send, "m_bChargedShot") != 0;
+
+						damage = charged ? 108.0 : 81.0;
 
 						// Do not use internal rampup/falloff.
 						damage_type &= ~DMG_USEDISTANCEMOD;
@@ -5363,10 +5372,13 @@ Action SDKHookCB_OnTakeDamageAlive(
 						// PrintToChatAll("GetVectorDistance: %f", GetVectorDistance(pos1, pos2, false));
 						
 						// Deal damage with 150% rampup, 52.8% falloff.
-						if (distance <= distance_512hu)
+						if (distance <= distance_512hu) {
 							damage *= ValveRemapVal(distance, 0.0, distance_512hu, 1.5, 1.0);
+							if (damage_type & DMG_CRIT)
+								damage *= 1.35; // add minicrit damage to normal dmg dealt
+						}
 						else if (damage_type & DMG_CRIT) // DMG_CRIT checks for crits AND minicrits, and cow mangler does not deal crits so use this
-							damage *= 1.0; // minicrits ignore damage falloff by design, so do not decrease damage
+							damage *= 1.35; // minicrits ignore damage falloff by design
 						else if (distance <= distance_1024hu)
 							damage *= ValveRemapVal(distance, distance_512hu, distance_1024hu, 1.0, 0.528);
 						else
