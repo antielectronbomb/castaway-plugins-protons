@@ -2730,6 +2730,7 @@ public void ApplyRevertsToItem(int entity) {
 			}
 			case 2: {
 				TF2Attrib_SetByDefIndex(entity, 1, 0.90); // -10% damage penalty
+				TF2Attrib_SetByDefIndex(entity, 135, 0.90); // -10% rocket jump blast damage reduction (needed to reflect lower base dmg)
 				TF2Attrib_SetByDefIndex(entity, 288, 1.0); // Cannot be crit boosted (does nothing, handled elsewhere)
 				TF2Attrib_SetByDefIndex(entity, 335, 1.25); // +25% clip size
 				TF2Attrib_SetByDefIndex(entity, 869, 0.0); // Minicrits whenever it would normally crit
@@ -5349,9 +5350,12 @@ Action SDKHookCB_OnTakeDamageAlive(
 			// release cow mangler 5000 old damage and rampup
 			if (StrEqual(class, "tf_projectile_energy_ball")) {
 				GetEntityClassname(weapon, class, sizeof(class));
-				
+
 				if (
-					GetItemVariant(Wep_CowMangler) == 2 && StrEqual(class, "tf_weapon_particle_cannon")
+					GetItemVariant(Wep_CowMangler) == 2 && StrEqual(class, "tf_weapon_particle_cannon") &&
+					victim != attacker && // self-blast damage for rocket jumping fix
+					damage > 0 &&
+					damage_type & DMG_BLAST != 0
 				) {
 						// Base damage has been set to 81 from 90 (10% dmg penalty) via here and in attributes elsewhere
 						bool charged = GetEntProp(inflictor, Prop_Send, "m_bChargedShot") != 0;
@@ -5377,13 +5381,14 @@ Action SDKHookCB_OnTakeDamageAlive(
 							if (damage_type & DMG_CRIT)
 								damage *= 1.35; // add minicrit damage to normal dmg dealt
 						}
-						else if (damage_type & DMG_CRIT) // DMG_CRIT checks for crits AND minicrits, and cow mangler does not deal crits so use this
-							damage *= 1.35; // minicrits ignore damage falloff by design
+						// !!!this check ignores splash damage mechanics!!! commenting this out. there should be another simpler way of increasing rampup to 150% instead of this current method
+						// else if (damage_type & DMG_CRIT) // DMG_CRIT checks for crits AND minicrits, and cow mangler does not deal crits so use this
+						// 	damage *= 1.35; // minicrits ignore damage falloff by design
 						else if (distance <= distance_1024hu)
 							damage *= ValveRemapVal(distance, distance_512hu, distance_1024hu, 1.0, 0.528);
 						else
 							damage *= 0.528;
-							
+
 					return Plugin_Changed;
 				}
 			} 
