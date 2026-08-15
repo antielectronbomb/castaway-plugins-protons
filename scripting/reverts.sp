@@ -812,6 +812,8 @@ public void OnPluginStart() {
 	ItemDefine("bison", "Bison_PreMYM", CLASSFLAG_SOLDIER, Wep_Bison);
 	ItemVariant(Wep_Bison, "Bison_PreTB");
 	ItemDefine("rocketjmp", "RocketJmp_Pre2013", CLASSFLAG_SOLDIER, Wep_RocketJumper);
+	ItemVariant(Wep_RocketJumper, "RocketJmp_Pre2011");
+	ItemVariant(Wep_RocketJumper, "RocketJmp_Oct2010");
 	ItemVariant(Wep_RocketJumper, "RocketJmp_Release");
 	ItemDefine("sandman", "Sandman_PreJI", CLASSFLAG_SCOUT, Wep_Sandman);
 	ItemVariant(Wep_Sandman, "Sandman_PreApr2010");
@@ -2641,9 +2643,25 @@ public void ApplyRevertsToItem(int entity) {
 		case 402: { if (ItemIsEnabled(Wep_BazaarBargain)) {
 			TF2Attrib_SetByDefIndex(entity, 268, 1.20); // Base charge rate decreased by 20%
 		}}
-		case 237: { if (GetItemVariant(Wep_RocketJumper) == 1) {
-			TF2Attrib_SetByDefIndex(entity, 15, 1.0); // crit mod disabled
-			TF2Attrib_SetByDefIndex(entity, 400, 0.0); // cannot_pick_up_intelligence
+		case 237: { switch (GetItemVariant(Wep_RocketJumper)) {
+			case 1: { // RocketJmp_Pre2011 (December 22, 2010 version)
+				TF2Attrib_SetByDefIndex(entity, 15, 1.0); // crit mod disabled
+				TF2Attrib_SetByDefIndex(entity, 61, 2.00); // 100% fire damage vulnerability on wearer
+				TF2Attrib_SetByDefIndex(entity, 65, 2.00); // 100% explosive damage vulnerability on wearer
+				TF2Attrib_SetByDefIndex(entity, 67, 2.00); // 100% bullet damage vulnerability on wearer
+				TF2Attrib_SetByDefIndex(entity, 207, 0.0); // remove self blast dmg; blast dmg to self increased
+				TF2Attrib_SetByDefIndex(entity, 400, 0.0); // cannot_pick_up_intelligence				
+			}
+			case 2: { // RocketJmp_Oct2010 (October 27, 2010 version)
+				TF2Attrib_SetByDefIndex(entity, 15, 1.0); // crit mod disabled
+				TF2Attrib_SetByDefIndex(entity, 125, -100.0); // max health additive penalty
+				TF2Attrib_SetByDefIndex(entity, 207, 0.0); // remove self blast dmg; blast dmg to self increased
+				TF2Attrib_SetByDefIndex(entity, 400, 0.0); // cannot_pick_up_intelligence
+			}
+			case 3: { // RocketJmp_Release
+				TF2Attrib_SetByDefIndex(entity, 15, 1.0); // crit mod disabled
+				TF2Attrib_SetByDefIndex(entity, 400, 0.0); // cannot_pick_up_intelligence
+			}
 		}}
 		case 730: { if (ItemIsEnabled(Wep_Beggars)) {
 			TF2Attrib_SetByDefIndex(entity, 100, 1.0); // blast radius decreased
