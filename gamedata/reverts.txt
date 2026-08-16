@@ -312,6 +312,11 @@
 				"windows"	"477"
 				"linux"		"484"
 			}
+			"CTFGrenadePipebombProjectile::Detonate"
+			{
+				"windows"	"237"
+				"linux"		"238"
+			}
 
 			// ╔══════════════════════════════════════════════╗
 			// ║       Private/Protected Member Offsets       ║
@@ -560,6 +565,14 @@
 						"type"	"int"
 					}
 				}
+			}
+			"CTFGrenadePipebombProjectile::Detonate"
+			{
+				"offset"	"CTFGrenadePipebombProjectile::Detonate"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"entity"
+				"hooktype"	"entity"
 			}
 
 			// Signature

@@ -396,6 +396,7 @@ DynamicHook dhook_CTFRevolver_CanFireCriticalShot;
 DynamicHook dhook_CTFStunBall_ApplyBallImpactEffectOnVictim;
 DynamicHook dhook_CTFWeaponBaseGrenadeProj_GetEnemy;
 DynamicHook dhook_CTFWeaponBaseMelee_GetMeleeDamage;
+DynamicHook dhook_CTFGrenadePipebombProjectile_Detonate;
 
 DynamicDetour dhook_CTFPlayer_CanDisguise;
 DynamicDetour dhook_CTFPlayer_CalculateMaxSpeed;
@@ -981,6 +982,7 @@ public void OnPluginStart() {
 		dhook_CTFStunBall_ApplyBallImpactEffectOnVictim = DynamicHook.FromConf(conf, "CTFStunBall::ApplyBallImpactEffectOnVictim");
 		dhook_CTFWeaponBaseGrenadeProj_GetEnemy = DynamicHook.FromConf(conf, "CTFWeaponBaseGrenadeProj::GetEnemy");
 		dhook_CTFWeaponBaseMelee_GetMeleeDamage = DynamicHook.FromConf(conf, "CTFWeaponBaseMelee::GetMeleeDamage");
+		dhook_CTFGrenadePipebombProjectile_Detonate = DynamicHook.FromConf(conf, "CTFGrenadePipebombProjectile::Detonate");
 
 		dhook_CTFPlayer_CanDisguise = DynamicDetour.FromConf(conf, "CTFPlayer::CanDisguise");
 		dhook_CTFPlayer_CalculateMaxSpeed = DynamicDetour.FromConf(conf, "CTFPlayer::TeamFortress_CalculateMaxSpeed");
@@ -1119,6 +1121,7 @@ public void OnPluginStart() {
 	VALIDATE_HANDLE(dhook_CTFStunBall_ApplyBallImpactEffectOnVictim);
 	VALIDATE_HANDLE(dhook_CTFWeaponBaseGrenadeProj_GetEnemy);
 	VALIDATE_HANDLE(dhook_CTFWeaponBaseMelee_GetMeleeDamage);
+	VALIDATE_HANDLE(dhook_CTFGrenadePipebombProjectile_Detonate);
 
 	VALIDATE_HANDLE(dhook_CTFPlayer_CanDisguise);
 	VALIDATE_HANDLE(dhook_CTFPlayer_CalculateMaxSpeed);
@@ -1434,6 +1437,7 @@ void ToggleMemoryPatchReverts(bool enable, int wep_enum) {
 
 public void OnMapStart() {
 	PrecacheSound("weapons/rocket_shoot.wav", true);
+	PrecacheSound("weapons/stickybomblauncher_shoot.wav", true);
 	PrecacheSound("items/ammo_pickup.wav");
 	PrecacheSound("items/gunpickup2.wav");
 	PrecacheSound("misc/banana_slip.wav");
@@ -2200,6 +2204,9 @@ public void OnEntityCreated(int entity, const char[] class) {
 	else if (StrEqual(class, "tf_projectile_pipe")) {
 		dhook_CTFWeaponBaseGrenadeProj_GetEnemy.HookEntity(Hook_Pre, entity, DHookCallback_CTFWeaponBaseGrenadeProj_GetEnemy);
 	}
+	else if (StrEqual(class, "tf_projectile_pipe_remote")) {
+		dhook_CTFGrenadePipebombProjectile_Detonate.HookEntity(Hook_Pre, entity, DHookCallback_CTFGrenadePipebombProjectile_Detonate);
+	}
 	else if (
 		StrEqual(class, "tf_projectile_stun_ball") ||
 		StrEqual(class, "tf_projectile_energy_ring") ||
@@ -2653,20 +2660,20 @@ public void ApplyRevertsToItem(int entity) {
 				TF2Attrib_SetByDefIndex(entity, 61, 2.00); // 100% fire damage vulnerability on wearer
 				TF2Attrib_SetByDefIndex(entity, 65, 2.00); // 100% explosive damage vulnerability on wearer
 				TF2Attrib_SetByDefIndex(entity, 67, 2.00); // 100% bullet damage vulnerability on wearer
-				TF2Attrib_SetByDefIndex(entity, 181, 0.0); // no self blast dmg (needed to restore normal projectile visuals)
+				TF2Attrib_SetByDefIndex(entity, 181, 0.0); // no self blast dmg (needed to restore explosion visuals); self-blast dmg nullification handled elsewhere
 				TF2Attrib_SetByDefIndex(entity, 207, 0.0); // remove self blast dmg; blast dmg to self increased
 				TF2Attrib_SetByDefIndex(entity, 400, 0.0); // cannot_pick_up_intelligence
 			}
 			case 2: { // RocketJmp_Oct2010 (October 27, 2010 version)
 				TF2Attrib_SetByDefIndex(entity, 15, 1.0); // crit mod disabled
 				TF2Attrib_SetByDefIndex(entity, 125, -100.0); // max health additive penalty
-				TF2Attrib_SetByDefIndex(entity, 181, 0.0); // no self blast dmg (needed to restore normal projectile visuals)
+				TF2Attrib_SetByDefIndex(entity, 181, 0.0); // no self blast dmg (needed to restore explosion visuals); self-blast dmg nullification handled elsewhere
 				TF2Attrib_SetByDefIndex(entity, 207, 0.0); // remove self blast dmg; blast dmg to self increased
 				TF2Attrib_SetByDefIndex(entity, 400, 0.0); // cannot_pick_up_intelligence
 			}
 			case 3: { // RocketJmp_Release
 				TF2Attrib_SetByDefIndex(entity, 15, 1.0); // crit mod disabled
-				TF2Attrib_SetByDefIndex(entity, 181, 0.0); // no self blast dmg (needed to restore normal projectile visuals)
+				TF2Attrib_SetByDefIndex(entity, 181, 0.0); // no self blast dmg (needed to restore explosion visuals); self-blast dmg nullification handled elsewhere
 				TF2Attrib_SetByDefIndex(entity, 400, 0.0); // cannot_pick_up_intelligence
 			}
 		}}
@@ -3191,6 +3198,7 @@ public void ApplyRevertsToItem(int entity) {
 			}
 			case 1: { // StkJumper_Pre2013_Intel (Manniversary Update version)
 				TF2Attrib_SetByDefIndex(entity, 89, 0.0); // max pipebombs decreased
+				TF2Attrib_SetByDefIndex(entity, 181, 0.0); // no self blast dmg (needed to restore explosion visuals); self-blast dmg nullification handled elsewhere
 				TF2Attrib_SetByDefIndex(entity, 400, 0.0); // cannot_pick_up_intelligence
 			}
 			case 2: { // StkJumper_Pre2011 (December 22, 2010 version)
@@ -3199,15 +3207,19 @@ public void ApplyRevertsToItem(int entity) {
 				TF2Attrib_SetByDefIndex(entity, 65, 2.00); // 100% explosive damage vulnerability on wearer
 				TF2Attrib_SetByDefIndex(entity, 67, 2.00); // 100% bullet damage vulnerability on wearer
 				TF2Attrib_SetByDefIndex(entity, 89, 0.0); // max pipebombs decreased
+				TF2Attrib_SetByDefIndex(entity, 181, 0.0); // no self blast dmg (needed to restore explosion visuals); self-blast dmg nullification handled elsewhere
 				TF2Attrib_SetByDefIndex(entity, 207, 0.0); // remove self blast dmg; blast dmg to self increased (only works for the weapon itself)
 				TF2Attrib_SetByDefIndex(entity, 400, 0.0); // cannot_pick_up_intelligence
+				TF2Attrib_SetFromStringValue(entity, "custom projectile model", "models/weapons/w_models/w_stickybomb.mdl"); // custom projectile model
 			}
 			case 3: { // StkJumper_ReleaseDay2 (October 28, 2010 version)
 				TF2Attrib_SetByDefIndex(entity, 15, 1.0); // crit mod disabled
 				TF2Attrib_SetByDefIndex(entity, 89, 0.0); // max pipebombs decreased
 				TF2Attrib_SetByDefIndex(entity, 125, -75.0); // max health additive penalty
+				TF2Attrib_SetByDefIndex(entity, 181, 0.0); // no self blast dmg (needed to restore explosion visuals); self-blast dmg nullification handled elsewhere
 				TF2Attrib_SetByDefIndex(entity, 207, 0.0); // remove self blast dmg; blast dmg to self increased
 				TF2Attrib_SetByDefIndex(entity, 400, 0.0); // cannot_pick_up_intelligence
+				TF2Attrib_SetFromStringValue(entity, "custom projectile model", "models/weapons/w_models/w_stickybomb.mdl"); // custom projectile model
 			}
 		}}
 		case 349: { switch (GetItemVariant(Wep_SunOnAStick)) {
@@ -4255,12 +4267,18 @@ Action OnSoundNormal(
 		}
 	}
 
-	if (GetItemVariant(Wep_RocketJumper) >= 1) 
-	{
-		if (StrContains(sample, "weapons/rocket_jumper_shoot.wav") != -1)
-		{
+	if (GetItemVariant(Wep_RocketJumper) >= 1) {
+		if (StrContains(sample, "weapons/rocket_jumper_shoot.wav") != -1) {
 			strcopy(sample, PLATFORM_MAX_PATH, "weapons/rocket_shoot.wav");
 			EmitSoundToClient(entity, "weapons/rocket_shoot.wav", entity, channel, level, flags, volume, pitch);
+			return Plugin_Changed;
+		}
+	}
+
+	if (GetItemVariant(Wep_StickyJumper) >= 1) {
+		if (StrContains(sample, "weapons/sticky_jumper_shoot.wav") != -1) {
+			strcopy(sample, PLATFORM_MAX_PATH, "weapons/stickybomblauncher_shoot.wav");
+			EmitSoundToClient(entity, "weapons/stickybomblauncher_shoot.wav", entity, channel, level, flags, volume, pitch);
 			return Plugin_Changed;
 		}
 	}
@@ -5392,6 +5410,20 @@ Action SDKHookCB_OnTakeDamageAlive(
 					SetEntityHealth(victim, 500);
 				}
 
+				if (
+					(GetItemVariant(Wep_StickyJumper) == 1 && // For Manniversary Sticky Jumper, allow old blast visuals while not damaging the user from only their stickies
+					player_weapons[victim][Wep_StickyJumper]) &&
+					inflictor > MaxClients &&
+					IsValidEntity(inflictor)
+				) {
+					GetEntityClassname(inflictor, class, sizeof(class));
+
+					if (StrEqual(class, "tf_projectile_pipe_remote")) {
+						players[victim].old_health = GetClientHealth(victim);
+						SetEntityHealth(victim, 500);
+					}
+				}
+
 				if (damage_custom == TF_CUSTOM_TAUNT_GRENADE) {
 					if (
 						// Grenade Kamikaze taunt self-damage reduction from modern 320 self-damage to historical 256 self-damage
@@ -5577,6 +5609,18 @@ void SDKHookCB_OnTakeDamagePost(
 			) {
 				// Restore health after tanking self blast damage
 				SetEntityHealth(victim, players[victim].old_health);
+			}
+
+			if (
+				(GetItemVariant(Wep_StickyJumper) == 1 &&
+				player_weapons[victim][Wep_StickyJumper]) &&
+				inflictor > MaxClients &&
+				IsValidEntity(inflictor)
+			) {
+				// Restore health after tanking damage from only own stickybombs
+				GetEntityClassname(inflictor, class, sizeof(class));
+				if (StrEqual(class, "tf_projectile_pipe_remote"))
+					SetEntityHealth(victim, players[victim].old_health);
 			}
 		}
 
@@ -8110,6 +8154,28 @@ MRESReturn DHookCallback_CTFProjectile_EnergyRing_ShouldPenetrate(int entity, DH
 			}
 		}
 	}}
+	return MRES_Ignored;
+}
+
+MRESReturn DHookCallback_CTFGrenadePipebombProjectile_Detonate(int entity, DHookReturn returnValue) {
+	int weapon;
+	// sticky jumper explosion sounds revert
+	if (
+		GetItemVariant(Wep_StickyJumper) >= 1 &&
+		IsValidEntity(entity)
+	) {
+		weapon = GetEntPropEnt(entity, Prop_Send, "m_hLauncher");
+
+		if (
+			weapon > MaxClients &&
+			IsValidEntity(weapon) &&
+			GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 265
+		) {
+			float pos[3];
+			GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos);
+			EmitGameSoundToAll("BaseExplosionEffect.Sound", SOUND_FROM_WORLD, SND_NOFLAGS, -1, pos);
+		}
+	}
 	return MRES_Ignored;
 }
 
