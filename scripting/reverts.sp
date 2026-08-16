@@ -1433,6 +1433,7 @@ void ToggleMemoryPatchReverts(bool enable, int wep_enum) {
 #endif
 
 public void OnMapStart() {
+	PrecacheSound("weapons/rocket_shoot.wav", true);
 	PrecacheSound("items/ammo_pickup.wav");
 	PrecacheSound("items/gunpickup2.wav");
 	PrecacheSound("misc/banana_slip.wav");
@@ -2192,6 +2193,8 @@ public void OnEntityCreated(int entity, const char[] class) {
 		rocket_create_entity = entity;
 		rocket_create_frame = GetGameTickCount();
 
+		SDKHook(entity, SDKHook_StartTouch, SDKHookCB_StartTouch);
+
 		dhook_CTFBaseRocket_GetRadius.HookEntity(Hook_Post, entity, DHookCallback_CTFBaseRocket_GetRadius);
 	}
 	else if (StrEqual(class, "tf_projectile_pipe")) {
@@ -2650,17 +2653,20 @@ public void ApplyRevertsToItem(int entity) {
 				TF2Attrib_SetByDefIndex(entity, 61, 2.00); // 100% fire damage vulnerability on wearer
 				TF2Attrib_SetByDefIndex(entity, 65, 2.00); // 100% explosive damage vulnerability on wearer
 				TF2Attrib_SetByDefIndex(entity, 67, 2.00); // 100% bullet damage vulnerability on wearer
+				TF2Attrib_SetByDefIndex(entity, 181, 0.0); // no self blast dmg (needed to restore normal projectile visuals)
 				TF2Attrib_SetByDefIndex(entity, 207, 0.0); // remove self blast dmg; blast dmg to self increased
-				TF2Attrib_SetByDefIndex(entity, 400, 0.0); // cannot_pick_up_intelligence				
+				TF2Attrib_SetByDefIndex(entity, 400, 0.0); // cannot_pick_up_intelligence
 			}
 			case 2: { // RocketJmp_Oct2010 (October 27, 2010 version)
 				TF2Attrib_SetByDefIndex(entity, 15, 1.0); // crit mod disabled
 				TF2Attrib_SetByDefIndex(entity, 125, -100.0); // max health additive penalty
+				TF2Attrib_SetByDefIndex(entity, 181, 0.0); // no self blast dmg (needed to restore normal projectile visuals)
 				TF2Attrib_SetByDefIndex(entity, 207, 0.0); // remove self blast dmg; blast dmg to self increased
 				TF2Attrib_SetByDefIndex(entity, 400, 0.0); // cannot_pick_up_intelligence
 			}
 			case 3: { // RocketJmp_Release
 				TF2Attrib_SetByDefIndex(entity, 15, 1.0); // crit mod disabled
+				TF2Attrib_SetByDefIndex(entity, 181, 0.0); // no self blast dmg (needed to restore normal projectile visuals)
 				TF2Attrib_SetByDefIndex(entity, 400, 0.0); // cannot_pick_up_intelligence
 			}
 		}}
@@ -4248,6 +4254,17 @@ Action OnSoundNormal(
 			}
 		}
 	}
+
+	if (GetItemVariant(Wep_RocketJumper) >= 1) 
+	{
+		if (StrContains(sample, "weapons/rocket_jumper_shoot.wav") != -1)
+		{
+			strcopy(sample, PLATFORM_MAX_PATH, "weapons/rocket_shoot.wav");
+			EmitSoundToClient(entity, "weapons/rocket_shoot.wav", entity, channel, level, flags, volume, pitch);
+			return Plugin_Changed;
+		}
+	}
+	
 	return Plugin_Continue;
 }
 
@@ -4421,6 +4438,33 @@ Action SDKHookCB_Touch(int entity, int other) {
 	}
 
 	return Plugin_Continue;
+}
+
+Action SDKHookCB_StartTouch(int entity, int other) {
+	int weapon;
+
+	{
+		// rocket jumper explosion sounds revert
+		if (
+			GetItemVariant(Wep_RocketJumper) >= 1 &&
+			IsValidEntity(entity)
+		) {
+			weapon = GetEntPropEnt(entity, Prop_Send, "m_hLauncher");
+
+			if (
+				weapon > MaxClients &&
+				IsValidEntity(weapon) &&
+				GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 237
+			) {
+				float pos[3];
+				GetEntPropVector(entity, Prop_Send, "m_vecOrigin", pos);
+
+				EmitGameSoundToAll("BaseExplosionEffect.Sound", SOUND_FROM_WORLD, SND_NOFLAGS, -1, pos);
+				return Plugin_Handled;
+			}
+		}
+	}
+	return Plugin_Continue;	
 }
 
 Action SDKHookCB_TraceAttack(

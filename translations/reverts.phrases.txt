@@ -1150,15 +1150,15 @@
 	}
 	"RocketJmp_Pre2011"
 	{
-		"en"	"Reverted to December 22, 2010: no self blast damage including from Equalizer/Escape Plan taunt, +100%% bullet, explosive, and fire damage vulns, wearer can pick up intel, random crits"
+		"en"	"Reverted to December 22, 2010: no self blast damage including from Equalizer/Escape Plan taunt, +100%% bullet, explosive, and fire damage vulns, wearer can pick up intel, random crits, old visuals & sounds"
 	}
 	"RocketJmp_Oct2010"
 	{
-		"en"	"Reverted to October 27, 2010: no self blast damage including from Equalizer/Escape Plan taunt, -100 max health, wearer can pick up intel, random crits"
+		"en"	"Reverted to October 27, 2010: no self blast damage including from Equalizer/Escape Plan taunt, -100 max health, wearer can pick up intel, random crits, old visuals & sounds"
 	}
 	"RocketJmp_Release"
 	{
-		"en"	"Reverted to release, immune to all self blast damage including from Equalizer/Escape Plan taunt, wearer can pick up intel, random crits"
+		"en"	"Reverted to release, immune to all self blast damage including from Equalizer/Escape Plan taunt, wearer can pick up intel, random crits, old visuals & sounds"
 	}
 	"Saharan_Release"
 	{
