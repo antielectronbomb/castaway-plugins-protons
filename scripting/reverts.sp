@@ -839,6 +839,7 @@ public void OnPluginStart() {
 	ItemDefine("stkjumper", "StkJumper_Pre2013", CLASSFLAG_DEMOMAN, Wep_StickyJumper);
 	ItemVariant(Wep_StickyJumper, "StkJumper_Pre2013_Intel");
 	ItemVariant(Wep_StickyJumper, "StkJumper_Pre2011");
+	ItemVariant(Wep_StickyJumper, "StkJumper_ReleaseDay2");
 	ItemDefine("sunstick", "SunOnAStick_PreMYM", CLASSFLAG_SCOUT | ITEMFLAG_DISABLED, Wep_SunOnAStick);
 	ItemVariant(Wep_SunOnAStick, "SunOnAStick_PreHatless");
 	ItemVariant(Wep_SunOnAStick, "SunOnAStick_Release");
@@ -3193,6 +3194,13 @@ public void ApplyRevertsToItem(int entity) {
 				TF2Attrib_SetByDefIndex(entity, 67, 2.00); // 100% bullet damage vulnerability on wearer
 				TF2Attrib_SetByDefIndex(entity, 89, 0.0); // max pipebombs decreased
 				TF2Attrib_SetByDefIndex(entity, 207, 0.0); // remove self blast dmg; blast dmg to self increased (only works for the weapon itself)
+				TF2Attrib_SetByDefIndex(entity, 400, 0.0); // cannot_pick_up_intelligence
+			}
+			case 3: { // StkJumper_ReleaseDay2 (October 28, 2010 version)
+				TF2Attrib_SetByDefIndex(entity, 15, 1.0); // crit mod disabled
+				TF2Attrib_SetByDefIndex(entity, 89, 0.0); // max pipebombs decreased
+				TF2Attrib_SetByDefIndex(entity, 125, -75.0); // max health additive penalty
+				TF2Attrib_SetByDefIndex(entity, 207, 0.0); // remove self blast dmg; blast dmg to self increased
 				TF2Attrib_SetByDefIndex(entity, 400, 0.0); // cannot_pick_up_intelligence
 			}
 		}}
