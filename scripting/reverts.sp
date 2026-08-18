@@ -4269,16 +4269,16 @@ Action OnSoundNormal(
 
 	if (GetItemVariant(Wep_RocketJumper) >= 1) {
 		if (StrContains(sample, "weapons/rocket_jumper_shoot.wav") != -1) {
-			strcopy(sample, PLATFORM_MAX_PATH, "weapons/rocket_shoot.wav");
-			EmitSoundToClient(entity, "weapons/rocket_shoot.wav", entity, channel, level, flags, volume, pitch);
+			EmitGameSoundToAll("Weapon_RPG.Single", idx); // this is needed to hear the launcher sound from other players
+			EmitGameSoundToClient(entity, "Weapon_RPG.Single"); // needed to hear the launcher sound from yourself
 			return Plugin_Changed;
 		}
 	}
 
 	if (GetItemVariant(Wep_StickyJumper) >= 1) {
 		if (StrContains(sample, "weapons/sticky_jumper_shoot.wav") != -1) {
-			strcopy(sample, PLATFORM_MAX_PATH, "weapons/stickybomblauncher_shoot.wav");
-			EmitSoundToClient(entity, "weapons/stickybomblauncher_shoot.wav", entity, channel, level, flags, volume, pitch);
+			EmitGameSoundToAll("Weapon_StickyBombLauncher.Single", idx); // this is needed to hear the launcher sound from other players
+			EmitGameSoundToClient(entity, "Weapon_StickyBombLauncher.Single"); // needed to hear the launcher sound from yourself
 			return Plugin_Changed;
 		}
 	}
