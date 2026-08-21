@@ -2153,13 +2153,17 @@ public void OnEntityCreated(int entity, const char[] class) {
 
 		SDKHook(entity, SDKHook_StartTouch, SDKHookCB_StartTouch);
 
-		dhook_CTFBaseRocket_GetRadius.HookEntity(Hook_Post, entity, DHookCallback_CTFBaseRocket_GetRadius);
+		dhook_CTFBaseRocket_GetRadius.HookEntity(Hook_Post, entity, DHookCallback_CTFBaseRocket_GetRadius_Post);
 	}
 	else if (StrEqual(class, "tf_projectile_pipe")) {
-		dhook_CTFWeaponBaseGrenadeProj_GetEnemy.HookEntity(Hook_Pre, entity, DHookCallback_CTFWeaponBaseGrenadeProj_GetEnemy);
+		dhook_CTFWeaponBaseGrenadeProj_GetEnemy.HookEntity(Hook_Pre, entity, DHookCallback_CTFWeaponBaseGrenadeProj_GetEnemy_Pre);
 	}
 	else if (StrEqual(class, "tf_projectile_pipe_remote")) {
-		dhook_CTFGrenadePipebombProjectile_Detonate.HookEntity(Hook_Pre, entity, DHookCallback_CTFGrenadePipebombProjectile_Detonate);
+		dhook_CTFGrenadePipebombProjectile_Detonate.HookEntity(Hook_Pre, entity, DHookCallback_CTFGrenadePipebombProjectile_Detonate_Pre);
+	}
+	else if (StrEqual(class, "tf_projectile_healing_bolt")) {
+		dhook_CTFProjectile_HealingBolt_ImpactTeamPlayer.HookEntity(Hook_Pre, entity, DHookCallback_CTFProjectile_HealingBolt_ImpactTeamPlayer_Pre);
+		dhook_CTFProjectile_HealingBolt_ImpactTeamPlayer.HookEntity(Hook_Post, entity, DHookCallback_CTFProjectile_HealingBolt_ImpactTeamPlayer_Post);
 	}
 	else if (
 		StrEqual(class, "tf_projectile_stun_ball") ||
@@ -2212,7 +2216,7 @@ public void OnEntityCreated(int entity, const char[] class) {
 	else if (StrEqual(class, "tf_weapon_minigun")) {
 		dhook_CTFMinigun_GetProjectileDamage.HookEntity(Hook_Pre, entity, DHookCallback_CTFMinigun_GetProjectileDamage_Pre);
 		dhook_CTFMinigun_GetWeaponSpread.HookEntity(Hook_Pre, entity, DHookCallback_CTFMinigun_GetWeaponSpread_Pre);
-		dhook_CTFWeaponBase_PrimaryAttack.HookEntity(Hook_Pre, entity, DHookCallback_CTFWeaponBase_PrimaryAttack);
+		dhook_CTFWeaponBase_PrimaryAttack.HookEntity(Hook_Pre, entity, DHookCallback_CTFWeaponBase_PrimaryAttack_Pre);
 		dhook_CBaseCombatWeapon_ItemPostFrame.HookEntity(Hook_Post, entity, DHookCallback_CBaseCombatWeapon_ItemPostFrame_Post);
 	}
 	else if (StrEqual(class, "tf_weapon_lunchbox")) {
@@ -8057,7 +8061,7 @@ MRESReturn DHookCallback_CWeaponMedigun_WeaponReset_Post(int entity) {
 	return MRES_Ignored;
 }
 
-MRESReturn DHookCallback_CTFGrenadePipebombProjectile_Detonate(int entity, DHookReturn returnValue) {
+MRESReturn DHookCallback_CTFGrenadePipebombProjectile_Detonate_Pre(int entity, DHookReturn returnValue) {
 	int weapon;
 	// sticky jumper explosion sounds revert
 	if (
