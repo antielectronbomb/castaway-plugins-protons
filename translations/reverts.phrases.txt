@@ -1274,7 +1274,7 @@
 	}
 	"StkJumper_Pre2013_Intel"
 	{
-		"en"	"Reverted to Manniversary update, can have 8 stickybombs out at once, wearer can pick up intel, old visuals & sounds"
+		"en"	"Reverted to Manniversary update, can have 8 stickybombs out at once, wearer can pick up intel, old explosion visuals & sounds"
 	}
 	"StkJumper_Pre2011"
 	{

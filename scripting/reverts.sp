@@ -2123,6 +2123,7 @@ public void OnClientPutInServer(int client) {
 	SDKHook(client, SDKHook_OnTakeDamageAlive, SDKHookCB_OnTakeDamageAlive);
 	SDKHook(client, SDKHook_OnTakeDamagePost, SDKHookCB_OnTakeDamagePost);
 	SDKHook(client, SDKHook_WeaponSwitchPost, SDKHookCB_WeaponSwitchPost);
+	SDKHook(client, SDKHook_WeaponEquipPost, SDKHookCB_WeaponEquipPost);
 }
 
 public void OnEntityCreated(int entity, const char[] class) {
@@ -5653,6 +5654,29 @@ void SDKHookCB_WeaponSwitchPost(int client, int weapon) {
 	}
 
 	players[client].weapon_switch_time = GetGameTime();
+}
+
+void SDKHookCB_WeaponEquipPost(int client, int weapon) {
+	
+	// replace rocket jumper world model with stock rocket launcher world model
+	if (
+		GetItemVariant(Wep_RocketJumper) >= 1 &&
+		GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 237 &&
+		IsValidEntity(weapon)
+	) {
+		// SetEntProp(weapon, Prop_Send, "m_nModelIndexOverrides", PrecacheModel("models/weapons/c_models/c_rocketlauncher/c_rocketlauncher.mdl"));
+		SetEntProp(weapon, Prop_Send, "m_nModelIndexOverrides", PrecacheModel("models/weapons/w_models/w_rocketlauncher.mdl")); // use this for the old models
+	}
+
+	// replace sticky jumper world model with stock sticky launcher world model
+	if (
+		GetItemVariant(Wep_StickyJumper) >= 2 &&
+		GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 265 &&
+		IsValidEntity(weapon)
+	) {
+		// SetEntProp(weapon, Prop_Send, "m_nModelIndexOverrides", PrecacheModel("models/weapons/c_models/c_stickybomb_launcher/c_stickybomb_launcher.mdl"));
+		SetEntProp(weapon, Prop_Send, "m_nModelIndexOverrides", PrecacheModel("models/weapons/w_models/w_stickybomb_launcher.mdl")); // use this for the old models
+	}
 }
 
 public Action OnPlayerRunCmd(
