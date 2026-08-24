@@ -5657,25 +5657,35 @@ void SDKHookCB_WeaponSwitchPost(int client, int weapon) {
 }
 
 void SDKHookCB_WeaponEquipPost(int client, int weapon) {
-	
+	if (!IsValidEntity(weapon))
+	return;
+
 	// replace rocket jumper world model with stock rocket launcher world model
 	if (
 		GetItemVariant(Wep_RocketJumper) >= 1 &&
-		GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 237 &&
-		IsValidEntity(weapon)
+		GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 237
 	) {
 		// SetEntProp(weapon, Prop_Send, "m_nModelIndexOverrides", PrecacheModel("models/weapons/c_models/c_rocketlauncher/c_rocketlauncher.mdl"));
-		SetEntProp(weapon, Prop_Send, "m_nModelIndexOverrides", PrecacheModel("models/weapons/w_models/w_rocketlauncher.mdl")); // use this for the old models
+		// SetEntProp(weapon, Prop_Send, "m_nModelIndexOverrides", PrecacheModel("models/weapons/w_models/w_rocketlauncher.mdl")); // use this for the old models
+		int model = PrecacheModel("models/weapons/c_models/c_rocketlauncher/c_rocketlauncher.mdl");
+
+		for (int i = 0; i < 4; i++) {
+			SetEntProp(weapon, Prop_Send, "m_nModelIndexOverrides", model, 4, i);
+		}
 	}
 
 	// replace sticky jumper world model with stock sticky launcher world model
 	if (
 		GetItemVariant(Wep_StickyJumper) >= 2 &&
-		GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 265 &&
-		IsValidEntity(weapon)
+		GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 265
 	) {
 		// SetEntProp(weapon, Prop_Send, "m_nModelIndexOverrides", PrecacheModel("models/weapons/c_models/c_stickybomb_launcher/c_stickybomb_launcher.mdl"));
-		SetEntProp(weapon, Prop_Send, "m_nModelIndexOverrides", PrecacheModel("models/weapons/w_models/w_stickybomb_launcher.mdl")); // use this for the old models
+		// SetEntProp(weapon, Prop_Send, "m_nModelIndexOverrides", PrecacheModel("models/weapons/w_models/w_stickybomb_launcher.mdl")); // use this for the old models
+		int model = PrecacheModel("models/weapons/c_models/c_stickybomb_launcher/c_stickybomb_launcher.mdl");
+
+		for (int i = 0; i < 4; i++) {
+			SetEntProp(weapon, Prop_Send, "m_nModelIndexOverrides", model, 4, i);
+		}
 	}
 }
 
