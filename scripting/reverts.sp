@@ -285,6 +285,8 @@ enum struct Player {
 	int fireproof_frame;
 	int cannonball_frame;
 	int old_metal;
+	int zatoichi_frame;
+	int powerjack_frame;
 	bool has_used_jetpack;
 	bool was_jump_key_pressed;
 	bool blast_jump_sound_loop;
@@ -398,6 +400,8 @@ DynamicHook dhook_CTFProjectile_HealingBolt_ImpactTeamPlayer;
 DynamicHook dhook_CBaseObject_InputWrenchHit;
 DynamicHook dhook_CBaseObject_Command_Repair;
 DynamicHook dhook_CWeaponMedigun_WeaponReset;
+DynamicHook dhook_CTFPlayer_Event_KilledOther;
+DynamicHook dhook_CTFPlayer_TakeHealth;
 DynamicHook dhook_CBaseCombatWeapon_Deploy;
 DynamicHook dhook_CBaseCombatWeapon_Holster;
 DynamicHook dhook_CTFWeaponBase_GetSpeedMod;
@@ -445,6 +449,7 @@ int CTFStunBall_m_flCreationTime;
 // Offsets loaded from gamedata
 int CTFPlayer_m_flTauntNextStartTime;
 Address CGameTrace_m_pEnt;
+Address CTakeDamageInfo_m_hWeapon;
 Address CTakeDamageInfo_m_flDamage;
 Address CTakeDamageInfo_m_iDamageCustom;
 
@@ -1017,6 +1022,8 @@ public void OnPluginStart() {
 		dhook_CBaseObject_InputWrenchHit = DynamicHook.FromConf(conf, "CBaseObject::InputWrenchHit");
 		dhook_CBaseObject_Command_Repair = DynamicHook.FromConf(conf, "CBaseObject::Command_Repair");
 		dhook_CWeaponMedigun_WeaponReset = DynamicHook.FromConf(conf, "CWeaponMedigun::WeaponReset");
+		dhook_CTFPlayer_Event_KilledOther = DynamicHook.FromConf(conf, "CTFPlayer::Event_KilledOther");
+		dhook_CTFPlayer_TakeHealth = DynamicHook.FromConf(conf, "CTFPlayer::TakeHealth");
 		dhook_CBaseCombatWeapon_Deploy = DynamicHook.FromConf(conf, "CBaseCombatWeapon::Deploy");
 		dhook_CBaseCombatWeapon_Holster = DynamicHook.FromConf(conf, "CBaseCombatWeapon::Holster");
 		dhook_CTFWeaponBase_GetSpeedMod = DynamicHook.FromConf(conf, "CTFWeaponBase::GetSpeedMod");
@@ -1050,11 +1057,13 @@ public void OnPluginStart() {
 
 		CTFPlayer_m_flTauntNextStartTime = GameConfGetOffset(conf, "CTFPlayer.m_flTauntNextStartTime");
 		CGameTrace_m_pEnt = view_as<Address>(GameConfGetOffset(conf, "CGameTrace.m_pEnt"));
+		CTakeDamageInfo_m_hWeapon = view_as<Address>(GameConfGetOffset(conf, "CTakeDamageInfo.m_hWeapon"));
 		CTakeDamageInfo_m_flDamage = view_as<Address>(GameConfGetOffset(conf, "CTakeDamageInfo.m_flDamage"));
 		CTakeDamageInfo_m_iDamageCustom = view_as<Address>(GameConfGetOffset(conf, "CTakeDamageInfo.m_iDamageCustom"));
 
 		VALIDATE_OFFSET(CTFPlayer_m_flTauntNextStartTime);
 		VALIDATE_OFFSET(CGameTrace_m_pEnt);
+		VALIDATE_OFFSET(CTakeDamageInfo_m_hWeapon);
 		VALIDATE_OFFSET(CTakeDamageInfo_m_flDamage);
 		VALIDATE_OFFSET(CTakeDamageInfo_m_iDamageCustom);
 
@@ -1160,6 +1169,8 @@ public void OnPluginStart() {
 	VALIDATE_HANDLE(dhook_CBaseObject_InputWrenchHit);
 	VALIDATE_HANDLE(dhook_CBaseObject_Command_Repair);
 	VALIDATE_HANDLE(dhook_CWeaponMedigun_WeaponReset);
+	VALIDATE_HANDLE(dhook_CTFPlayer_Event_KilledOther);
+	VALIDATE_HANDLE(dhook_CTFPlayer_TakeHealth);
 	VALIDATE_HANDLE(dhook_CBaseCombatWeapon_Deploy);
 	VALIDATE_HANDLE(dhook_CBaseCombatWeapon_Holster);
 	VALIDATE_HANDLE(dhook_CTFWeaponBase_GetSpeedMod);
@@ -2157,6 +2168,8 @@ public void OnClientPutInServer(int client) {
 	SDKHook(client, SDKHook_OnTakeDamageAlive, SDKHookCB_OnTakeDamageAlive);
 	SDKHook(client, SDKHook_OnTakeDamagePost, SDKHookCB_OnTakeDamagePost);
 	SDKHook(client, SDKHook_WeaponSwitchPost, SDKHookCB_WeaponSwitchPost);
+	dhook_CTFPlayer_Event_KilledOther.HookEntity(Hook_Pre, client, DHookCallback_CTFPlayer_Event_KilledOther_Pre);
+	dhook_CTFPlayer_TakeHealth.HookEntity(Hook_Pre, client, DHookCallback_CTFPlayer_TakeHealth_Pre);
 }
 
 public void OnEntityCreated(int entity, const char[] class) {
@@ -3303,7 +3316,7 @@ public void ApplyRevertsToItem(int entity) {
 		}}
 		case 357: { if (ItemIsEnabled(Wep_Zatoichi)) {
 			TF2Attrib_SetByDefIndex(entity, 15, 1.0); // crit mod disabled
-			TF2Attrib_SetByDefIndex(entity, 220, 0.0); // restore health on kill
+			TF2Attrib_SetByDefIndex(entity, 220, 100.0); // restore health on kill
 			TF2Attrib_SetByDefIndex(entity, 226, 0.0); // honorbound
 			TF2Attrib_SetByDefIndex(entity, 781, 0.0); // is a sword
 		}}
@@ -3366,171 +3379,27 @@ public Action Event_OnPlayerSpawn(Event event, const char[] name, bool dontBroad
 
 public Action Event_OnPlayerDeath(Event event, const char[] name, bool dontBroadcast) {
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
-	int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
-	int victim = GetClientOfUserId(GetEventInt(event, "userid"));
-	int weapon;
-	char class[64];
 
 	// 1 second sentry disable if wrangler shield active and engineer dies.
-	// should not affect the normal 3 second disable on engineer weapon switch etc.
 	if (
-		client > 0 &&
-		client <= MaxClients &&
-		IsClientInGame(client) &&
 		ItemIsEnabled(Wep_Wrangler) &&
-		GetItemVariant(Wep_Wrangler) < 2
-	) {
-		if (TF2_GetPlayerClass(client) == TFClass_Engineer) {
-
-			int sentry = FindSentryGunOwnedByClient(client);
-			if (sentry != -1) {
-
-				if (GetEntProp(sentry, Prop_Send, "m_bPlayerControlled") > 0) {
-
-					// Offset to m_flShieldFadeTime and input our own value.
-					SetEntDataFloat(sentry, CObjectSentrygun_m_flShieldFadeTime, GetGameTime() + 1.0);
-
-					// Set m_bPlayerControlled to 0 such that the original code
-					// wouldn't set the shield fade time to 3 seconds, thus undoing our revert.
-					SetEntProp(sentry, Prop_Send, "m_bPlayerControlled", 0);
-				} 
-			} 
-		} 
-	}
-
-	if (
-		client > 0 &&
+		GetItemVariant(Wep_Wrangler) < 2 &&
+		client >= 1 &&
 		client <= MaxClients &&
-		attacker > 0 &&
-		attacker <= MaxClients &&
 		IsClientInGame(client) &&
-		IsClientInGame(attacker)
+		TF2_GetPlayerClass(client) == TFClass_Engineer
 	) {
+		int sentry = FindSentryGunOwnedByClient(client);
 		if (
-			client != attacker &&
-			(GetEventInt(event, "death_flags") & TF_DEATH_FEIGN_DEATH) == 0 &&
-			GetEventInt(event, "inflictor_entindex") == attacker && // make sure it wasn't a "finished off" kill
-			IsPlayerAlive(attacker)
+			sentry != -1 &&
+			GetEntProp(sentry, Prop_Send, "m_bPlayerControlled") > 0
 		) {
-			weapon = GetEntPropEnt(attacker, Prop_Send, "m_hActiveWeapon");
+			// Offset to m_flShieldFadeTime and input our own value.
+			SetEntDataFloat(sentry, CObjectSentrygun_m_flShieldFadeTime, GetGameTime() + 1.0);
 
-			if (weapon > 0) {
-				GetEntityClassname(weapon, class, sizeof(class));
-
-				if (
-					ItemIsEnabled(Wep_Zatoichi) &&
-					StrEqual(class, "tf_weapon_katana")
-				) {
-					// zatoichi heal on kill
-					int health_max = SDKCall(sdkcall_GetMaxHealth, attacker);
-					if (GetClientHealth(attacker) < health_max) {
-						SetEntProp(attacker, Prop_Send, "m_iHealth", health_max);
-
-						Event healOnHitEvent = CreateEvent("player_healonhit", true);
-
-						healOnHitEvent.SetInt("amount", health_max);
-						healOnHitEvent.SetInt("entindex", attacker);
-						healOnHitEvent.SetInt("weapon_def_index", -1);
-
-						healOnHitEvent.Fire();
-					}
-				}
-
-				if (
-					ItemIsEnabled(Wep_Powerjack) &&
-					TF2Attrib_HookValueInt(0, "heal_on_kill", weapon) &&
-					GetEventInt(event, "customkill") == 0
-				) {
-					players[attacker].old_health = GetClientHealth(attacker);
-					RequestFrame(ApplyOverhealOnKill, weapon);
-				}
-
-				if (
-					ItemIsEnabled(Set_Demopan) &&
-					// StrEqual(class, "tf_wearable_demoshield") &&
-					ItemIsEnabled(Wep_CharginTarge) && player_weapons[attacker][Wep_CharginTarge] &&
-					(GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 264 ||
-					GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex") == 1071)
-				) { 
-					// destroy the ears of anyone nearby. play the same sound 3x to make it louder
-					// PrintToChatAll("louder pan sounds"); // this is needed because the tester went deaf with testing
-					EmitGameSoundToAll("FryingPan.HitFlesh", attacker);
-					EmitGameSoundToAll("FryingPan.HitFlesh", attacker);
-					EmitGameSoundToAll("FryingPan.HitFlesh", attacker);
-
-					if(cvar_spawn_demopan_stout_shako.BoolValue) {
-						// spawn a stout shako at the enemy player's death position
-						float pos[3];
-						GetClientAbsOrigin(victim, pos);
-
-						int shako = CreateEntityByName("prop_physics_override");
-
-						if (shako != -1)
-						{
-							DispatchKeyValue(shako, "model", "models/player/items/soldier/soldier_shako.mdl");
-							DispatchKeyValue(shako, "OnUser1", "!self,Kill,,5,-1");
-
-							DispatchSpawn(shako);
-
-							SetEntProp(shako, Prop_Send, "m_CollisionGroup", 1); // COLLISION_GROUP_DEBRIS = 1
-							SetEntProp(shako, Prop_Send, "m_usSolidFlags", 16); // FSOLID_NOT_STANDABLE = 16
-
-							SetEntProp(shako, Prop_Send, "m_nSkin", GetClientTeam(attacker) == 3 ? 1 : 0);
-
-							TeleportEntity(shako, pos, NULL_VECTOR, NULL_VECTOR);
-
-							AcceptEntityInput(shako, "FireUser1");
-						}
-					}
-				}
-			}
-
-			{
-				// ambassador machina sound fix
-
-				if (StrEqual(class, "tf_weapon_revolver")) {
-					// track ambassador kills for cancelling machina penetration sounds
-					if (
-						GetItemVariant(Wep_Ambassador) >= 1 &&
-						GetEventInt(event, "attacker") != -1 &&
-						GetEventInt(event, "playerpenetratecount") > 0
-					) {
-						players[attacker].ambassador_kill_frame = GetGameTickCount();
-					}
-				}
-			}
-
-			{
-				// ambassador headshot kill icon
-
-				if (
-					GetEventInt(event, "customkill") != TF_CUSTOM_HEADSHOT &&
-					(
-						(	// redundant check for default ambassador revert just in case the dhook method does not work or gets broken in the next tf2 update
-							GetItemVariant(Wep_Ambassador) == 0 &&
-							players[attacker].headshot_frame == GetGameTickCount() 
-						) ||
-						(	// make sure headshot kill icon pops up when victims are killed from rapid fire headshots
-							GetItemVariant(Wep_Ambassador) >= 1 &&
-							players[attacker].headshot_frame <= GetGameTickCount() + 66 &&
-							players[victim].hit_by_headshot
-						)
-					)
-				) {
-					weapon = GetEntPropEnt(attacker, Prop_Send, "m_hActiveWeapon");
-
-					if (weapon > 0) {
-						GetEntityClassname(weapon, class, sizeof(class));
-						if (
-							ItemIsEnabled(Wep_Ambassador) &&
-							StrEqual(class, "tf_weapon_revolver")
-						) {
-							event.SetInt("customkill", TF_CUSTOM_HEADSHOT);
-							return Plugin_Changed;
-						}
-					}
-				}
-			}
+			// Set m_bPlayerControlled to 0 such that the original code
+			// wouldn't set the shield fade time to 3 seconds, thus undoing our revert.
+			SetEntProp(sentry, Prop_Send, "m_bPlayerControlled", 0);
 		}
 	}
 	return Plugin_Continue;
@@ -6373,28 +6242,6 @@ void SetFeignDeathEnd(int client) {
 	SetEntDataFloat(client, CTFPlayerShared_m_flFeignDeathEnd, GetGameTime() + 6.0);
 }
 
-void ApplyOverhealOnKill(int weapon) {
-	if (!IsValidEntity(weapon))
-		return;
-
-	int owner = GetEntityOwner(weapon);
-
-	if (owner >= 1 && owner <= MaxClients) {
-		int health_cur = GetClientHealth(owner);
-
-		int heal_amt = TF2Attrib_HookValueInt(0, "heal_on_kill", weapon);
-		heal_amt = intMin(
-			TF2Util_GetPlayerMaxHealthBoost(owner) - health_cur,
-			heal_amt - (health_cur - players[owner].old_health)
-		);
-
-		if (heal_amt) {
-			// Apply overheal
-			TF2Util_TakeHealth(owner, float(heal_amt), TAKEHEALTH_IGNORE_MAXHEALTH);
-		}
-	}
-}
-
 void SetMeleeCrit(int client) {
 	if (!IsClientInGame(client))
 		return;
@@ -7515,12 +7362,11 @@ MRESReturn DHookCallback_CBaseCombatWeapon_ItemPostFrame_Pre(int entity) {
 		GetItemVariant(Wep_Vaccinator) == 1 &&
 		GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex") == 998 &&
 		owner >= 1 &&
-		owner <= MaxClients
+		owner <= MaxClients &&
+		players[owner].using_vaccinator_uber
 	) {
-		if (players[owner].using_vaccinator_uber) {
-			// Prevent resistance cycling while Ubering with the Vaccinator.
-			SetEntData(entity, CWeaponMedigun_m_bReloadDown, true, 1);
-		}
+		// Prevent resistance cycling while Ubering with the Vaccinator.
+		SetEntData(entity, CWeaponMedigun_m_bReloadDown, true, 1);
 	}
 	return MRES_Ignored;
 }
@@ -8126,6 +7972,29 @@ MRESReturn DHookCallback_CWeaponMedigun_WeaponReset_Post(int entity) {
 	return MRES_Ignored;
 }
 
+MRESReturn DHookCallback_CTFPlayer_Event_KilledOther_Pre(int client, DHookParam parameters) {
+	Address info = parameters.Get(2);
+	int weapon = LoadEntityFromHandleAddress(info + CTakeDamageInfo_m_hWeapon);
+	if (
+		client >= 1 && client <= MaxClients &&
+		IsValidEntity(weapon)
+	) {
+		if (
+			ItemIsEnabled(Wep_Zatoichi) &&
+			TF2Attrib_HookValueInt(0, "restore_health_on_kill", weapon) > 50
+		) {
+			players[client].zatoichi_frame = GetGameTickCount();
+		}
+		if (
+			ItemIsEnabled(Wep_Powerjack) &&
+			TF2Attrib_HookValueInt(0, "heal_on_kill", weapon) != 0
+		) {
+			players[client].powerjack_frame = GetGameTickCount();
+		}
+	}
+	return MRES_Ignored;
+}
+
 MRESReturn DHookCallback_CTFShovel_Deploy_Post(int entity, DHookReturn returnValue) {
 	if (ItemIsEnabled(Wep_Pickaxe)) {
 		// Set damage boost after deploying
@@ -8137,6 +8006,35 @@ MRESReturn DHookCallback_CTFShovel_Holster_Post(int entity, DHookReturn returnVa
 	if (ItemIsEnabled(Wep_Pickaxe)) {
 		// Set speed boost after holstering. This should help with client prediction when deployed.
 		SetShovelSpeedBoost(entity);
+	}
+	return MRES_Ignored;
+}
+
+MRESReturn DHookCallback_CTFPlayer_TakeHealth_Pre(int client, DHookReturn returnValue, DHookParam parameters) {
+	int flags;
+	if (client >= 1 && client <= MaxClients) {
+		if (
+			ItemIsEnabled(Wep_Zatoichi) &&
+			players[client].zatoichi_frame == GetGameTickCount()
+		) {
+			players[client].zatoichi_frame = 0;
+
+			flags = parameters.Get(2);
+			flags &= ~TAKEHEALTH_IGNORE_MAXHEALTH;
+			parameters.Set(2, flags);
+			return MRES_ChangedHandled;
+		}
+		if (
+			ItemIsEnabled(Wep_Powerjack) &&
+			players[client].powerjack_frame == GetGameTickCount()
+		) {
+			players[client].powerjack_frame = 0;
+
+			flags = parameters.Get(2);
+			flags |= TAKEHEALTH_IGNORE_MAXHEALTH;
+			parameters.Set(2, flags);
+			return MRES_ChangedHandled;
+		}
 	}
 	return MRES_Ignored;
 }
