@@ -321,6 +321,21 @@
 				"windows"	"237"
 				"linux"		"238"
 			}
+			"CBaseCombatWeapon::Deploy"
+			{
+				"windows"	"262"
+				"linux"		"268"
+			}
+			"CBaseCombatWeapon::Holster"
+			{
+				"windows"	"263"
+				"linux"		"269"
+			}
+			"CTFWeaponBase::GetSpeedMod"
+			{
+				"windows"	"438"
+				"linux"		"445"
+			}
 
 			// ╔══════════════════════════════════════════════╗
 			// ║       Private/Protected Member Offsets       ║
@@ -651,6 +666,34 @@
 				"return"	"void"
 				"this"		"entity"
 				"hooktype"	"entity"
+			}
+			"CBaseCombatWeapon::Deploy"
+			{
+				"offset"	"CBaseCombatWeapon::Deploy"
+				"hooktype"	"entity"
+				"this"		"entity"
+				"return"	"bool"
+			}
+			"CBaseCombatWeapon::Holster"
+			{
+				"offset"	"CBaseCombatWeapon::Holster"
+				"hooktype"	"entity"
+				"this"		"entity"
+				"return"	"bool"
+				"arguments"
+				{
+					"pSwitchingTo"
+					{
+						"type"	"cbaseentity"
+					}
+				}
+			}
+			"CTFWeaponBase::GetSpeedMod"
+			{
+				"offset"	"CTFWeaponBase::GetSpeedMod"
+				"hooktype"	"entity"
+				"this"		"entity"
+				"return"	"float"
 			}
 
 			// Signature
