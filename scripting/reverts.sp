@@ -3591,9 +3591,11 @@ void CacheWeapons(int client) {
 					if (StrEqual(class, "tf_weapon_flamethrower")) {
 						player_weapons[client][Feat_Flamethrower] = true;
 					}
+#endif
 				}
 				else if (StrContains(class, "tf_weapon_sniperrifle") == 0) {
 					player_weapons[client][Feat_SniperRifle] = true;
+#if defined MEMORY_PATCHES
 					player_weapons[client][Feat_SniperQuickscope] = true;
 #endif
 				}
@@ -6363,13 +6365,17 @@ int GetResistType(int entity)
 }
 
 void SetShovelDamageBoost(int entity) {
-	TF2Attrib_SetByDefIndex(entity, 115, 1.0); // mod shovel damage boost
-	TF2Attrib_SetByDefIndex(entity, 235, 0.0); // mod shovel speed boost
+	if (TF2Attrib_HookValueInt(0, "set_weapon_mode", entity) != SHOVEL_STANDARD) {
+		TF2Attrib_SetByDefIndex(entity, 115, 1.0); // mod shovel damage boost
+		TF2Attrib_SetByDefIndex(entity, 235, 0.0); // mod shovel speed boost
+	}
 }
 
 void SetShovelSpeedBoost(int entity) {
-	TF2Attrib_SetByDefIndex(entity, 115, 0.0); // mod shovel damage boost
-	TF2Attrib_SetByDefIndex(entity, 235, 2.0); // mod shovel speed boost
+	if (TF2Attrib_HookValueInt(0, "set_weapon_mode", entity) != SHOVEL_STANDARD) {
+		TF2Attrib_SetByDefIndex(entity, 115, 0.0); // mod shovel damage boost
+		TF2Attrib_SetByDefIndex(entity, 235, 2.0); // mod shovel speed boost
+	}
 }
 
 void SetFeignDeathEnd(int client) {
