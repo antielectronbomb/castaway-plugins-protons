@@ -134,23 +134,23 @@
 			//  Dragons Fury bonus requires center of fireball hitbox
 			//  to hit enemy, removal
 
-				"CTFProjectile_BallOfFire::Burn_SkipCenterHitRequirement"
+			"CTFProjectile_BallOfFire::Burn_SkipCenterHitRequirement"
+			{
+				"signature" "CTFProjectile_BallOfFire::Burn"
+				"linux"
 				{
-					"signature" "CTFProjectile_BallOfFire::Burn"
-					"linux"
-					{
-						"offset"    "2473"
-						"verify"    "\x83\xEC\x08\x6A\x16" // Oct12: existing default branch InCond(22) setup
-						"patch"     "\xE9\xBD\x09\x00\x00" // Route validated default path to existing conditional bonus block
+					"offset"    "2473"
+					"verify"    "\x83\xEC\x08\x6A\x16" // Oct12: existing default branch InCond(22) setup
+					"patch"     "\xE9\xBD\x09\x00\x00" // Route validated default path to existing conditional bonus block
 
-					}
-					"windows"
-					{
-						"offset"    "1682"
-						"verify"    "\x74\x2A" // JZ rel8 (skip bonus damage when center hit requirement fails)
-						"patch"     "\x90\x90" // 2x NOP to remove center hit requirement while preserving InCond(22) check
-					}
 				}
+				"windows"
+				{
+					"offset"    "1682"
+					"verify"    "\x74\x2A" // JZ rel8 (skip bonus damage when center hit requirement fails)
+					"patch"     "\x90\x90" // 2x NOP to remove center hit requirement while preserving InCond(22) check
+				}
+			}
 
 			// ================================================
 			//  Revert flamethrower damage and mechanics to Pre-Bluemoon/Jungle Inferno.
