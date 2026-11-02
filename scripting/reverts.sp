@@ -5089,7 +5089,7 @@ Action SDKHookCB_OnTakeDamageAlive(
 	int health_max;
 	int healer;
 	float rage;
-	// float charge;
+	float charge;
 	float pos1[3];
 	float pos2[3];
 
