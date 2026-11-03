@@ -28,8 +28,8 @@ jobs:
       fail-fast: false
       matrix:
         # TODO: Re-enable SM 1.13 builds when Address gets fixed
-        # sm-target: ["1.12", "1.13"]
-        sm-target: ["1.12"]
+        sm-target: ["1.12", "1.13"]
+        # sm-target: ["1.12"]
 
     steps:
       - name: Checkout repo
