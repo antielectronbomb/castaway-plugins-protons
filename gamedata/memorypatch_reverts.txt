@@ -362,14 +362,14 @@
 				"windows"
 				{
 					"offset"	"231"
-					"verify"	"\x77\x2A"	// JA
-					"patch"		"\x90\x90"	// NOP 2x
+					"verify"	"\x77\x2A" // JA rel8 to reject shots before 200 ms (observed +0x18, displacement wildcarded)
+					"patch" 	"\x90\x90" // 2x NOP to fall through to crit eligibility after the scope check
 				}
 				"linux"
 				{
-					"offset"	"354"
-					"verify"	"\x76\x8A"	// JBE (-118)
-					"patch"		"\xEB\x8A"	// JMP (-118)
+					"offset"	"366"
+					"verify"	"\x76\x86" // JBE SHORT -0x7A to allow crit eligibility once 200 ms has elapsed
+					"patch"		"\xEB\x86" // JMP SHORT -0x7A to the same success path without the 200 ms wait
 				}
 			}
 
